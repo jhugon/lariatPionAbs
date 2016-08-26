@@ -12,18 +12,25 @@ def plotManyFilesOneAxis(fileConfigs,histConfigs,canvas,treename):
   treename is where to find the tree in each file
 
   fileConfig options:
-    fn: filename
+    fn: filename REQUIRED
     pdg: PDG ID number (unused)
     name: name of sample (unused)
     title: title of sample: will be used for legends
     color: will be used for line/marker color
     scaleFactor: scale histograms by this much after filling
   histConfig options:
-    name: name of histogram, used for savename
+    name: name of histogram, used for savename REQUIRED
     xtitle: x axis title
     ytitle: y axis title
-    var: variable to draw, first argument to tree.Draw
-    cuts: cut string, second argument to tree.Draw
+    var: variable to draw, first argument to tree.Draw REQUIRED
+    cuts: cut string, second argument to tree.Draw REQUIRED
+    xlim: xlimits, a two element list of xlimits for plot
+    ylim: ylimits, a two element list of ylimits for plot
+    caption, captionleft1, captionleft2, captionleft3, captionright1,
+        captionright2, captionright3, preliminaryString:
+        all are passed to drawStandardCaptions
+    normToBinWidth: if True, normalize histogram to bin width (after applying
+        scaleFactor)
   """
   
   for fileConfig in fileConfigs:
@@ -33,10 +40,36 @@ def plotManyFilesOneAxis(fileConfigs,histConfigs,canvas,treename):
     fileConfig['tree'] = tree
 
   for histConfig in histConfigs:
+    # setup
     hists = []
     binning = histConfig['binning']
     var = histConfig['var']
     cuts = histConfig['cuts']
+    xtitle = ""
+    ytitle = "Events/bin"
+    if "xtitle" in histConfig: xtitle = histConfig['xtitle']
+    if "ytitle" in histConfig: ytitle = histConfig['ytitle']
+    xlim = []
+    ylim = []
+    if "xlim" in histConfig: xlim = histConfig['xlim']
+    if "ylim" in histConfig: ylim = histConfig['ylim']
+    caption = ""
+    captionleft1 = ""
+    captionleft2 = ""
+    captionleft3 = ""
+    captionright1 = ""
+    captionright2 = ""
+    captionright3 = ""
+    preliminaryString = ""
+    if "caption" in histConfig: caption = histConfig['caption']
+    if "captionleft1" in histConfig: captionleft1 = histConfig['captionleft1']
+    if "captionleft2" in histConfig: captionleft2 = histConfig['captionleft2']
+    if "captionleft3" in histConfig: captionleft3 = histConfig['captionleft3']
+    if "captionright1" in histConfig: captionright1 = histConfig['captionright1']
+    if "captionright2" in histConfig: captionright2 = histConfig['captionright2']
+    if "captionright3" in histConfig: captionright3 = histConfig['captionright3']
+    if "preliminaryString" in histConfig: preliminaryString = histConfig['preliminaryString']
+    # now on to the real work
     for fileConfig in fileConfigs:
       hist = Hist(*binning)
       hist.SetLineColor(fileConfig['color'])
@@ -45,23 +78,19 @@ def plotManyFilesOneAxis(fileConfigs,histConfigs,canvas,treename):
       f = fileConfig['f']
       tree.Draw(varAndHist,cuts)
       scaleFactor = 1.
-      if "scaleFactor" in fileConfig:
-        scaleFactor = fileConfig['scaleFactor']
+      if "scaleFactor" in fileConfig: scaleFactor = fileConfig['scaleFactor']
       hist.Scale(scaleFactor)
+      if "normToBinWidth" in histConfig and histConfig["normToBinWidth"]:
+        normToBinWidth(hist)
       hists.append(hist)
-    axisHist = makeStdAxisHist(hists,freeTopSpace=0.35)
-    xtitle = ""
-    ytitle = "Events/bin"
-    if "xtitle" in histConfig:
-      xtitle = histConfig['xtitle']
-    if "ytitle" in histConfig:
-      ytitle = histConfig['ytitle']
+    axisHist = makeStdAxisHist(hists,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
     setHistTitles(axisHist,xtitle,ytitle)
     axisHist.Draw()
     for h in reversed(hists):
       h.Draw("histsame")
     labels = [fileConfig['title'] for fileConfig in fileConfigs]
     leg = drawNormalLegend(hists,labels)
+    drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
     canvas.RedrawAxis()
     saveNameBase = histConfig['name'] + "Hist"
     canvas.SaveAs(saveNameBase+".png")
@@ -107,18 +136,31 @@ if __name__ == "__main__":
   histConfigs = [
     {
       'name': "pPrimary",
-      'xtitle': "Primary particle |p| [GeV/c]",
-      'binning': [100,0,1.5],
-      'var': "sqrt(Px*Px+Py*Py+Pz*Pz)",
+      'xtitle': "Primary particle |p| [MeV/c]",
+      'ytitle': "Particles per MeV/c",
+      'normToBinWidth': True,
+      'binning': [75,0,1500],
+      'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
       'cuts': "process_primary",
     },
     {
       'name': "pSecondary",
-      'xtitle': "Secondary particle |p| [GeV/c]",
-      'ytitle': "Entries/bin",
-      'binning': [100,0,0.75],
-      'var': "sqrt(Px*Px+Py*Py+Pz*Pz)",
+      'xtitle': "Secondary particle |p| [MeV/c]",
+      'ytitle': "Particles per MeV/c",
+      'normToBinWidth': True,
+      'binning': [75,0,750],
+      'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
       'cuts': "!process_primary && Mother == 1 && sqrt(Px*Px+Py*Py+Pz*Pz)>0.01 && abs(pdg) < 1000000",
+      #'cuts': "!process_primary && pdg != 2112",
+    },
+    {
+      'name': "pTertiary",
+      'xtitle': "Tertiary particle |p| [MeV/c]",
+      'ytitle': "Particles per MeV/c",
+      'normToBinWidth': True,
+      'binning': [75,0,750],
+      'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
+      'cuts': "!process_primary && Mother != 1 && sqrt(Px*Px+Py*Py+Pz*Pz)>0.01 && abs(pdg) < 1000000",
       #'cuts': "!process_primary && pdg != 2112",
     },
     #{
