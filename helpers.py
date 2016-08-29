@@ -1191,7 +1191,7 @@ def getIntegralHist(hist,setErrors=True):
             result.SetBinError(iX,iY,sumw2**0.5)
   else:
     nBins = result.GetNbinsX()
-    for i in range(nBins+1):
+    for i in range(nBins+2):
       sumw = 0.0
       sumw2 = 0.0
       for j in range(i,nBins+2):

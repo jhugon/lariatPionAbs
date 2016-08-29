@@ -4,10 +4,10 @@ import ROOT as root
 from helpers import *
 root.gROOT.SetBatch(True)
 
-def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename):
+def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint):
   """
   Plots the same histogram and cuts for a variety of files on one plot. Use to
-    compare the same histogram from different samples. 
+    compare the same histogram from different samples. Only for 1D Hists.
 
   fileConfigs is a list of dictionaries configuring the files
   histConfigs is a list of dictionaries configuring the histograms. It is a
@@ -36,6 +36,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename):
     normToBinWidth: if True, normalize histogram to bin width (after applying
         scaleFactor)
     normalize: if True normalize histogram (after normToBinWidth)
+    integral: if True, makes each bin content Nevents for X >= bin low edge
     title: (unused)
     color: (unused)
   """
@@ -82,7 +83,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename):
       hist.SetLineColor(fileConfig['color'])
       varAndHist = var + " >> " + hist.GetName()
       tree = fileConfig['tree']
-      tree.Draw(varAndHist,cuts)
+      tree.Draw(varAndHist,cuts,"",nMax)
       scaleFactor = 1.
       if "scaleFactor" in fileConfig: scaleFactor = fileConfig['scaleFactor']
       hist.Scale(scaleFactor)
@@ -91,6 +92,8 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename):
       if "normalize" in histConfig and histConfig['normalize']:
         integral = hist.Integral()
         hist.Scale(1./integral)
+      if "integral" in histConfig and histConfig['integral']:
+        hist = getIntegralHist(hist)
       hists.append(hist)
     axisHist = makeStdAxisHist(hists,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
     setHistTitles(axisHist,xtitle,ytitle)
@@ -101,14 +104,14 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename):
     leg = drawNormalLegend(hists,labels)
     drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
     canvas.RedrawAxis()
-    saveNameBase = histConfig['name'] + "Hist"
+    saveNameBase = outPrefix + histConfig['name'] + outSuffix
     canvas.SaveAs(saveNameBase+".png")
     canvas.SaveAs(saveNameBase+".pdf")
 
-def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename):
+def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint):
   """
   For each file, plots multiple different histograms (cuts and/or variables) on one plot. Use to
-    compare different cuts or variables on the same sample. 
+    compare different cuts or variables on the same sample. Only for 1D Hists.
 
   fileConfigs is a list of dictionaries configuring the files. fileConfigs is a
     list so you can plots for multiple samples.
@@ -140,6 +143,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename):
     normToBinWidth: if True, normalize histogram to bin width (after applying
         scaleFactor)
     normalize: if True normalize histogram (after normToBinWidth)
+    integral: if True, makes each bin content Nevents for X >= bin low edge
   """
   
   for fileConfig in fileConfigs:
@@ -201,7 +205,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename):
       hist = Hist(*binning)
       hist.SetLineColor(histConfig['color'])
       varAndHist = var + " >> " + hist.GetName()
-      tree.Draw(varAndHist,cuts)
+      tree.Draw(varAndHist,cuts,"",nMax)
       scaleFactor = 1.
       if "scaleFactor" in fileConfig: scaleFactor = fileConfig['scaleFactor']
       hist.Scale(scaleFactor)
@@ -210,6 +214,8 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename):
       if "normalize" in histConfig and histConfig['normalize']:
         integral = hist.Integral()
         hist.Scale(1./integral)
+      if "integral" in histConfig and histConfig['integral']:
+        hist = getIntegralHist(hist)
       hists.append(hist)
     axisHist = makeStdAxisHist(hists,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
     setHistTitles(axisHist,xtitle,ytitle)
@@ -220,7 +226,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename):
     leg = drawNormalLegend(hists,labels)
     drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
     canvas.RedrawAxis()
-    saveNameBase = fileConfig['name'] + "Hist"
+    saveNameBase = outPrefix + fileConfig['name'] + outSuffix
     canvas.SaveAs(saveNameBase+".png")
     canvas.SaveAs(saveNameBase+".pdf")
 
@@ -255,7 +261,6 @@ if __name__ == "__main__":
   evalFrac = 0.1
   fileConfigs = [
     {
-      #'fn': "/scratch/jhugon/catalogue/anaTree_p_v10.root",
       'fn': "anaTree_p_v10.root",
       'pdg': 2212,
       'name': "p",
@@ -264,7 +269,6 @@ if __name__ == "__main__":
       'color': root.kGreen+1,
     },
     {
-      #'fn': "/scratch/jhugon/catalogue/anaTree_pip_v11.root",
       'fn': "anaTree_pip_v11.root",
       'pdg': 211,
       'name': "pip",
@@ -274,7 +278,6 @@ if __name__ == "__main__":
       'scaleFactor' : 0.5,
     },
     {
-      #'fn': "/scratch/jhugon/catalogue/anaTree_mup_v10.root",
       'fn': "anaTree_mup_v10.root",
       'pdg': -13,
       'name': "mup",
@@ -283,7 +286,6 @@ if __name__ == "__main__":
       'color': root.kRed,
     },
     {
-      #'fn': "/scratch/jhugon/catalogue/anaTree_kp_v10.root",
       'fn': "anaTree_kp_v10.root",
       'pdg': 321,
       'name': "kp",
@@ -342,7 +344,7 @@ if __name__ == "__main__":
   ]
 
   c = root.TCanvas()
-  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"anatree/anatree")
+  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=1000)
 
   histConfigs = [
     {
@@ -402,5 +404,5 @@ if __name__ == "__main__":
     },
   ]
 
-  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"anatree/anatree")
+  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=1000,outPrefix="pSecondary_")
 
