@@ -38,6 +38,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     scaleFactor: scale histograms by this much after filling
     pdg: PDG ID number (unused)
     name: name of sample (unused)
+    addFriend: add friend tree to main tree. Should be a length 2 list [treename,filename]
   histConfig options:
     name: name of histogram, used for savename REQUIRED
     xtitle: x axis title
@@ -47,6 +48,8 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     cuts: cut string, second argument to tree.Draw REQUIRED
     xlim: xlimits, a two element list of xlimits for plot
     ylim: ylimits, a two element list of ylimits for plot
+    logy: if True, plot on y on log scale
+    logx: if True, plot on y on log scale
     caption, captionleft1, captionleft2, captionleft3, captionright1,
         captionright2, captionright3, preliminaryString:
         all are passed to drawStandardCaptions
@@ -61,6 +64,8 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
   for fileConfig in fileConfigs:
     f = root.TFile(fileConfig['fn'])
     tree = f.Get(treename)
+    if 'addFriend' in fileConfig:
+      tree.AddFriend(*(fileConfig['addFriend']))
     fileConfig['f'] = f
     fileConfig['tree'] = tree
 
@@ -80,6 +85,10 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     ylim = []
     if "xlim" in histConfig: xlim = histConfig['xlim']
     if "ylim" in histConfig: ylim = histConfig['ylim']
+    logy = False
+    logx = False
+    if "logy" in histConfig: logy = histConfig['logy']
+    if "logx" in histConfig: logx = histConfig['logx']
     caption = ""
     captionleft1 = ""
     captionleft2 = ""
@@ -115,7 +124,9 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       if "integral" in histConfig and histConfig['integral']:
         hist = getIntegralHist(hist)
       hists.append(hist)
-    axisHist = makeStdAxisHist(hists,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
+    canvas.SetLogy(logy)
+    canvas.SetLogx(logx)
+    axisHist = makeStdAxisHist(hists,logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
     setHistTitles(axisHist,xtitle,ytitle)
     axisHist.Draw()
     for h in reversed(hists):
@@ -127,6 +138,8 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     saveNameBase = outPrefix + histConfig['name'] + outSuffix
     canvas.SaveAs(saveNameBase+".png")
     canvas.SaveAs(saveNameBase+".pdf")
+    canvas.SetLogy(False)
+    canvas.SetLogx(False)
 
 def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint):
   """
@@ -146,6 +159,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     title: title of sample (unused)
     color:  (unused)
     scaleFactor: scale histograms by this much after filling
+    addFriend: add friend tree to main tree. Should be a length 2 list [treename,filename]
   histConfig options:
     name: (unused)
     title: title of histogram, used for legend
@@ -157,6 +171,8 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     cuts: cut string, second argument to tree.Draw REQUIRED
     xlim: xlimits, a two element list of xlimits for plot, first one found is used
     ylim: ylimits, a two element list of ylimits for plot, first one found is used
+    logy: if True, plot on y on log scale. If any are True, will be logy.
+    logx: if True, plot on y on log scale. If any are True, will be logx.
     caption, captionleft1, captionleft2, captionleft3, captionright1,
         captionright2, captionright3, preliminaryString:
         all are passed to drawStandardCaptions, first set of captions found is
@@ -170,6 +186,8 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
   for fileConfig in fileConfigs:
     f = root.TFile(fileConfig['fn'])
     tree = f.Get(treename)
+    if 'addFriend' in fileConfig:
+      tree.AddFriend(*(fileConfig['addFriend']))
     fileConfig['f'] = f
     fileConfig['tree'] = tree
     xtitle = ""
@@ -192,6 +210,11 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       if "ylim" in histConfig: 
         ylim = histConfig['ylim']
         break
+    logy = False
+    logx = False
+    for histConfig in histConfigs:
+      if "logy" in histConfig and histConfig['logy']: logy = True
+      if "logx" in histConfig and histConfig['logx']: logx = True
     caption = ""
     captionleft1 = ""
     captionleft2 = ""
@@ -241,7 +264,9 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       if "integral" in histConfig and histConfig['integral']:
         hist = getIntegralHist(hist)
       hists.append(hist)
-    axisHist = makeStdAxisHist(hists,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
+    canvas.SetLogy(logy)
+    canvas.SetLogx(logx)
+    axisHist = makeStdAxisHist(hists,logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
     setHistTitles(axisHist,xtitle,ytitle)
     axisHist.Draw()
     for h in reversed(hists):
@@ -253,6 +278,8 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     saveNameBase = outPrefix + fileConfig['name'] + outSuffix
     canvas.SaveAs(saveNameBase+".png")
     canvas.SaveAs(saveNameBase+".pdf")
+    canvas.SetLogy(False)
+    canvas.SetLogx(False)
 
 def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint):
   """
@@ -286,6 +313,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     cuts: cut string, second argument to tree.Draw REQUIRED
     xlim: xlimits, a two element list of xlimits for plot
     ylim: ylimits, a two element list of ylimits for plot
+    logy: if True, plot on y on log scale
+    logx: if True, plot on y on log scale
     caption, captionleft1, captionleft2, captionleft3, captionright1,
         captionright2, captionright3, preliminaryString:
         all are passed to drawStandardCaptions
@@ -296,11 +325,14 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         For 2D plots, makes each bin content Nevents for X >= and Y >= 
         their low bin edges.
     title: (unused)
+    addFriend: add friend tree to main tree. Should be a length 2 list [treename,filename]
   """
   
   for fileConfig in fileConfigs:
     f = root.TFile(fileConfig['fn'])
     tree = f.Get(treename)
+    if 'addFriend' in fileConfig:
+      tree.AddFriend(*(fileConfig['addFriend']))
     for histConfig in histConfigs:
       # setup
       binning = histConfig['binning']
@@ -322,6 +354,10 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       ylim = []
       if "xlim" in histConfig: xlim = histConfig['xlim']
       if "ylim" in histConfig: ylim = histConfig['ylim']
+      logy = False
+      logx = False
+      if "logy" in histConfig: logy = histConfig['logy']
+      if "logx" in histConfig: logx = histConfig['logx']
       caption = ""
       captionleft1 = ""
       captionleft2 = ""
@@ -359,6 +395,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       if "integral" in histConfig and histConfig['integral']:
         hist = getIntegralHist(hist)
       setHistTitles(hist,xtitle,ytitle,ztitle)
+      canvas.SetLogy(logy)
+      canvas.SetLogx(logx)
       if hist.InheritsFrom("TH2"):
         setupCOLZFrame(canvas)
         hist.Draw("colz")
@@ -371,7 +409,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       canvas.SaveAs(saveNameBase+".pdf")
       if hist.InheritsFrom("TH2"):
         setupCOLZFrame(canvas,True) #reset frame
-
+      canvas.SetLogy(False)
+      canvas.SetLogx(False)
 
 def getOrdinalStr(inInt):
   result = str(inInt)

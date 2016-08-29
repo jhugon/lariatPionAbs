@@ -25,6 +25,8 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
 {
   using namespace std;
 
+  cout << "makeFriendTree for "<< inputFileName.Data() << "in file " << outputFileName.Data() << endl;
+
   TChain * tree = new TChain("anatree/anatree");
   tree->Add(inputFileName);
 
@@ -84,12 +86,32 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
   bool startsInTPC[MAXGEANT];
   bool endsInTPC[MAXGEANT];
   bool allSecondariesEndInTPC;
+  bool allSecondaryPionsEndInTPC;
+  bool allSecondaryProtonsEndInTPC;
+  bool allSecondaryPhotonsEndInTPC;
 
   friendTree->Branch("geant_list_size",&geant_list_size,"geant_list_size/I"); // just in case
   friendTree->Branch("P",P,"P[geant_list_size]/D");
   friendTree->Branch("startsInTPC",startsInTPC,"startsInTPC[geant_list_size]/O");
   friendTree->Branch("endsInTPC",endsInTPC,"endsInTPC[geant_list_size]/O");
   friendTree->Branch("allSecondariesEndInTPC",&allSecondariesEndInTPC,"allSecondariesEndInTPC/O");
+  friendTree->Branch("allSecondaryPionsEndInTPC",&allSecondaryPionsEndInTPC,"allSecondaryPionsEndInTPC/O");
+  friendTree->Branch("allSecondaryProtonsEndInTPC",&allSecondaryProtonsEndInTPC,"allSecondaryProtonsEndInTPC/O");
+  friendTree->Branch("allSecondaryPhotonsEndInTPC",&allSecondaryPhotonsEndInTPC,"allSecondaryPhotonsEndInTPC/O");
+
+  int nSecondaryPiPlus;
+  int nSecondaryPi0;
+  int nSecondaryPiMinus;
+  int nSecondaryProton;
+  int nSecondaryPhoton;
+  int nSecondaryNeutron;
+
+  friendTree->Branch("nSecondaryPiPlus",&nSecondaryPiPlus,"nSecondaryPiPlus/I");
+  friendTree->Branch("nSecondaryPi0",&nSecondaryPi0,"nSecondaryPi0/I");
+  friendTree->Branch("nSecondaryPiMinus",&nSecondaryPiMinus,"nSecondaryPiMinus/I");
+  friendTree->Branch("nSecondaryProton",&nSecondaryProton,"nSecondaryProton/I");
+  friendTree->Branch("nSecondaryPhoton",&nSecondaryPhoton,"nSecondaryPhoton/I");
+  friendTree->Branch("nSecondaryNeutron",&nSecondaryNeutron,"nSecondaryNeutron/I");
 
   ///////////////////////////////
   ///////////////////////////////
@@ -98,6 +120,8 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
 
   unsigned nEvents = tree->GetEntries();
   unsigned reportEach=1000;
+  cout << "nEvents in tree: " << nEvents << endl;
+  cout << "Stopping at " << maxEvents << endl;
 
   for(unsigned iEvent=0; iEvent<nEvents;iEvent++)
   {
@@ -112,28 +136,73 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
       endsInTPC[iGeant] = false;
     }
     allSecondariesEndInTPC = true;
+    allSecondaryPionsEndInTPC = true;
+    allSecondaryProtonsEndInTPC = true;
+    allSecondaryPhotonsEndInTPC = true;
+    nSecondaryPiPlus = 0;
+    nSecondaryPi0 = 0;
+    nSecondaryPiMinus = 0;
+    nSecondaryProton = 0;
+    nSecondaryPhoton = 0;
+    nSecondaryNeutron = 0;
 
     tree->GetEvent(iEvent);
     if (iEvent % reportEach == 0) cout << "Event: " << iEvent << endl;
 
     for (int iPart=0; iPart<geant_list_size; iPart++)
     {
-      if (abs(pdg[iPart]) < 1000000000)
+      startsInTPC[iPart] = StartPointx[iPart] > minx && StartPointx[iPart] < maxx 
+               && StartPointy[iPart] > miny && StartPointy[iPart] < maxy
+               && StartPointz[iPart] > minz && StartPointz[iPart] < maxz;
+      endsInTPC[iPart] = EndPointx[iPart] > minx && EndPointx[iPart] < maxx 
+                    && EndPointy[iPart] > miny && EndPointy[iPart] < maxy
+                    && EndPointz[iPart] > minz && EndPointz[iPart] < maxz;
+      P[iPart] = pow(Px[iPart]*Px[iPart] + Py[iPart]*Py[iPart] + Pz[iPart]*Pz[iPart],0.5);
+      if (Mother[iPart] == 1 && !endsInTPC[iPart] && abs(pdg[iPart]) < 1000000000)
       {
-        startsInTPC[iPart] = StartPointx[iPart] > minx && StartPointx[iPart] < maxx 
-                 && StartPointy[iPart] > miny && StartPointy[iPart] < maxy
-                 && StartPointz[iPart] > minz && StartPointz[iPart] < maxz;
-        endsInTPC[iPart] = EndPointx[iPart] > minx && EndPointx[iPart] < maxx 
-                      && EndPointy[iPart] > miny && EndPointy[iPart] < maxy
-                      && EndPointz[iPart] > minz && EndPointz[iPart] < maxz;
-        P[iPart] = pow(Px[iPart]*Px[iPart] + Py[iPart]*Py[iPart] + Pz[iPart]*Pz[iPart],0.5);
-        if (Mother[iPart] == 1 && !endsInTPC[iPart])
+        allSecondariesEndInTPC = false;
+        if (abs(pdg[iPart])==211)
         {
-          allSecondariesEndInTPC = false;
+          allSecondaryPionsEndInTPC = false;
         }
+        else if (pdg[iPart]==2212)
+        {
+          allSecondaryProtonsEndInTPC = false;
+        }
+        else if (pdg[iPart]==22)
+        {
+          allSecondaryPhotonsEndInTPC = false;
+        }
+      }
+      if (Mother[iPart] == 1)
+      {
+        if (pdg[iPart] == 211)
+        {
+          nSecondaryPiPlus += 1;
+        }
+        else if (pdg[iPart] == 111)
+        {
+          nSecondaryPi0 += 1;
+        }
+        else if (pdg[iPart] == -211)
+        {
+          nSecondaryPiMinus += 1;
+        }
+        else if (pdg[iPart] == 2212)
+        {
+          nSecondaryProton += 1;
+        }
+        else if (pdg[iPart] == 22)
+        {
+          nSecondaryPhoton += 1;
+        }
+        else if (pdg[iPart] == 2112)
+        {
+          nSecondaryNeutron += 1;
+        }
+      } // if Mother == 1
 
-        //cout << pdg[iPart] << ", " << TrackId[iPart] << ", "<< Mother[iPart] << ", " << startsInTPC[iPart] << ", " << endsInTPC[iPart]  << ", " << P[iPart] << endl;
-      } // if pdg
+      //cout << pdg[iPart] << ", " << TrackId[iPart] << ", "<< Mother[iPart] << ", " << startsInTPC[iPart] << ", " << endsInTPC[iPart]  << ", " << P[iPart] << endl;
     } // for iPart in geant_list_size
 
     //if (endsInTPC[0] && allSecondariesEndInTPC)
