@@ -142,24 +142,42 @@ def divideYValByXVal(hist):
 	hist.SetBinContent(iBinX,binVal/xVal)
 	hist.SetBinError(iBinX,binErrVal/xVal)
 
-def setNormalColorTable():
-  rArray = array.array('d',[0.0,1.0,1.0])
-  gArray = array.array('d',[1.0,1.0,0.0])
-  bArray = array.array('d',[0.0,0.0,0.0])
-  stopArray = array.array('d',[0.,0.5,1.])
-  nTabColors = 500
-  root.TColor.CreateGradientColorTable(len(stopArray),
-            stopArray,rArray,gArray,bArray,nTabColors
-         )
-def setInvertColorTable():
-  rArray = array.array('d',[1.0,1.0,0.0])
-  gArray = array.array('d',[0.0,1.0,1.0])
-  bArray = array.array('d',[0.0,0.0,0.0])
-  stopArray = array.array('d',[0.,0.5,1.])
-  nTabColors = 500
-  root.TColor.CreateGradientColorTable(len(stopArray),
-            stopArray,rArray,gArray,bArray,nTabColors
-         )
+def setNormalColorTable(diverging=False):
+  if diverging:
+    gStyle.SetPalette(54)
+  else:
+    ## My old GYR colors
+    #rArray = array.array('d',[0.0,1.0,1.0])
+    #gArray = array.array('d',[1.0,1.0,0.0])
+    #bArray = array.array('d',[0.0,0.0,0.0])
+    #stopArray = array.array('d',[0.,0.5,1.])
+    #nTabColors = 500
+    #root.TColor.CreateGradientColorTable(len(stopArray),
+    #          stopArray,rArray,gArray,bArray,nTabColors
+    #       )
+
+    ## nice grey scale
+    #alpha = 1.
+    #stops = [ 0.0000, 0.1250, 0.2500, 0.3750, 0.5000, 0.6250, 0.7500, 0.8750, 1.0000]
+    #red   = [ 0./255., 32./255., 64./255., 96./255., 128./255., 160./255., 192./255., 224./255., 255./255.];
+    #green = [ 0./255., 32./255., 64./255., 96./255., 128./255., 160./255., 192./255., 224./255., 255./255.];
+    #blue  = [ 0./255., 32./255., 64./255., 96./255., 128./255., 160./255., 192./255., 224./255., 255./255.];
+    #root.TColor.CreateGradientColorTable(len(stops), 
+    #              array.array('d',stops), array.array('d',red), 
+    #              array.array('d',green), array.array('d',blue), 255, alpha
+    #          )
+
+    # bird color palette from root 6
+    alpha = 1.
+    stops = [ 0.0000, 0.1250, 0.2500, 0.3750, 0.5000, 0.6250, 0.7500, 0.8750, 1.0000]
+    red = [ 0.2082, 0.0592, 0.0780, 0.0232, 0.1802, 0.5301, 0.8186, 0.9956, 0.9764]
+    green = [ 0.1664, 0.3599, 0.5041, 0.6419, 0.7178, 0.7492, 0.7328, 0.7862, 0.9832]
+    blue = [ 0.5293, 0.8684, 0.8385, 0.7914, 0.6425, 0.4662, 0.3499, 0.1968, 0.0539]
+    root.TColor.CreateGradientColorTable(len(stops), 
+                  array.array('d',stops), array.array('d',red), 
+                  array.array('d',green), array.array('d',blue), 255, alpha
+              )
+
 
 def setStyle():
   gStyle.SetCanvasColor(0)
