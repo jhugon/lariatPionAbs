@@ -69,8 +69,8 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     hists = []
     binning = histConfig['binning']
     var = histConfig['var']
-    if var.count(":") != 0:
-      raise Exception("No ':' allowed in variable, only 1D hists allowed",var)
+    #if var.count(":") != 0:
+    #  raise Exception("No ':' allowed in variable, only 1D hists allowed",var)
     cuts = histConfig['cuts']
     xtitle = ""
     ytitle = "Events/bin"
@@ -222,8 +222,8 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     for histConfig in histConfigs:
       binning = histConfig['binning']
       var = histConfig['var']
-      if var.count(":") != 0:
-        raise Exception("No ':' allowed in variable, only 1D hists allowed",var)
+      #if var.count(":") != 0:
+      #  raise Exception("No ':' allowed in variable, only 1D hists allowed",var)
       cuts = histConfig['cuts']
       hist = Hist(*binning)
       if 'color' in histConfig:

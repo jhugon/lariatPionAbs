@@ -31,6 +31,7 @@ def printAllPDGs(tree):
 
 if __name__ == "__main__":
 
+  NMAX=10000
   fileConfigs = [
     {
       'fn': "anaTree_p_v10.root",
@@ -47,7 +48,7 @@ if __name__ == "__main__":
       'title': "#pi^{+} MC Sample",
       'caption': "#pi^{+} MC Sample",
       'color': root.kBlack,
-      'scaleFactor' : 0.5,
+      #'scaleFactor' : 0.5,
     },
     {
       'fn': "anaTree_mup_v10.root",
@@ -68,35 +69,35 @@ if __name__ == "__main__":
   ]
 
   histConfigs = [
-    {
-      'name': "pPrimary",
-      'xtitle': "Primary particle |p| [MeV/c]",
-      'ytitle': "Particles per MeV/c",
-      'normToBinWidth': True,
-      'binning': [75,0,1500],
-      'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
-      'cuts': "process_primary",
-    },
-    {
-      'name': "pSecondary",
-      'xtitle': "Secondary particle |p| [MeV/c]",
-      'ytitle': "Particles per MeV/c",
-      'normToBinWidth': True,
-      'binning': [75,0,750],
-      'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
-      'cuts': "!process_primary && Mother == 1 && sqrt(Px*Px+Py*Py+Pz*Pz)>0.01 && abs(pdg) < 1000000",
-      #'cuts': "!process_primary && pdg != 2112",
-    },
-    {
-      'name': "pTertiary",
-      'xtitle': "Tertiary particle |p| [MeV/c]",
-      'ytitle': "Particles per MeV/c",
-      'normToBinWidth': True,
-      'binning': [75,0,750],
-      'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
-      'cuts': "!process_primary && Mother != 1 && sqrt(Px*Px+Py*Py+Pz*Pz)>0.01 && abs(pdg) < 1000000",
-      #'cuts': "!process_primary && pdg != 2112",
-    },
+    #{
+    #  'name': "pPrimary",
+    #  'xtitle': "Primary particle |p| [MeV/c]",
+    #  'ytitle': "Particles per MeV/c",
+    #  'normToBinWidth': True,
+    #  'binning': [75,0,1500],
+    #  'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
+    #  'cuts': "process_primary",
+    #},
+    #{
+    #  'name': "pSecondary",
+    #  'xtitle': "Secondary particle |p| [MeV/c]",
+    #  'ytitle': "Particles per MeV/c",
+    #  'normToBinWidth': True,
+    #  'binning': [75,0,750],
+    #  'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
+    #  'cuts': "!process_primary && Mother == 1 && sqrt(Px*Px+Py*Py+Pz*Pz)>0.01 && abs(pdg) < 1000000",
+    #  #'cuts': "!process_primary && pdg != 2112",
+    #},
+    #{
+    #  'name': "pTertiary",
+    #  'xtitle': "Tertiary particle |p| [MeV/c]",
+    #  'ytitle': "Particles per MeV/c",
+    #  'normToBinWidth': True,
+    #  'binning': [75,0,750],
+    #  'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
+    #  'cuts': "!process_primary && Mother != 1 && sqrt(Px*Px+Py*Py+Pz*Pz)>0.01 && abs(pdg) < 1000000",
+    #  #'cuts': "!process_primary && pdg != 2112",
+    #},
     #{
     #  'name': "motherPecondary",
     #  'xtitle': "Mother TrackID",
@@ -113,11 +114,42 @@ if __name__ == "__main__":
     #  'var': "Mother",
     #  'cuts': "!process_primary && abs(pdg) < 1000000",
     #},
+    {
+      'name': "thetaz",
+      'xtitle': "Primary particle #theta w.r.t. z-axis [deg]",
+      'ytitle': "Events / bin",
+      'binning': [30,0,30],
+      'var': "acos(Pz/sqrt(Px*Px+Py*Py+Pz*Pz))*180/pi",
+      'cuts': "process_primary",
+    },
+    {
+      'name': "costhetaz",
+      'xtitle': "Primary particle cos(#theta) w.r.t. z-axis",
+      'ytitle': "Events / bin",
+      'binning': [20,0.99,1],
+      'var': "Pz/sqrt(Px*Px+Py*Py+Pz*Pz)",
+      'cuts': "process_primary",
+    },
+    {
+      'name': "thetaxz",
+      'xtitle': "Primary particle #theta in x-z plane",
+      'ytitle': "Events / bin",
+      'binning': [40,0,10],
+      'var': "TMath::ATan2(Px,Pz)*180/pi",
+      'cuts': "process_primary",
+    },
+    {
+      'name': "thetayz",
+      'xtitle': "Primary particle #theta in y-z plane",
+      'ytitle': "Events / bin",
+      'binning': [40,0,10],
+      'var': "TMath::ATan2(Py,Pz)*180/pi",
+      'cuts': "process_primary",
+    },
   ]
 
   c = root.TCanvas()
-  """
-  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=1000)
+  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX)
 
   histConfigs = [
     {
@@ -177,8 +209,44 @@ if __name__ == "__main__":
     },
   ]
 
-  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=1000,outPrefix="pSecondary_")
-  """
+  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX,outPrefix="pSecondary_")
+
+  histConfigs = [
+    {
+      'name': "stopped",
+      'title': "Stopped in TPC",
+      'xtitle': "Primary particle |p| [MeV/c]",
+      'ytitle': "Particles per MeV/c",
+      'normToBinWidth': True,
+      'binning': [75,0,1500],
+      'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
+      'cuts': "process_primary && EndPointx > -0.8 && EndPointx < 49.17 && EndPointy > -25 && EndPointy < 25 && EndPointz > -5. && EndPointz < 95.",
+      'color': root.kGreen,
+    },
+    {
+      'name': "stoppedBefore",
+      'title': "Stopped before TPC",
+      'xtitle': "Primary particle |p| [MeV/c]",
+      'ytitle': "Particles per MeV/c",
+      'normToBinWidth': True,
+      'binning': [75,0,1500],
+      'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
+      'cuts': "process_primary && EndPointz < -5.",
+      'color': root.kRed,
+    },
+    {
+      'name': "all",
+      'title': "All",
+      'xtitle': "Primary particle |p| [MeV/c]",
+      'ytitle': "Particles per MeV/c",
+      'normToBinWidth': True,
+      'binning': [75,0,1500],
+      'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
+      'cuts': "process_primary",
+      'color': root.kBlue,
+    },
+  ]
+  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX,outPrefix="pPrimaryStopped_")
 
   histConfigs = [
     {
@@ -227,5 +295,5 @@ if __name__ == "__main__":
       'cuts': "process_primary",
     },
   ]
-  plotOneHistOnePlot(fileConfigs[:1],histConfigs,c,"anatree/anatree",nMax=1000,outPrefix="")
+  plotOneHistOnePlot(fileConfigs[:1],histConfigs,c,"anatree/anatree",nMax=NMAX,outPrefix="")
 
