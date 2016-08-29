@@ -26,6 +26,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     name: name of histogram, used for savename REQUIRED
     xtitle: x axis title
     ytitle: y axis title
+    binning: Binning list, either [nBins,min,max] or a list of bin edges REQUIRED
     var: variable to draw, first argument to tree.Draw REQUIRED
     cuts: cut string, second argument to tree.Draw REQUIRED
     xlim: xlimits, a two element list of xlimits for plot
@@ -52,6 +53,8 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     hists = []
     binning = histConfig['binning']
     var = histConfig['var']
+    if var.count(":") != 0:
+      raise Exception("No ':' allowed in variable, only 1D hists allowed",var)
     cuts = histConfig['cuts']
     xtitle = ""
     ytitle = "Events/bin"
@@ -80,7 +83,8 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     # now on to the real work
     for fileConfig in fileConfigs:
       hist = Hist(*binning)
-      hist.SetLineColor(fileConfig['color'])
+      if "color" in fileConfig:
+        hist.SetLineColor(fileConfig['color'])
       varAndHist = var + " >> " + hist.GetName()
       tree = fileConfig['tree']
       tree.Draw(varAndHist,cuts,"",nMax)
@@ -132,6 +136,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     color: sets line/marker color of histogram
     xtitle: x axis title, the first one found in the list is used
     ytitle: y axis title, the first one found in the list is used
+    binning: Binning list, either [nBins,min,max] or a list of bin edges REQUIRED
     var: variable to draw, first argument to tree.Draw REQUIRED
     cuts: cut string, second argument to tree.Draw REQUIRED
     xlim: xlimits, a two element list of xlimits for plot, first one found is used
@@ -201,9 +206,12 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     for histConfig in histConfigs:
       binning = histConfig['binning']
       var = histConfig['var']
+      if var.count(":") != 0:
+        raise Exception("No ':' allowed in variable, only 1D hists allowed",var)
       cuts = histConfig['cuts']
       hist = Hist(*binning)
-      hist.SetLineColor(histConfig['color'])
+      if 'color' in histConfig:
+        hist.SetLineColor(histConfig['color'])
       varAndHist = var + " >> " + hist.GetName()
       tree.Draw(varAndHist,cuts,"",nMax)
       scaleFactor = 1.
@@ -229,6 +237,124 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     saveNameBase = outPrefix + fileConfig['name'] + outSuffix
     canvas.SaveAs(saveNameBase+".png")
     canvas.SaveAs(saveNameBase+".pdf")
+
+def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint):
+  """
+  For each histogram in each file, plot a histogram on one plot. Works with 1D
+    and 2D histograms.
+
+  fileConfigs is a list of dictionaries configuring the files. fileConfigs is a
+    list so you can plots for multiple samples.
+  histConfigs is a list of dictionaries configuring the histograms. It is a
+    list so you can do multiple plots for each sample
+  canvas is a root TCanvas
+  treename is where to find the tree in each file
+
+  fileConfig options:
+    fn: filename REQUIRED
+    name: name of sample, used for savename REQUIRED
+    scaleFactor: scale histogram by this much after filling
+    pdg: PDG ID number (unused)
+    title: title of sample (unused)
+    color:  (unused)
+  histConfig options:
+    name: name of histogram, used for savename REQUIRED
+    color: sets line/marker color of histogram
+    xtitle: x axis title
+    ytitle: y axis title
+    ztitle: z axis title
+    binning: Binning list. For 1D, either [nBins,min,max] or a list of bin edges.
+        For 2D, [nBinsX,minX,maxX,nBinsY,minY,maxY] 
+        or [list of bin edges X, list of bin edges Y] REQUIRED
+    var: variable(s) to draw, first argument to tree.Draw REQUIRED
+    cuts: cut string, second argument to tree.Draw REQUIRED
+    xlim: xlimits, a two element list of xlimits for plot
+    ylim: ylimits, a two element list of ylimits for plot
+    caption, captionleft1, captionleft2, captionleft3, captionright1,
+        captionright2, captionright3, preliminaryString:
+        all are passed to drawStandardCaptions
+    normToBinWidth: if True, normalize histogram to bin width (after applying
+        scaleFactor)
+    normalize: if True normalize histogram (after normToBinWidth)
+    integral: if True, makes each bin content Nevents for X >= bin low edge.
+        For 2D plots, makes each bin content Nevents for X >= and Y >= 
+        their low bin edges.
+    title: (unused)
+  """
+  
+  for fileConfig in fileConfigs:
+    f = root.TFile(fileConfig['fn'])
+    tree = f.Get(treename)
+    for histConfig in histConfigs:
+      # setup
+      binning = histConfig['binning']
+      var = histConfig['var']
+      ncolon = var.count(":")
+      is2D = False
+      if ncolon > 1:
+        raise Exception("Multiple ':' not allowed in variable, only 1D/2D hists allowed",var)
+      elif ncolon == 1:
+        is2D = True
+      cuts = histConfig['cuts']
+      xtitle = ""
+      ytitle = "Events/bin"
+      ztitle = None
+      if "xtitle" in histConfig: xtitle = histConfig['xtitle']
+      if "ytitle" in histConfig: ytitle = histConfig['ytitle']
+      if "ztitle" in histConfig: ztitle = histConfig['ztitle']
+      xlim = []
+      ylim = []
+      if "xlim" in histConfig: xlim = histConfig['xlim']
+      if "ylim" in histConfig: ylim = histConfig['ylim']
+      caption = ""
+      captionleft1 = ""
+      captionleft2 = ""
+      captionleft3 = ""
+      captionright1 = ""
+      captionright2 = ""
+      captionright3 = ""
+      preliminaryString = ""
+      if "caption" in histConfig: caption = histConfig['caption']
+      if "captionleft1" in histConfig: captionleft1 = histConfig['captionleft1']
+      if "captionleft2" in histConfig: captionleft2 = histConfig['captionleft2']
+      if "captionleft3" in histConfig: captionleft3 = histConfig['captionleft3']
+      if "captionright1" in histConfig: captionright1 = histConfig['captionright1']
+      if "captionright2" in histConfig: captionright2 = histConfig['captionright2']
+      if "captionright3" in histConfig: captionright3 = histConfig['captionright3']
+      if "preliminaryString" in histConfig: preliminaryString = histConfig['preliminaryString']
+      # now on to the real work
+      hist = None
+      if is2D:
+        hist = Hist2D(*binning)
+      else:
+        hist = Hist(*binning)
+      if 'color' in histConfig:
+        hist.SetLineColor(histConfig['color'])
+      varAndHist = var + " >> " + hist.GetName()
+      tree.Draw(varAndHist,cuts,"",nMax)
+      scaleFactor = 1.
+      if "scaleFactor" in fileConfig: scaleFactor = fileConfig['scaleFactor']
+      hist.Scale(scaleFactor)
+      if "normToBinWidth" in histConfig and histConfig["normToBinWidth"]:
+        normToBinWidth(hist)
+      if "normalize" in histConfig and histConfig['normalize']:
+        integral = hist.Integral()
+        hist.Scale(1./integral)
+      if "integral" in histConfig and histConfig['integral']:
+        hist = getIntegralHist(hist)
+      setHistTitles(hist,xtitle,ytitle,ztitle)
+      if hist.InheritsFrom("TH2"):
+        setupCOLZFrame(canvas)
+        hist.Draw("colz")
+      else:
+        hist.Draw("hist")
+      drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
+      canvas.RedrawAxis()
+      saveNameBase = outPrefix + histConfig['name'] + "_" + fileConfig['name'] + outSuffix
+      canvas.SaveAs(saveNameBase+".png")
+      canvas.SaveAs(saveNameBase+".pdf")
+      if hist.InheritsFrom("TH2"):
+        setupCOLZFrame(canvas,True) #reset frame
 
 def printAllPDGs(tree):
   pdgSecondariesSet = set()
@@ -257,8 +383,6 @@ def printAllPDGs(tree):
 
 if __name__ == "__main__":
 
-  binningArg = [325,0.,26.,200,0.,100.]
-  evalFrac = 0.1
   fileConfigs = [
     {
       'fn': "anaTree_p_v10.root",
@@ -344,6 +468,7 @@ if __name__ == "__main__":
   ]
 
   c = root.TCanvas()
+  """
   plotManyFilesOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=1000)
 
   histConfigs = [
@@ -405,4 +530,54 @@ if __name__ == "__main__":
   ]
 
   plotManyHistsOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=1000,outPrefix="pSecondary_")
+  """
+
+  histConfigs = [
+    {
+      'name': "yVxPrimary",
+      'xtitle': "Primary start x [cm]",
+      'ytitle': "Primary start y [cm]",
+      'ztitle': "Events/bin",
+      'binning': [50,10,40,50,-15,15],
+      'var': "StartPointy:StartPointx",
+      'cuts': "process_primary",
+    },
+    {
+      'name': "yVzPrimary",
+      'xtitle': "Primary start z [cm]",
+      'ytitle': "Primary start y [cm]",
+      'ztitle': "Events/bin",
+      'binning': [50,-50,200,50,-15,15],
+      'var': "StartPointy:StartPointz",
+      'cuts': "process_primary",
+    },
+    {
+      'name': "yVxEndPrimary",
+      'xtitle': "Primary end x [cm]",
+      'ytitle': "Primary end y [cm]",
+      'ztitle': "Events/bin",
+      'binning': [50,-100,100,50,-100,100],
+      'var': "EndPointy:EndPointx",
+      'cuts': "process_primary",
+    },
+    {
+      'name': "yVzEndPrimary",
+      'xtitle': "Primary end z [cm]",
+      'ytitle': "Primary end y [cm]",
+      'ztitle': "Events/bin",
+      'binning': [50,-50,200,50,-50,50],
+      'var': "EndPointy:EndPointz",
+      'cuts': "process_primary",
+    },
+    {
+      'name': "xVzEndPrimary",
+      'xtitle': "Primary end z [cm]",
+      'ytitle': "Primary end x [cm]",
+      'ztitle': "Events/bin",
+      'binning': [50,-50,200,50,-50,100],
+      'var': "EndPointx:EndPointz",
+      'cuts': "process_primary",
+    },
+  ]
+  plotOneHistOnePlot(fileConfigs[:1],histConfigs,c,"anatree/anatree",nMax=1000,outPrefix="")
 
