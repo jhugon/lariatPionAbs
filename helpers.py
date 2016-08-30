@@ -120,7 +120,8 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         normToBinWidth(hist)
       if "normalize" in histConfig and histConfig['normalize']:
         integral = hist.Integral()
-        hist.Scale(1./integral)
+        if integral != 0.:
+          hist.Scale(1./integral)
       if "integral" in histConfig and histConfig['integral']:
         hist = getIntegralHist(hist)
       hists.append(hist)
@@ -160,6 +161,9 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     color:  (unused)
     scaleFactor: scale histograms by this much after filling
     addFriend: add friend tree to main tree. Should be a length 2 list [treename,filename]
+    caption, captionleft1, captionleft2, captionleft3, captionright1,
+        captionright2, captionright3, preliminaryString:
+        all are passed to drawStandardCaptions. histConfig arguments override these
   histConfig options:
     name: (unused)
     title: title of histogram, used for legend
@@ -223,6 +227,14 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     captionright2 = ""
     captionright3 = ""
     preliminaryString = ""
+    if "caption" in fileConfig: caption = fileConfig['caption']
+    if "captionleft1" in fileConfig: captionleft1 = fileConfig['captionleft1']
+    if "captionleft2" in fileConfig: captionleft2 = fileConfig['captionleft2']
+    if "captionleft3" in fileConfig: captionleft3 = fileConfig['captionleft3']
+    if "captionright1" in fileConfig: captionright1 = fileConfig['captionright1']
+    if "captionright2" in fileConfig: captionright2 = fileConfig['captionright2']
+    if "captionright3" in fileConfig: captionright3 = fileConfig['captionright3']
+    if "preliminaryString" in fileConfig: preliminaryString = fileConfig['preliminaryString']
     for histConfig in histConfigs:
         if "caption" in histConfig \
                 or "captionleft1" in histConfig \
@@ -260,7 +272,8 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         normToBinWidth(hist)
       if "normalize" in histConfig and histConfig['normalize']:
         integral = hist.Integral()
-        hist.Scale(1./integral)
+        if integral != 0.:
+          hist.Scale(1./integral)
       if "integral" in histConfig and histConfig['integral']:
         hist = getIntegralHist(hist)
       hists.append(hist)
@@ -300,6 +313,9 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     pdg: PDG ID number (unused)
     title: title of sample (unused)
     color:  (unused)
+    caption, captionleft1, captionleft2, captionleft3, captionright1,
+        captionright2, captionright3, preliminaryString:
+        all are passed to drawStandardCaptions. histConfig arguments override these
   histConfig options:
     name: name of histogram, used for savename REQUIRED
     color: sets line/marker color of histogram
@@ -366,6 +382,14 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       captionright2 = ""
       captionright3 = ""
       preliminaryString = ""
+      if "caption" in fileConfig: caption = fileConfig['caption']
+      if "captionleft1" in fileConfig: captionleft1 = fileConfig['captionleft1']
+      if "captionleft2" in fileConfig: captionleft2 = fileConfig['captionleft2']
+      if "captionleft3" in fileConfig: captionleft3 = fileConfig['captionleft3']
+      if "captionright1" in fileConfig: captionright1 = fileConfig['captionright1']
+      if "captionright2" in fileConfig: captionright2 = fileConfig['captionright2']
+      if "captionright3" in fileConfig: captionright3 = fileConfig['captionright3']
+      if "preliminaryString" in fileConfig: preliminaryString = fileConfig['preliminaryString']
       if "caption" in histConfig: caption = histConfig['caption']
       if "captionleft1" in histConfig: captionleft1 = histConfig['captionleft1']
       if "captionleft2" in histConfig: captionleft2 = histConfig['captionleft2']
@@ -391,7 +415,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         normToBinWidth(hist)
       if "normalize" in histConfig and histConfig['normalize']:
         integral = hist.Integral()
-        hist.Scale(1./integral)
+        if integral != 0.:
+          hist.Scale(1./integral)
       if "integral" in histConfig and histConfig['integral']:
         hist = getIntegralHist(hist)
       setHistTitles(hist,xtitle,ytitle,ztitle)
