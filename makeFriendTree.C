@@ -13,6 +13,7 @@
 #include <vector>
 
 #define MAXGEANT 1000
+#define MAXTRACKS 1000
 
 const double minx = -0.8;
 const double miny = -25;
@@ -76,6 +77,13 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
   tree->SetBranchAddress("EndPointy",&EndPointy);
   tree->SetBranchAddress("EndPointz",&EndPointz);
 
+  int ntracks_reco;
+  tree->SetBranchAddress("ntracks_reco",&ntracks_reco);
+
+  double trkpidlh_pi[MAXTRACKS][2], trkpidlh_p[MAXTRACKS][2];
+  tree->SetBranchAddress("trkpidlh_pi",&trkpidlh_pi);
+  tree->SetBranchAddress("trkpidlh_p",&trkpidlh_p);
+
   ///////////////////////////////
   ///////////////////////////////
   ///////////////////////////////
@@ -91,6 +99,7 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
   bool allSecondaryPhotonsEndInTPC;
 
   friendTree->Branch("geant_list_size",&geant_list_size,"geant_list_size/I"); // just in case
+  friendTree->Branch("ntracks_reco",&ntracks_reco,"ntracks_reco/I"); // just in case
   friendTree->Branch("P",P,"P[geant_list_size]/D");
   friendTree->Branch("startsInTPC",startsInTPC,"startsInTPC[geant_list_size]/O");
   friendTree->Branch("endsInTPC",endsInTPC,"endsInTPC[geant_list_size]/O");
@@ -112,6 +121,9 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
   friendTree->Branch("nSecondaryProton",&nSecondaryProton,"nSecondaryProton/I");
   friendTree->Branch("nSecondaryPhoton",&nSecondaryPhoton,"nSecondaryPhoton/I");
   friendTree->Branch("nSecondaryNeutron",&nSecondaryNeutron,"nSecondaryNeutron/I");
+
+  float trkpidlhr_pi_p[MAXTRACKS][2];
+  friendTree->Branch("trkpidlhr_pi_p",&trkpidlhr_pi_p,"trkpidlhr_pi_p[ntracks_reco][2]/O");
 
   ///////////////////////////////
   ///////////////////////////////
@@ -216,6 +228,14 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
     //    } // if pdg
     //  } // for iPart in geant_list_size
     //} // if primary ends in tpc and allSecondariesEndInTPC
+
+    for(int iTrack=0; iTrack<ntracks_reco; iTrack++)
+    {
+      for(int iPlane=0; iPlane<2; iPlane++)
+      {
+        trkpidlhr_pi_p[iTrack][iPlane] = trkpidlh_pi[iTrack][iPlane] - trkpidlh_p[iTrack][iPlane];
+      }
+    }
 
     friendTree->Fill();
   } // for iEvent
