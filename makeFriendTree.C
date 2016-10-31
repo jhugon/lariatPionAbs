@@ -78,7 +78,7 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
   tree->SetBranchAddress("trkpidlh_p",&trkpidlh_p);
 
   double trkz[MAXTRACKS][MAXTRACKHITS];
-//  tree->SetBranchAddress("trkz",&trkz);
+  tree->SetBranchAddress("trkz",&trkz);
 
   ///////////////////////////////
   ///////////////////////////////
