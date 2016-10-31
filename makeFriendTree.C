@@ -14,6 +14,7 @@
 
 #define MAXGEANT 1000
 #define MAXTRACKS 1000
+#define MAXTRACKHITS 1000
 
 const double minx = -0.8;
 const double miny = -25;
@@ -26,24 +27,10 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
 {
   using namespace std;
 
-  cout << "makeFriendTree for "<< inputFileName.Data() << "in file " << outputFileName.Data() << endl;
+  cout << "makeFriendTree for "<< inputFileName.Data() << " in file " << outputFileName.Data() << endl;
 
   TChain * tree = new TChain("anatree/anatree");
   tree->Add(inputFileName);
-
-  TFile* outFile = new TFile(outputFileName,"RECREATE");
-  outFile->cd();
-
-  // These are the dimuon mass, pt, rapidity, and phi
-  //float recoCandMass, recoCandPt, recoCandY, recoCandPhi;
-  //float recoCandMassRes, recoCandMassResCov;
-
-  //tree->SetBranchAddress("recoCandMass",       &recoCandMass);
-  //tree->SetBranchAddress("recoCandPt",         &recoCandPt);
-  //tree->SetBranchAddress("recoCandY",          &recoCandY);
-  //tree->SetBranchAddress("recoCandPhi",        &recoCandPhi);
-  //tree->SetBranchAddress("recoCandMassRes",    &recoCandMassRes);
-  //tree->SetBranchAddress("recoCandMassResCov", &recoCandMassResCov);
 
   int no_primaries, geant_list_size;
   tree->SetBranchAddress("no_primaries",&no_primaries);
@@ -80,14 +67,26 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
   int ntracks_reco;
   tree->SetBranchAddress("ntracks_reco",&ntracks_reco);
 
+  int ntrkhits[MAXTRACKS];
+  tree->SetBranchAddress("ntrkhits",&ntrkhits);
+
+  double trklength[MAXTRACKS];
+  tree->SetBranchAddress("trklength",&trklength);
+
   double trkpidlh_pi[MAXTRACKS][2], trkpidlh_p[MAXTRACKS][2];
   tree->SetBranchAddress("trkpidlh_pi",&trkpidlh_pi);
   tree->SetBranchAddress("trkpidlh_p",&trkpidlh_p);
+
+  double trkz[MAXTRACKS][MAXTRACKHITS];
+//  tree->SetBranchAddress("trkz",&trkz);
 
   ///////////////////////////////
   ///////////////////////////////
   ///////////////////////////////
   // Friend Tree
+
+  TFile* outFile = new TFile(outputFileName,"RECREATE");
+  outFile->cd();
 
   TTree* friendTree = new TTree("friend","");
   double P[MAXGEANT];
@@ -125,6 +124,13 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
   float trkpidlhr_pi_p[MAXTRACKS][2];
   friendTree->Branch("trkpidlhr_pi_p",&trkpidlhr_pi_p,"trkpidlhr_pi_p[ntracks_reco][2]/O");
 
+  int nTracksFirst2cm, nTracksFirst14cm;
+  friendTree->Branch("nTracksFirst2cm",&nTracksFirst2cm,"nTracksFirst2cm/I");
+  friendTree->Branch("nTracksFirst14cm",&nTracksFirst14cm,"nTracksFirst14cm/I");
+
+  int nTracksLengthLt5cm;
+  friendTree->Branch("nTracksLengthLt5cm",&nTracksLengthLt5cm,"nTracksLengthLt5cm/I");
+
   ///////////////////////////////
   ///////////////////////////////
   ///////////////////////////////
@@ -157,6 +163,9 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
     nSecondaryProton = 0;
     nSecondaryPhoton = 0;
     nSecondaryNeutron = 0;
+    nTracksFirst2cm = 0;
+    nTracksFirst14cm = 0;
+    nTracksLengthLt5cm = 0;
 
     tree->GetEvent(iEvent);
     if (iEvent % reportEach == 0) cout << "Event: " << iEvent << endl;
@@ -235,7 +244,35 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
       {
         trkpidlhr_pi_p[iTrack][iPlane] = trkpidlh_pi[iTrack][iPlane] - trkpidlh_p[iTrack][iPlane];
       }
-    }
+
+      if(trklength[iTrack] < 5.0)
+      {
+        nTracksLengthLt5cm++;
+      }
+
+      bool trkInFirst2cm = false;
+      bool trkInFirst14cm = false;
+      for(int iTrkHit=0; iTrkHit < ntrkhits[iTrack]; iTrkHit++)
+      {
+        if (trkz[iTrack][iTrkHit] < 2.)
+        {
+            trkInFirst2cm = true;
+        }
+        if (trkz[iTrack][iTrkHit] < 14.)
+        {
+            trkInFirst14cm = true;
+            break;
+        }
+      } // for iTrkHit
+      if(trkInFirst2cm)
+      {
+        nTracksFirst2cm++;
+      }
+      if(trkInFirst14cm)
+      {
+        nTracksFirst14cm++;
+      }
+    } // for iTrack
 
     friendTree->Fill();
   } // for iEvent
