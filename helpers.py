@@ -18,6 +18,7 @@ import datetime
 import random
 import uuid
 import numbers
+import copy
 #import matplotlib.pyplot as mpl
 
 def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint):
@@ -39,6 +40,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     pdg: PDG ID number (unused)
     name: name of sample (unused)
     addFriend: add friend tree to main tree. Should be a length 2 list [treename,filename]
+    cuts: additional cuts per file concat to histConfig cuts, default ""
   histConfig options:
     name: name of histogram, used for savename REQUIRED
     xtitle: x axis title
@@ -59,6 +61,9 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     integral: if True, makes each bin content Nevents for X >= bin low edge
     title: (unused)
     color: (unused)
+    efficiencyDenomCuts: If this is a string, it makes this histogram an efficiency. 
+        Use this cut string to create the denominator histogram. The main histogram will be
+        the numerator in a TEfficiency.
   """
   
   for fileConfig in fileConfigs:
@@ -107,23 +112,38 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     if "preliminaryString" in histConfig: preliminaryString = histConfig['preliminaryString']
     # now on to the real work
     for fileConfig in fileConfigs:
-      hist = Hist(*binning)
+      hist = None
+      if len(binning) == 3:
+        hist = Hist(*binning)
+      else:
+        hist = Hist(binning)
       if "color" in fileConfig:
         hist.SetLineColor(fileConfig['color'])
       varAndHist = var + " >> " + hist.GetName()
       tree = fileConfig['tree']
-      tree.Draw(varAndHist,cuts,"",nMax)
-      scaleFactor = 1.
-      if "scaleFactor" in fileConfig: scaleFactor = fileConfig['scaleFactor']
-      hist.Scale(scaleFactor)
-      if "normToBinWidth" in histConfig and histConfig["normToBinWidth"]:
-        normToBinWidth(hist)
-      if "normalize" in histConfig and histConfig['normalize']:
-        integral = hist.Integral()
-        if integral != 0.:
-          hist.Scale(1./integral)
-      if "integral" in histConfig and histConfig['integral']:
-        hist = getIntegralHist(hist)
+      thiscuts = copy.deepcopy(cuts)
+      if "cuts" in fileConfig:
+        thiscuts += fileConfig['cuts']
+      tree.Draw(varAndHist,thiscuts,"",nMax)
+      if "efficiencyDenomCuts" in fileConfig and type(fileConfig["efficiencyDenomCuts"]) == str:
+        denomHist = hist.Clone(hist.GetName()+"_denom")
+        denomHist.Reset()
+        varAndHistDenom = var + " >> " + denomHist.GetName()
+        tree.Draw(varAndHistDenom,fileConfig["efficiencyDenomCuts"],"",nMax)
+        teff = root.TEfficiency(hist,denomHist)
+        hist = teff
+      else:
+        scaleFactor = 1.
+        if "scaleFactor" in fileConfig: scaleFactor = fileConfig['scaleFactor']
+        hist.Scale(scaleFactor)
+        if "normToBinWidth" in histConfig and histConfig["normToBinWidth"]:
+          normToBinWidth(hist)
+        if "normalize" in histConfig and histConfig['normalize']:
+          integral = hist.Integral()
+          if integral != 0.:
+            hist.Scale(1./integral)
+        if "integral" in histConfig and histConfig['integral']:
+          hist = getIntegralHist(hist)
       hists.append(hist)
     canvas.SetLogy(logy)
     canvas.SetLogx(logx)
@@ -164,6 +184,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     caption, captionleft1, captionleft2, captionleft3, captionright1,
         captionright2, captionright3, preliminaryString:
         all are passed to drawStandardCaptions. histConfig arguments override these
+    cuts: additional cuts per file concat to histConfig cuts, default ""
   histConfig options:
     name: (unused)
     title: title of histogram, used for legend
@@ -185,6 +206,9 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         scaleFactor)
     normalize: if True normalize histogram (after normToBinWidth)
     integral: if True, makes each bin content Nevents for X >= bin low edge
+    efficiencyDenomCuts: If this is a string, it makes this histogram an efficiency. 
+        Use this cut string to create the denominator histogram. The main histogram will be
+        the numerator in a TEfficiency.
   """
   
   for fileConfig in fileConfigs:
@@ -260,22 +284,37 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       #if var.count(":") != 0:
       #  raise Exception("No ':' allowed in variable, only 1D hists allowed",var)
       cuts = histConfig['cuts']
-      hist = Hist(*binning)
+      thiscuts = copy.deepcopy(cuts)
+      if "cuts" in fileConfig:
+        thiscuts += fileConfig['cuts']
+      hist = None
+      if len(binning) == 3:
+        hist = Hist(*binning)
+      else:
+        hist = Hist(binning)
       if 'color' in histConfig:
         hist.SetLineColor(histConfig['color'])
       varAndHist = var + " >> " + hist.GetName()
-      tree.Draw(varAndHist,cuts,"",nMax)
-      scaleFactor = 1.
-      if "scaleFactor" in fileConfig: scaleFactor = fileConfig['scaleFactor']
-      hist.Scale(scaleFactor)
-      if "normToBinWidth" in histConfig and histConfig["normToBinWidth"]:
-        normToBinWidth(hist)
-      if "normalize" in histConfig and histConfig['normalize']:
-        integral = hist.Integral()
-        if integral != 0.:
-          hist.Scale(1./integral)
-      if "integral" in histConfig and histConfig['integral']:
-        hist = getIntegralHist(hist)
+      tree.Draw(varAndHist,thiscuts,"",nMax)
+      if "efficiencyDenomCuts" in fileConfig and type(fileConfig["efficiencyDenomCuts"]) == str:
+        denomHist = hist.Clone(hist.GetName()+"_denom")
+        denomHist.Reset()
+        varAndHistDenom = var + " >> " + denomHist.GetName()
+        tree.Draw(varAndHistDenom,fileConfig["efficiencyDenomCuts"],"",nMax)
+        teff = root.TEfficiency(hist,denomHist)
+        hist = teff
+      else:
+        scaleFactor = 1.
+        if "scaleFactor" in fileConfig: scaleFactor = fileConfig['scaleFactor']
+        hist.Scale(scaleFactor)
+        if "normToBinWidth" in histConfig and histConfig["normToBinWidth"]:
+          normToBinWidth(hist)
+        if "normalize" in histConfig and histConfig['normalize']:
+          integral = hist.Integral()
+          if integral != 0.:
+            hist.Scale(1./integral)
+        if "integral" in histConfig and histConfig['integral']:
+          hist = getIntegralHist(hist)
       hists.append(hist)
     canvas.SetLogy(logy)
     canvas.SetLogx(logx)
@@ -316,6 +355,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     caption, captionleft1, captionleft2, captionleft3, captionright1,
         captionright2, captionright3, preliminaryString:
         all are passed to drawStandardCaptions. histConfig arguments override these
+    cuts: additional cuts per file concat to histConfig cuts, default ""
   histConfig options:
     name: name of histogram, used for savename REQUIRED
     color: sets line/marker color of histogram
@@ -342,6 +382,13 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         their low bin edges.
     title: (unused)
     addFriend: add friend tree to main tree. Should be a length 2 list [treename,filename]
+    efficiencyDenomCuts: If this is a string, it makes this histogram an efficiency. 
+        Use this cut string to create the denominator histogram. The main histogram will be
+        the numerator in a TEfficiency.
+    profileX: if True, draw profileX of 2D hist (not yet implemented)
+    profileY: if True, draw profileY of 2D hist (not yet implemented)
+    profileXtoo: if True, draw profileX of 2D hist, on top of 2D hist (not yet implemented)
+    profileYtoo: if True, draw profileY of 2D hist, on top of 2D hist (not yet implemented)
   """
   
   for fileConfig in fileConfigs:
@@ -360,6 +407,9 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       elif ncolon == 1:
         is2D = True
       cuts = histConfig['cuts']
+      thiscuts = copy.deepcopy(cuts)
+      if "cuts" in fileConfig:
+        thiscuts += fileConfig['cuts']
       xtitle = ""
       ytitle = "Events/bin"
       ztitle = None
@@ -401,24 +451,38 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       # now on to the real work
       hist = None
       if is2D:
-        hist = Hist2D(*binning)
+        if len(binning) == 2:
+          hist = Hist(binning[0],binning[1])
+        else:
+          hist = Hist2D(*binning)
       else:
-        hist = Hist(*binning)
+        if len(binning) == 3:
+          hist = Hist(*binning)
+        else:
+          hist = Hist(binning)
       if 'color' in histConfig:
         hist.SetLineColor(histConfig['color'])
       varAndHist = var + " >> " + hist.GetName()
-      tree.Draw(varAndHist,cuts,"",nMax)
-      scaleFactor = 1.
-      if "scaleFactor" in fileConfig: scaleFactor = fileConfig['scaleFactor']
-      hist.Scale(scaleFactor)
-      if "normToBinWidth" in histConfig and histConfig["normToBinWidth"]:
-        normToBinWidth(hist)
-      if "normalize" in histConfig and histConfig['normalize']:
-        integral = hist.Integral()
-        if integral != 0.:
-          hist.Scale(1./integral)
-      if "integral" in histConfig and histConfig['integral']:
-        hist = getIntegralHist(hist)
+      tree.Draw(varAndHist,thiscuts,"",nMax)
+      if "efficiencyDenomCuts" in fileConfig and type(fileConfig["efficiencyDenomCuts"]) == str:
+        denomHist = hist.Clone(hist.GetName()+"_denom")
+        denomHist.Reset()
+        varAndHistDenom = var + " >> " + denomHist.GetName()
+        tree.Draw(varAndHistDenom,fileConfig["efficiencyDenomCuts"],"",nMax)
+        teff = root.TEfficiency(hist,denomHist)
+        hist = teff
+      else:
+        scaleFactor = 1.
+        if "scaleFactor" in fileConfig: scaleFactor = fileConfig['scaleFactor']
+        hist.Scale(scaleFactor)
+        if "normToBinWidth" in histConfig and histConfig["normToBinWidth"]:
+          normToBinWidth(hist)
+        if "normalize" in histConfig and histConfig['normalize']:
+          integral = hist.Integral()
+          if integral != 0.:
+            hist.Scale(1./integral)
+        if "integral" in histConfig and histConfig['integral']:
+          hist = getIntegralHist(hist)
       setHistTitles(hist,xtitle,ytitle,ztitle)
       canvas.SetLogy(logy)
       canvas.SetLogx(logx)
@@ -1626,7 +1690,7 @@ def getIntegralHist(hist,setErrors=True):
             result.SetBinError(iX,iY,sumw2**0.5)
   else:
     nBins = result.GetNbinsX()
-    for i in range(nBins+2):
+    for i in range(nBins+1):
       sumw = 0.0
       sumw2 = 0.0
       for j in range(i,nBins+2):
@@ -1746,7 +1810,7 @@ def getIntegralAll(hist,boundaries=[]):
   xbinHigh = None
   if len(boundaries)==0:
     xbinLow = 0
-    xbinHigh = hist.GetXaxis().GetNbins()
+    xbinHigh = hist.GetXaxis().GetNbins()+1
   elif len(boundaries)==2:
     xbinLow, xbinHigh = getXbinsHighLow(hist,boundaries[0],boundaries[1])
   else:
@@ -1818,6 +1882,7 @@ def drawStandardCaptions(canvas,caption,captionleft1="",captionleft2="",captionl
   tlatex.SetTextAlign(32)
   tlatex.DrawLatex(1.0-canvas.GetRightMargin(),0.96,caption)
   tlatex.SetTextAlign(12)
+  tlatex.SetTextColor(colorInside)
   tlatex.DrawLatex(0.02+canvas.GetLeftMargin(),0.88,captionleft1)
   tlatex.DrawLatex(0.02+canvas.GetLeftMargin(),0.82,captionleft2)
   tlatex.DrawLatex(0.02+canvas.GetLeftMargin(),0.76,captionleft3)
@@ -1936,49 +2001,59 @@ def normToBinWidth(hist):
       hist.SetBinContent(i,binContent/binWidth)
     return hist
 
-def Hist(*args):
+def Hist(*args,**kargs):
   """
   Returns TH1F with UUID for name and "" for title.
   The arguments are used as the binning.
   """
+  func = root.TH1F
+  if "TH1D" in kargs and kargs["TH1D"]:
+    func = root.TH1D
+  if "TEfficiency" in kargs and kargs["TEfficiency"]:
+    func = root.TEfficiency
   name = uuid.uuid1().hex
   hist = None
   if len(args) == 1 and type(args[0]) == list:
-    hist = root.TH1F(name,"",len(args[0])-1,array.array('f',args[0]))
+    hist = func(name,"",len(args[0])-1,array.array('f',args[0]))
   elif len(args) == 3:
     for i in range(3):
       if not isinstance(args[i],numbers.Number):
         raise Exception(i,"th argument is not a number")
-    hist = root.TH1F(name,"",args[0],args[1],args[2])
+    hist = func(name,"",args[0],args[1],args[2])
   else:
     raise Exception("Hist: Innapropriate arguments, requires either nBins, low, high or a list of bin edges:",args)
   return hist
 
-def Hist2D(*args):
+def Hist2D(*args,**kargs):
   """
   Returns TH1F with UUID for name and "" for title.
   The arguments are used as the binning.
   """
+  func = root.TH2F
+  if "TH2D" in kargs and kargs["TH2D"]:
+    func = root.TH2D
+  if "TEfficiency" in kargs and kargs["TEfficiency"]:
+    func = root.TEfficiency
   name = uuid.uuid1().hex
   hist = None
   if len(args) == 2 and type(args[0]) == list and type(args[1]) == list:
-    hist = root.TH2F(name,"",len(args[0])-1,array.array('f',args[0]),len(args[1])-1,array.array('f',args[1]))
+    hist = func(name,"",len(args[0])-1,array.array('f',args[0]),len(args[1])-1,array.array('f',args[1]))
   elif len(args) == 6:
     for i in range(6):
       if not isinstance(args[i],numbers.Number):
         raise Exception(i,"th argument is not a number")
-    hist = root.TH2F(name,"",args[0],args[1],args[2],args[3],args[4],args[5])
+    hist = func(name,"",args[0],args[1],args[2],args[3],args[4],args[5])
   elif len(args) == 4:
     if type(args[0]) == list:
       for i in range(1,4):
         if not isinstance(args[i],numbers.Number):
           raise Exception(i,"th argument is not a number")
-      hist = root.TH2F(name,"",len(args[0])-1,array.array('d',args[0]),args[1],args[2],args[3])
+      hist = func(name,"",len(args[0])-1,array.array('d',args[0]),args[1],args[2],args[3])
     elif type(args[3]) == list:
       for i in range(3):
         if not isinstance(args[i],numbers.Number):
           raise Exception(i,"th argument is not a number")
-      hist = root.TH2F(name,"",args[0],args[1],args[2],len(args[3])-1,array.array('d',args[3]))
+      hist = func(name,"",args[0],args[1],args[2],len(args[3])-1,array.array('d',args[3]))
   else:
     raise Exception("Hist: Innapropriate arguments, requires either nBins, low, high or a list of bin edges:",args)
   return hist
