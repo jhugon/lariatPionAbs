@@ -1870,7 +1870,7 @@ def getEfficiencyInterval(passed,total):
   high = eff.ClopperPearson(int(total),int(passed),quant,True)
   return [low,nom,high]
 
-def drawStandardCaptions(canvas,caption,captionleft1="",captionleft2="",captionleft3="",captionright1="",captionright2="",captionright3="",preliminaryString=""):
+def drawStandardCaptions(canvas,caption,captionleft1="",captionleft2="",captionleft3="",captionright1="",captionright2="",captionright3="",preliminaryString="",colorInside=root.kBlack):
   tlatex = root.TLatex()
   tlatex.SetNDC()
 
