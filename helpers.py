@@ -65,6 +65,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         Use this cut string to create the denominator histogram. The main histogram will be
         the numerator in a TEfficiency.
   """
+  #print("plotManyFilesOnePlot")
   
   for fileConfig in fileConfigs:
     f = root.TFile(fileConfig['fn'])
@@ -75,6 +76,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     fileConfig['tree'] = tree
 
   for histConfig in histConfigs:
+    #print(" hist: {}, {}".format(histConfig["var"],histConfig["cuts"]))
     # setup
     hists = []
     binning = histConfig['binning']
@@ -112,6 +114,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     if "preliminaryString" in histConfig: preliminaryString = histConfig['preliminaryString']
     # now on to the real work
     for fileConfig in fileConfigs:
+      #print("   file: {}, {}".format(fileConfig["title"],fileConfig['fn']))
       hist = None
       if len(binning) == 3:
         hist = Hist(*binning)
@@ -153,7 +156,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     axisHist.Draw()
     for h in reversed(hists):
       if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
-        hist.Draw("PZ0same")
+        h.Draw("PZ0same")
       else:
         h.Draw("histsame")
     labels = [fileConfig['title'] for fileConfig in fileConfigs]
@@ -215,7 +218,9 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         the numerator in a TEfficiency.
   """
   
+  #print("plotManyHistsOnePlot")
   for fileConfig in fileConfigs:
+    #print("  file: {}, {}".format(fileConfig["title"],fileConfig['fn']))
     f = root.TFile(fileConfig['fn'])
     tree = f.Get(treename)
     if 'addFriend' in fileConfig:
@@ -283,6 +288,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
 
     hists = []
     for histConfig in histConfigs:
+      #print("    hist: {}, {}".format(histConfig["var"],histConfig["cuts"]))
       binning = histConfig['binning']
       var = histConfig['var']
       #if var.count(":") != 0:
