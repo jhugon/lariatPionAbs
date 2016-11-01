@@ -117,19 +117,17 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         hist = Hist(*binning)
       else:
         hist = Hist(binning)
-      if "color" in fileConfig:
-        hist.SetLineColor(fileConfig['color'])
       varAndHist = var + " >> " + hist.GetName()
       tree = fileConfig['tree']
       thiscuts = copy.deepcopy(cuts)
       if "cuts" in fileConfig:
         thiscuts += fileConfig['cuts']
       tree.Draw(varAndHist,thiscuts,"",nMax)
-      if "efficiencyDenomCuts" in fileConfig and type(fileConfig["efficiencyDenomCuts"]) == str:
+      if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
         denomHist = hist.Clone(hist.GetName()+"_denom")
         denomHist.Reset()
         varAndHistDenom = var + " >> " + denomHist.GetName()
-        tree.Draw(varAndHistDenom,fileConfig["efficiencyDenomCuts"],"",nMax)
+        tree.Draw(varAndHistDenom,histConfig["efficiencyDenomCuts"],"",nMax)
         teff = root.TEfficiency(hist,denomHist)
         hist = teff
       else:
@@ -144,6 +142,9 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
             hist.Scale(1./integral)
         if "integral" in histConfig and histConfig['integral']:
           hist = getIntegralHist(hist)
+      if "color" in fileConfig:
+        hist.SetLineColor(fileConfig['color'])
+        hist.SetMarkerColor(fileConfig['color'])
       hists.append(hist)
     canvas.SetLogy(logy)
     canvas.SetLogx(logx)
@@ -151,7 +152,10 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     setHistTitles(axisHist,xtitle,ytitle)
     axisHist.Draw()
     for h in reversed(hists):
-      h.Draw("histsame")
+      if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
+        hist.Draw("PZ0same")
+      else:
+        h.Draw("histsame")
     labels = [fileConfig['title'] for fileConfig in fileConfigs]
     leg = drawNormalLegend(hists,labels)
     drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
@@ -292,15 +296,13 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         hist = Hist(*binning)
       else:
         hist = Hist(binning)
-      if 'color' in histConfig:
-        hist.SetLineColor(histConfig['color'])
       varAndHist = var + " >> " + hist.GetName()
       tree.Draw(varAndHist,thiscuts,"",nMax)
-      if "efficiencyDenomCuts" in fileConfig and type(fileConfig["efficiencyDenomCuts"]) == str:
+      if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
         denomHist = hist.Clone(hist.GetName()+"_denom")
         denomHist.Reset()
         varAndHistDenom = var + " >> " + denomHist.GetName()
-        tree.Draw(varAndHistDenom,fileConfig["efficiencyDenomCuts"],"",nMax)
+        tree.Draw(varAndHistDenom,histConfig["efficiencyDenomCuts"],"",nMax)
         teff = root.TEfficiency(hist,denomHist)
         hist = teff
       else:
@@ -315,6 +317,9 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
             hist.Scale(1./integral)
         if "integral" in histConfig and histConfig['integral']:
           hist = getIntegralHist(hist)
+      if 'color' in histConfig:
+        hist.SetLineColor(histConfig['color'])
+        hist.SetMarkerColor(histConfig['color'])
       hists.append(hist)
     canvas.SetLogy(logy)
     canvas.SetLogx(logx)
@@ -322,7 +327,10 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     setHistTitles(axisHist,xtitle,ytitle)
     axisHist.Draw()
     for h in reversed(hists):
-      h.Draw("histsame")
+      if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
+        h.Draw("PZ0same")
+      else:
+        h.Draw("histsame")
     labels = [histConfig['title'] for histConfig in histConfigs]
     leg = drawNormalLegend(hists,labels)
     drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
@@ -464,11 +472,11 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         hist.SetLineColor(histConfig['color'])
       varAndHist = var + " >> " + hist.GetName()
       tree.Draw(varAndHist,thiscuts,"",nMax)
-      if "efficiencyDenomCuts" in fileConfig and type(fileConfig["efficiencyDenomCuts"]) == str:
+      if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
         denomHist = hist.Clone(hist.GetName()+"_denom")
         denomHist.Reset()
         varAndHistDenom = var + " >> " + denomHist.GetName()
-        tree.Draw(varAndHistDenom,fileConfig["efficiencyDenomCuts"],"",nMax)
+        tree.Draw(varAndHistDenom,histConfig["efficiencyDenomCuts"],"",nMax)
         teff = root.TEfficiency(hist,denomHist)
         hist = teff
       else:
@@ -483,14 +491,25 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
             hist.Scale(1./integral)
         if "integral" in histConfig and histConfig['integral']:
           hist = getIntegralHist(hist)
-      setHistTitles(hist,xtitle,ytitle,ztitle)
       canvas.SetLogy(logy)
       canvas.SetLogx(logx)
+      axisHist = None
       if hist.InheritsFrom("TH2"):
         setupCOLZFrame(canvas)
-        hist.Draw("colz")
+        axisHist = hist
+        if xlim:
+            axisHist.GetXaxis().SetRangeUser(*xlim)
+        if ylim:
+            axisHist.GetYaxis().SetRangeUser(*ylim)
+        hist.Draw("colzsame")
       else:
-        hist.Draw("hist")
+        axisHist = makeStdAxisHist([hist],logy=logy,freeTopSpace=0.05,xlim=xlim,ylim=ylim)
+        axisHist.Draw()
+        if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
+          hist.Draw("PZ0same")
+        else:
+          hist.Draw("histsame")
+      setHistTitles(axisHist,xtitle,ytitle)
       drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
       canvas.RedrawAxis()
       saveNameBase = outPrefix + histConfig['name'] + "_" + fileConfig['name'] + outSuffix
@@ -1916,9 +1935,12 @@ def copyTreeBranchToNewNameTree(tree,oldBranchName,newBranchName):
   return result
 
 def getHistMax(hist):
-  iBin = hist.GetMaximumBin()
-  result = hist.GetBinContent(iBin)
-  return result
+  if hist.InheritsFrom("TEfficiency"):
+    return 1.0
+  else:
+    iBin = hist.GetMaximumBin()
+    result = hist.GetBinContent(iBin)
+    return result
 
 def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
   assert(len(histList)>0)
@@ -1932,9 +1954,12 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
   for hist in histList:
     histMax = getHistMax(hist)
     yMax = max(yMax,histMax)
-    nBins = hist.GetNbinsX()
-    xMax = max(xMax,hist.GetXaxis().GetBinUpEdge(nBins))
-    xMin = min(xMin,hist.GetBinLowEdge(1))
+    histX = hist
+    if hist.InheritsFrom("TEfficiency"):
+        histX = hist.GetTotalHistogram()
+    nBins = histX.GetNbinsX()
+    xMax = max(xMax,histX.GetXaxis().GetBinUpEdge(nBins))
+    xMin = min(xMin,histX.GetBinLowEdge(1))
   if yMax == 0.:
     yMax = 1.
   if logy:
