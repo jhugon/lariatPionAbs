@@ -507,7 +507,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
             axisHist.GetXaxis().SetRangeUser(*xlim)
         if ylim:
             axisHist.GetYaxis().SetRangeUser(*ylim)
-        hist.Draw("colzsame")
+        hist.Draw("colz")
       else:
         axisHist = makeStdAxisHist([hist],logy=logy,freeTopSpace=0.05,xlim=xlim,ylim=ylim)
         axisHist.Draw()
