@@ -216,6 +216,9 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     efficiencyDenomCuts: If this is a string, it makes this histogram an efficiency. 
         Use this cut string to create the denominator histogram. The main histogram will be
         the numerator in a TEfficiency.
+    profileX: if True, draw profileX of 2D hist
+    profileY: if True, draw profileY of 2D hist
+    profileStdDev: if True, profile errors are std deviation instead of std error on mean
   """
   
   #print("plotManyHistsOnePlot")
@@ -288,9 +291,19 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
 
     hists = []
     for histConfig in histConfigs:
+      doProfileX = False
+      if "profileX" in histConfig and histConfig["profileX"]: doProfileX = True
+      doProfileY = False
+      if "profileY" in histConfig and histConfig["profileY"]: doProfileY = True
       #print("    hist: {}, {}".format(histConfig["var"],histConfig["cuts"]))
       binning = histConfig['binning']
       var = histConfig['var']
+      is2D = False
+      ncolon = var.count(":")
+      if ncolon > 1:
+        raise Exception("Multiple ':' not allowed in variable, only 1D/2D hists allowed",var)
+      elif ncolon == 1:
+        is2D = True
       #if var.count(":") != 0:
       #  raise Exception("No ':' allowed in variable, only 1D hists allowed",var)
       cuts = histConfig['cuts']
@@ -298,10 +311,16 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       if "cuts" in fileConfig:
         thiscuts += fileConfig['cuts']
       hist = None
-      if len(binning) == 3:
-        hist = Hist(*binning)
+      if is2D:
+        if len(binning) == 2:
+          hist = Hist(binning[0],binning[1])
+        else:
+          hist = Hist2D(*binning)
       else:
-        hist = Hist(binning)
+        if len(binning) == 3:
+          hist = Hist(*binning)
+        else:
+          hist = Hist(binning)
       varAndHist = var + " >> " + hist.GetName()
       tree.Draw(varAndHist,thiscuts,"",nMax)
       if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
@@ -323,6 +342,16 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
             hist.Scale(1./integral)
         if "integral" in histConfig and histConfig['integral']:
           hist = getIntegralHist(hist)
+      if doProfileX:
+        if "profileStdDev" in histConfig and histConfig["profileStdDev"]:
+          hist = hist.ProfileX("_pfx",1,-1,'s')
+        else:
+          hist = hist.ProfileX()
+      elif doProfileY:
+        if "profileStdDev" in histConfig and histConfig["profileStdDev"]:
+          hist = hist.ProfileY("_pfy",1,-1,'s')
+        else:
+          hist = hist.ProfileY()
       if 'color' in histConfig:
         hist.SetLineColor(histConfig['color'])
         hist.SetMarkerColor(histConfig['color'])
@@ -335,6 +364,8 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     for h in reversed(hists):
       if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
         h.Draw("PZ0same")
+      elif doProfileX or doProfileY:
+        h.Draw("Esame")
       else:
         h.Draw("histsame")
     labels = [histConfig['title'] for histConfig in histConfigs]
@@ -399,10 +430,10 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     efficiencyDenomCuts: If this is a string, it makes this histogram an efficiency. 
         Use this cut string to create the denominator histogram. The main histogram will be
         the numerator in a TEfficiency.
-    profileX: if True, draw profileX of 2D hist (not yet implemented)
-    profileY: if True, draw profileY of 2D hist (not yet implemented)
-    profileXtoo: if True, draw profileX of 2D hist, on top of 2D hist (not yet implemented)
-    profileYtoo: if True, draw profileY of 2D hist, on top of 2D hist (not yet implemented)
+    profileX: if True, draw profileX of 2D hist
+    profileY: if True, draw profileY of 2D hist
+    profileStdDev: if True, profile errors are std deviation instead of std error on mean
+    profileXtoo: if True, draw profileX of 2D hist, on top of 2D hist
   """
   
   for fileConfig in fileConfigs:
@@ -462,6 +493,12 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       if "captionright2" in histConfig: captionright2 = histConfig['captionright2']
       if "captionright3" in histConfig: captionright3 = histConfig['captionright3']
       if "preliminaryString" in histConfig: preliminaryString = histConfig['preliminaryString']
+      doProfileXtoo = False
+      if "profileXtoo" in histConfig and histConfig["profileXtoo"]: doProfileXtoo = True
+      doProfileX = False
+      if doProfileXtoo or "profileX" in histConfig and histConfig["profileX"]: doProfileX = True
+      doProfileY = False
+      if "profileY" in histConfig and histConfig["profileY"]: doProfileY = True
       # now on to the real work
       hist = None
       if is2D:
@@ -499,6 +536,20 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
           hist = getIntegralHist(hist)
       canvas.SetLogy(logy)
       canvas.SetLogx(logx)
+      prof = None
+      if doProfileX:
+        if "profileStdDev" in histConfig and histConfig["profileStdDev"]:
+          prof = hist.ProfileX("_pfx",1,-1,'s')
+        else:
+          prof = hist.ProfileX()
+        if not doProfileXtoo:
+          hist = prof
+      elif doProfileY:
+        if "profileStdDev" in histConfig and histConfig["profileStdDev"]:
+          prof = hist.ProfileY("_pfy",1,-1,'s')
+        else:
+          prof = hist.ProfileY()
+          hist = prof
       axisHist = None
       if hist.InheritsFrom("TH2"):
         setupCOLZFrame(canvas)
@@ -508,11 +559,15 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         if ylim:
             axisHist.GetYaxis().SetRangeUser(*ylim)
         hist.Draw("colz")
+        if doProfileXtoo:
+            prof.Draw("Esame")
       else:
         axisHist = makeStdAxisHist([hist],logy=logy,freeTopSpace=0.05,xlim=xlim,ylim=ylim)
         axisHist.Draw()
         if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
           hist.Draw("PZ0same")
+        elif doProfileX or doProfileY:
+          hist.Draw("Esame")
         else:
           hist.Draw("histsame")
       setHistTitles(axisHist,xtitle,ytitle)
