@@ -8,13 +8,13 @@ if __name__ == "__main__":
 
   c = root.TCanvas()
   NMAX=10000000000
-  #NMAX=1000
+  #NMAX=10000
   fileConfigs = [
     {
-      #'fn': "anaTree_data_Lovely1_Pos_RunI_elanag_v02_v01.root",
+      'fn': "anaTree_data_Lovely1_Pos_RunI_elanag_v02_v01.root",
       #'addFriend': ["friend","friendTree_data_Lovely1_Pos_RunI_elanag_v02_v01.root"],
-      'fn': "anaTree_data_runI_pos_v0.1.root",
-      'addFriend': ["friend","friendTree_data_runI_pos_v0.1.root"],
+      #'fn': "anaTree_data_runI_pos_v0.1.root",
+      #'addFriend': ["friend","friendTree_data_runI_pos_v0.1.root"],
       'name': "RunI",
       'title': "Run I Pos. Polarity",
       'caption': "Run I Pos. Polarity",
@@ -121,7 +121,15 @@ if __name__ == "__main__":
       'name': "tofObject",
       'xtitle': "Time of Flight [ns]",
       'ytitle': "TOF / bin",
-      'binning': [200,-100,100],
+      'binning': [296,18,55],
+      'var': "tofObject",
+      'cuts': "",
+    },
+    {
+      'name': "tofObject_wide",
+      'xtitle': "Time of Flight [ns]",
+      'ytitle': "TOF / bin",
+      'binning': [400,0,100],
       'var': "tofObject",
       'cuts': "",
     },
@@ -132,6 +140,46 @@ if __name__ == "__main__":
       'binning': [2000,-5e5,5e5],
       'var': "tof_timestamp",
       'cuts': "",
+    },
+    {
+      'name': "tofVP_wide",
+      'ytitle': "Time of Flight [ns]",
+      'xtitle': "WC Track Momentum [MeV/c]",
+      'binning': [100,0,2000.,100,0,100],
+      'var': "tofObject[0]:wctrk_momentum[0]",
+      'cuts': "ntof == 1 && nwctrks == 1",
+    },
+    {
+      'name': "tofVP",
+      'ytitle': "Time of Flight [ns]",
+      'xtitle': "WC Track Momentum [MeV/c]",
+      'binning': [200,250,1250.,148,18,55],
+      'var': "tofObject[0]:wctrk_momentum[0]",
+      'cuts': "ntof == 1 && nwctrks == 1",
+    },
+    {
+      'name': "tof2p2Vp2",
+      'ytitle': "TOF^{2}p^{2} [(ns)^{2} (MeV/c)^{2}]",
+      'xtitle': "p^{2} [(MeV/c)^{2}]",
+      'binning': [200,0,1200,200,0,1e9],
+      'var': "tofObject[0]*tofObject[0]*wctrk_momentum[0]*wctrk_momentum[0]:wctrk_momentum[0]",
+      'cuts': "ntof == 1 && nwctrks == 1",
+    },
+    {
+      'name': "tof2p2Vp2_toflt27",
+      'ytitle': "TOF^{2}p^{2} [(ns)^{2} (MeV/c)^{2}]",
+      'xtitle': "p^{2} [(MeV/c)^{2}]",
+      'binning': [200,0,1200,200,0,1e9],
+      'var': "tofObject[0]*tofObject[0]*wctrk_momentum[0]*wctrk_momentum[0]:wctrk_momentum[0]",
+      'cuts': "ntof == 1 && nwctrks == 1 && tofObject[0]<27.",
+    },
+    {
+      'name': "tof2p2Vp2_tofgeq27",
+      'ytitle': "TOF^{2}p^{2} [(ns)^{2} (MeV/c)^{2}]",
+      'xtitle': "p^{2} [(MeV/c)^{2}]",
+      'binning': [200,0,1200,200,0,1e9],
+      'var': "tofObject[0]*tofObject[0]*wctrk_momentum[0]*wctrk_momentum[0]:wctrk_momentum[0]",
+      'cuts': "ntof == 1 && nwctrks == 1 && tofObject[0]>=27.",
     },
   ]
 
