@@ -185,3 +185,52 @@ if __name__ == "__main__":
 
   plotOneHistOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX)
 
+  histConfigs = [
+    {
+      'name': "dmpi",
+      'title': "m_{#pi}",
+      'xtitle': "p [MeV/c]",
+      'ytitle': "d [m]",
+      'binning': [200,0,1200,200,5,10],
+      'var': "0.299*tofObject[0]*wctrk_momentum[0]*pow(wctrk_momentum[0]*wctrk_momentum[0]+19488.16,-0.5):wctrk_momentum[0]",
+      'cuts': "ntof == 1 && nwctrks == 1 && tofObject[0]<27.",
+    },
+    {
+      'name': "dmmu",
+      'title': "m_{#mu}",
+      'xtitle': "p [MeV/c]",
+      'ytitle': "d [m]",
+      'binning': [200,0,1200,200,5,10],
+      'var': "0.299*tofObject[0]*wctrk_momentum[0]*pow(wctrk_momentum[0]*wctrk_momentum[0]+11161.92,-0.5):wctrk_momentum[0]",
+      'cuts': "ntof == 1 && nwctrks == 1 && tofObject[0]<27.",
+    },
+    {
+      'name': "dm0",
+      'title': "m=0",
+      'xtitle': "p [MeV/c]",
+      'ytitle': "d [m]",
+      'binning': [200,0,1200,200,5,10],
+      'var': "0.299*tofObject[0]:wctrk_momentum[0]",
+      'cuts': "ntof == 1 && nwctrks == 1 && tofObject[0]<27.",
+    },
+    {
+      'name': "dmp",
+      'title': "m_{p}",
+      'xtitle': "p [MeV/c]",
+      'ytitle': "d [m]",
+      'binning': [200,0,1200,200,5.,10],
+      'var': "0.299*tofObject[0]*wctrk_momentum[0]*pow(wctrk_momentum[0]*wctrk_momentum[0]+880406.89,-0.5):wctrk_momentum[0]",
+      'cuts': "ntof == 1 && nwctrks == 1 && tofObject[0]>=27.",
+    },
+    {
+      'name': "dmk",
+      'title': "m_{K}",
+      'xtitle': "p [MeV/c]",
+      'ytitle': "d [m]",
+      'binning': [200,0,1200,200,5,10],
+      'var': "0.299*tofObject[0]*wctrk_momentum[0]*pow(wctrk_momentum[0]*wctrk_momentum[0]+243707.1,-0.5):wctrk_momentum[0]",
+      'cuts': "ntof == 1 && nwctrks == 1",
+    },
+  ]
+  plotOneHistOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX,outPrefix="TOF_")
+
