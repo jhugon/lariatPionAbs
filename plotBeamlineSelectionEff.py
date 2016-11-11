@@ -20,6 +20,16 @@ if __name__ == "__main__":
       'caption': "Run I Pos. Polarity",
       'color': root.kBlack,
     },
+    {
+      'fn': "anaTree_data_Lovely1_Pos_RunII_elanag_v02_v01.root",
+      #'addFriend': ["friend","friendTree_data_Lovely1_Pos_RunI_elanag_v02_v01.root"],
+      #'fn': "anaTree_data_runI_pos_v0.1.root",
+      #'addFriend': ["friend","friendTree_data_runI_pos_v0.1.root"],
+      'name': "RunII_Pos",
+      'title': "Run II Pos. Polarity",
+      'caption': "Run II Pos. Polarity",
+      'color': root.kBlue,
+    },
 #    {
 #      'fn': "anaTree_runI_neg_1k.root",
 #      #'addFriend': ["friend","friendTree_data_Lovely1_Pos_RunI_elanag_v02_v01.root"],
@@ -217,6 +227,7 @@ if __name__ == "__main__":
       'var': "wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.)",
       'cuts': "ntof == 1 && nwctrks == 1",
       'captionleft1': "6.684 m",
+      'drawvlines': [105.658**2,139.570**2,493.667**2,938.272**2]
     },
     {
       'name': "mass",
@@ -226,6 +237,7 @@ if __name__ == "__main__":
       'var': "sqrt(wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.))",
       'cuts': "ntof == 1 && nwctrks == 1 && (wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.)) > 0.",
       'captionright1': "6.684 m",
+      'drawvlines': [105.658,139.570,493.667,938.272]
     },
   ]
 
@@ -297,6 +309,7 @@ if __name__ == "__main__":
       'cuts': "ntof == 1 && nwctrks == 1 && tofObject[0]<27.",
       'profileX':True,
       'color': root.kBlue,
+      'drawhlines': [6.684]
     },
     {
       'name': "dmmu",
@@ -357,6 +370,7 @@ if __name__ == "__main__":
       'cuts': "ntof == 1 && nwctrks == 1 && tofObject[0]<27.",
       'profileX':True,
       'color': root.kBlue,
+      'drawhlines': [6.684]
     },
     {
       'name': "dmmu",
@@ -415,6 +429,7 @@ if __name__ == "__main__":
       'var': "sqrt(wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.))",
       'cuts': "ntof == 1 && nwctrks == 1",
       'captionleft1': "6.684 m",
+      'drawvlines': [105.658,139.570,493.667,938.272]
     },
     {
       'name': "mass",

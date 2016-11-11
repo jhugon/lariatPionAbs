@@ -64,6 +64,8 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     efficiencyDenomCuts: If this is a string, it makes this histogram an efficiency. 
         Use this cut string to create the denominator histogram. The main histogram will be
         the numerator in a TEfficiency.
+    drawhlines: list of y locations to draw horizontal lines
+    drawvlines: list of x locations to draw vertical lines
   """
   #print("plotManyFilesOnePlot")
   
@@ -112,6 +114,14 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     if "captionright2" in histConfig: captionright2 = histConfig['captionright2']
     if "captionright3" in histConfig: captionright3 = histConfig['captionright3']
     if "preliminaryString" in histConfig: preliminaryString = histConfig['preliminaryString']
+    vlineXs = []
+    hlineYs = []
+    vlines = []
+    hlines = []
+    if "drawvlines" in histConfig and type(histConfig["drawvlines"]) == list:
+      vlineXs = histConfig["drawvlines"]
+    if "drawhlines" in histConfig and type(histConfig["drawhlines"]) == list:
+      hlineYs = histConfig["drawhlines"]
     # now on to the real work
     for fileConfig in fileConfigs:
       #print("   file: {}, {}".format(fileConfig["title"],fileConfig['fn']))
@@ -154,6 +164,10 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     axisHist = makeStdAxisHist(hists,logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
     setHistTitles(axisHist,xtitle,ytitle)
     axisHist.Draw()
+    for hlineY in hlineYs:
+      hlines.append(drawHline(axisHist,hlineY))
+    for vlineX in vlineXs:
+      vlines.append(drawVline(axisHist,vlineX))
     for h in reversed(hists):
       if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
         h.Draw("PZ0same")
@@ -219,6 +233,8 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     profileX: if True, draw profileX of 2D hist
     profileY: if True, draw profileY of 2D hist
     profileStdDev: if True, profile errors are std deviation instead of std error on mean
+    drawhlines: list of y locations to draw horizontal lines
+    drawvlines: list of x locations to draw vertical lines
   """
   
   #print("plotManyHistsOnePlot")
@@ -271,6 +287,10 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     if "captionright2" in fileConfig: captionright2 = fileConfig['captionright2']
     if "captionright3" in fileConfig: captionright3 = fileConfig['captionright3']
     if "preliminaryString" in fileConfig: preliminaryString = fileConfig['preliminaryString']
+    vlineXs = set()
+    hlineYs = set()
+    vlines = []
+    hlines = []
     for histConfig in histConfigs:
         if "caption" in histConfig \
                 or "captionleft1" in histConfig \
@@ -288,7 +308,15 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
             if "captionright2" in histConfig: captionright2 = histConfig['captionright2']
             if "captionright3" in histConfig: captionright3 = histConfig['captionright3']
             if "preliminaryString" in histConfig: preliminaryString = histConfig['preliminaryString']
-
+        if "drawvlines" in histConfig and type(histConfig["drawvlines"]) == list:
+          for vline in histConfig["drawvlines"]:
+            if not vline in vlineXs:
+              vlineXs.add(vline)
+        if "drawhlines" in histConfig and type(histConfig["drawhlines"]) == list:
+          for hline in histConfig["drawhlines"]:
+            if not hline in hlineYs:
+              hlineYs.add(hline)
+    
     hists = []
     for histConfig in histConfigs:
       doProfileX = False
@@ -361,6 +389,10 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     axisHist = makeStdAxisHist(hists,logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
     setHistTitles(axisHist,xtitle,ytitle)
     axisHist.Draw()
+    for hlineY in hlineYs:
+      hlines.append(drawHline(axisHist,hlineY))
+    for vlineX in vlineXs:
+      vlines.append(drawVline(axisHist,vlineX))
     for h in reversed(hists):
       if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
         h.Draw("PZ0same")
@@ -499,6 +531,14 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       if doProfileXtoo or "profileX" in histConfig and histConfig["profileX"]: doProfileX = True
       doProfileY = False
       if "profileY" in histConfig and histConfig["profileY"]: doProfileY = True
+      vlineXs = []
+      hlineYs = []
+      vlines = []
+      hlines = []
+      if "drawvlines" in histConfig and type(histConfig["drawvlines"]) == list:
+        vlineXs = histConfig["drawvlines"]
+      if "drawhlines" in histConfig and type(histConfig["drawhlines"]) == list:
+        hlineYs = histConfig["drawhlines"]
       # now on to the real work
       hist = None
       if is2D:
@@ -570,6 +610,10 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
           hist.Draw("Esame")
         else:
           hist.Draw("histsame")
+      for hlineY in hlineYs:
+        hlines.append(drawHline(axisHist,hlineY))
+      for vlineX in vlineXs:
+        vlines.append(drawVline(axisHist,vlineX))
       setHistTitles(axisHist,xtitle,ytitle)
       drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
       canvas.RedrawAxis()
@@ -2143,6 +2187,30 @@ def Hist2D(*args,**kargs):
   else:
     raise Exception("Hist: Innapropriate arguments, requires either nBins, low, high or a list of bin edges:",args)
   return hist
+
+def drawVline(axisHist,x):
+  axis = axisHist.GetYaxis()
+  nBins = axis.GetNbins()
+  yLow = axis.GetBinLowEdge(0)
+  yHigh = axis.GetBinUpEdge(nBins)
+  result = root.TGraph()
+  result.SetPoint(0,x,yLow)
+  result.SetPoint(1,x,yHigh)
+  result.SetLineColor(root.kGray+1)
+  result.Draw("lsame")
+  return result
+
+def drawHline(axisHist,y):
+  axis = axisHist.GetXaxis()
+  nBins = axis.GetNbins()
+  xLow = axis.GetBinLowEdge(0)
+  xHigh = axis.GetBinUpEdge(nBins)
+  result = root.TGraph()
+  result.SetPoint(0,xLow,y)
+  result.SetPoint(1,xHigh,y)
+  result.SetLineColor(root.kGray+1)
+  result.Draw("lsame")
+  return result
 
 if __name__ == "__main__":
 
