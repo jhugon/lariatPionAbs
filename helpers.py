@@ -33,7 +33,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
   treename is where to find the tree in each file
 
   fileConfig options:
-    fn: filename REQUIRED
+    fn: filename str or list of str for a chain. REQUIRED
     title: title of sample: will be used for legends
     color: will be used for line/marker color
     scaleFactor: scale histograms by this much after filling
@@ -70,12 +70,16 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
   #print("plotManyFilesOnePlot")
   
   for fileConfig in fileConfigs:
-    f = root.TFile(fileConfig['fn'])
-    tree = f.Get(treename)
+    fileConfig['tree'] = root.TChain(treename)
+    if type(fileConfig['fn']) is str:
+        fileConfig['tree'].AddFile(fileConfig['fn'])
+    elif type(fileConfig['fn']) is list:
+        for fn in fileConfig['fn']:
+            fileConfig['tree'].AddFile(fn)
+    else:
+        raise Exception("")
     if 'addFriend' in fileConfig:
-      tree.AddFriend(*(fileConfig['addFriend']))
-    fileConfig['f'] = f
-    fileConfig['tree'] = tree
+      fileConfig['tree'].AddFriend(*(fileConfig['addFriend']))
 
   for histConfig in histConfigs:
     #print(" hist: {}, {}".format(histConfig["var"],histConfig["cuts"]))
@@ -195,7 +199,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
   treename is where to find the tree in each file
 
   fileConfig options:
-    fn: filename REQUIRED
+    fn: filename str or list of str for a chain. REQUIRED
     pdg: PDG ID number (unused)
     name: name of sample, used for savename REQUIRED
     title: title of sample (unused)
@@ -240,12 +244,17 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
   #print("plotManyHistsOnePlot")
   for fileConfig in fileConfigs:
     #print("  file: {}, {}".format(fileConfig["title"],fileConfig['fn']))
-    f = root.TFile(fileConfig['fn'])
-    tree = f.Get(treename)
+    fileConfig['tree'] = root.TChain(treename)
+    if type(fileConfig['fn']) is str:
+        fileConfig['tree'].AddFile(fileConfig['fn'])
+    elif type(fileConfig['fn']) is list:
+        for fn in fileConfig['fn']:
+            fileConfig['tree'].AddFile(fn)
+    else:
+        raise Exception("")
     if 'addFriend' in fileConfig:
-      tree.AddFriend(*(fileConfig['addFriend']))
-    fileConfig['f'] = f
-    fileConfig['tree'] = tree
+      fileConfig['tree'].AddFriend(*(fileConfig['addFriend']))
+    tree = fileConfig['tree']
     xtitle = ""
     ytitle = "Events/bin"
     for histConfig in histConfigs:
@@ -423,7 +432,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
   treename is where to find the tree in each file
 
   fileConfig options:
-    fn: filename REQUIRED
+    fn: filename str or list of str for a chain. REQUIRED
     name: name of sample, used for savename REQUIRED
     scaleFactor: scale histogram by this much after filling
     pdg: PDG ID number (unused)
@@ -446,6 +455,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     cuts: cut string, second argument to tree.Draw REQUIRED
     xlim: xlimits, a two element list of xlimits for plot
     ylim: ylimits, a two element list of ylimits for plot
+    logz: if True, plot on z on log scale
     logy: if True, plot on y on log scale
     logx: if True, plot on y on log scale
     caption, captionleft1, captionleft2, captionleft3, captionright1,
@@ -469,10 +479,17 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
   """
   
   for fileConfig in fileConfigs:
-    f = root.TFile(fileConfig['fn'])
-    tree = f.Get(treename)
+    fileConfig['tree'] = root.TChain(treename)
+    if type(fileConfig['fn']) is str:
+        fileConfig['tree'].AddFile(fileConfig['fn'])
+    elif type(fileConfig['fn']) is list:
+        for fn in fileConfig['fn']:
+            fileConfig['tree'].AddFile(fn)
+    else:
+        raise Exception("")
     if 'addFriend' in fileConfig:
-      tree.AddFriend(*(fileConfig['addFriend']))
+      fileConfig['tree'].AddFriend(*(fileConfig['addFriend']))
+    tree = fileConfig['tree']
     for histConfig in histConfigs:
       # setup
       binning = histConfig['binning']
@@ -497,8 +514,10 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       ylim = []
       if "xlim" in histConfig: xlim = histConfig['xlim']
       if "ylim" in histConfig: ylim = histConfig['ylim']
+      logz = False
       logy = False
       logx = False
+      if "logz" in histConfig: logz = histConfig['logz']
       if "logy" in histConfig: logy = histConfig['logy']
       if "logx" in histConfig: logx = histConfig['logx']
       caption = ""
@@ -576,6 +595,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
           hist = getIntegralHist(hist)
       canvas.SetLogy(logy)
       canvas.SetLogx(logx)
+      canvas.SetLogz(logz)
       prof = None
       if doProfileX:
         if "profileStdDev" in histConfig and histConfig["profileStdDev"]:
