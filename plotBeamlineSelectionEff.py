@@ -55,6 +55,41 @@ if __name__ == "__main__":
       'color': root.kGreen+1,
     },
     {
+      'fn': "BeamLineAnaTree_run5605_v06_15_00_v1.root",
+      'name': "Run5605_v61500",
+      'title': "Run 5605 v6_15_00",
+      'caption': "Run 5605 v6_15_00",
+      'color': root.kGreen+1,
+    },
+    {
+      'fn': "BeamLineAnaTree_run6111_v06_15_00_v1.root",
+      'name': "Run6111_v61500",
+      'title': "Run 6111 v6_15_00",
+      'caption': "Run 6111 v6_15_00",
+      'color': root.kGreen+1,
+    },
+    {
+      'fn': "BeamLineAnaTree_run6264_v06_15_00_v1.root",
+      'name': "Run6264_v61500",
+      'title': "Run 6264 v6_15_00",
+      'caption': "Run 6264 v6_15_00",
+      'color': root.kGreen+1,
+    },
+    {
+      'fn': "BeamLineAnaTree_run6336_v06_15_00_v1.root",
+      'name': "Run6336_v61500",
+      'title': "Run 6336 v6_15_00",
+      'caption': "Run 6336 v6_15_00",
+      'color': root.kGreen+1,
+    },
+    {
+      'fn': "BeamLineAnaTree_run6373_v06_15_00_v1.root",
+      'name': "Run6373_v61500",
+      'title': "Run 6373 v6_15_00",
+      'caption': "Run 6373 v6_15_00",
+      'color': root.kGreen+1,
+    },
+    {
       'fn': "BeamLineAnaTree_data_Lovely1_Neg_Run1_elenag_v02_v01.root",
       #'fn': "anaTree_runI_neg_1k.root",
       #'addFriend': ["friend","friendTree_data_Lovely1_Pos_RunI_elanag_v02_v01.root"],
@@ -257,7 +292,7 @@ if __name__ == "__main__":
       #'logz': True,
     },
     {
-      'name': "mass2",
+      'name': "mass2_narrow",
       'xtitle': "m^{2} [MeV^{2}/c^{4}]",
       'ytitle': "Events / bin",
       'binning': [2000,-2.5e5,2.5e5],
@@ -265,6 +300,28 @@ if __name__ == "__main__":
       'cuts': "ntof == 1 && nwctrks == 1",
       'captionleft1': "6.684 m",
       'drawvlines': [105.658**2,139.570**2,493.667**2,938.272**2]
+    },
+    {
+      'name': "mass2",
+      'xtitle': "m^{2} [MeV^{2}/c^{4}]",
+      'ytitle': "Events / bin",
+      'binning': [150,-1.5e6,1.5e6],
+      'var': "wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.)",
+      'cuts': "ntof == 1 && nwctrks == 1",
+      'captionleft1': "6.684 m",
+      'drawvlines': [105.658**2,139.570**2,493.667**2,938.272**2],
+      'logy': True,
+    },
+    {
+      'name': "mass2_wide",
+      'xtitle': "m^{2} [MeV^{2}/c^{4}]",
+      'ytitle': "Events / bin",
+      'binning': [250,-5e6,5e6],
+      'var': "wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.)",
+      'cuts': "ntof == 1 && nwctrks == 1",
+      'captionleft1': "6.684 m",
+      'drawvlines': [105.658**2,139.570**2,493.667**2,938.272**2,1875.6**2],
+      'logy': True,
     },
     {
       'name': "mass2Vp",
@@ -603,7 +660,7 @@ if __name__ == "__main__":
       'binning': [170,5550,6400,100,0,100],
       'var': "tofObject[0]:run",
       'cuts': "ntof == 1 && nwctrks == 1",
-      #'logz': True,
+      'logz': True,
     },
     {
       'name': "PVrun",
@@ -612,7 +669,7 @@ if __name__ == "__main__":
       'binning': [170,5550,6400,75,0,1500],
       'var': "wctrk_momentum[0]:run",
       'cuts': "ntof == 1 && nwctrks == 1",
-      #'logz': True,
+      'logz': True,
     },
     {
       'name': "massVrun",
@@ -622,7 +679,7 @@ if __name__ == "__main__":
       'var': "sqrt(wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.)):run",
       'cuts': "ntof == 1 && nwctrks == 1 && (wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.)) > 0.",
       'drawhlines': [105.658,139.570,493.667,938.272],
-      #'logz': True,
+      'logz': True,
     },
     {
       'name': "mass2Vrun",
@@ -632,7 +689,7 @@ if __name__ == "__main__":
       'var': "wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.):run",
       'cuts': "ntof == 1 && nwctrks == 1",
       'drawhlines': [105.658**2,139.570**2,493.667**2,938.272**2],
-      #'logz': True,
+      'logz': True,
     },
   ]
   plotOneHistOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX)
@@ -703,4 +760,150 @@ if __name__ == "__main__":
     },
   ]
 
+  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX,outPrefix="compare4295_")
+
+###########################################3
+###########################################3
+###########################################3
+###########################################3
+###########################################3
+
+
+  fileConfigs = [
+    #{
+    #  'fn': "BeamLineAnaTree_run4295_v06_15_00_v1.root",
+    #  'name': "Run4295_v61500",
+    #  'title': "Run 4295 v6_15_00",
+    #  'caption': "Run 4295 v6_15_00",
+    #  'color': root.kBlack,
+    #},
+    {
+      'fn': "BeamLineAnaTree_run5605_v06_15_00_v1.root",
+      'name': "Run5605_v61500",
+      'title': "Run 5605 v6_15_00",
+      'caption': "Run 5605 v6_15_00",
+      'color': root.kBlue,
+    },
+    {
+      'fn': "BeamLineAnaTree_run6111_v06_15_00_v1.root",
+      'name': "Run6111_v61500",
+      'title': "Run 6111 v6_15_00",
+      'caption': "Run 6111 v6_15_00",
+      'color': root.kRed+1,
+    },
+    {
+      'fn': "BeamLineAnaTree_run6264_v06_15_00_v1.root",
+      'name': "Run6264_v61500",
+      'title': "Run 6264 v6_15_00",
+      'caption': "Run 6264 v6_15_00",
+      'color': root.kGreen+1,
+    },
+    {
+      'fn': "BeamLineAnaTree_run6336_v06_15_00_v1.root",
+      'name': "Run6336_v61500",
+      'title': "Run 6336 v6_15_00",
+      'caption': "Run 6336 v6_15_00",
+      'color': root.kMagenta,
+    },
+    {
+      'fn': "BeamLineAnaTree_run6373_v06_15_00_v1.root",
+      'name': "Run6373_v61500",
+      'title': "Run 6373 v6_15_00",
+      'caption': "Run 6373 v6_15_00",
+      'color': root.kCyan,
+    },
+  ]
+
+  histConfigs = [
+    {
+      'name': "nwctrks",
+      'xtitle': "Number of Wire Chamber Tracks",
+      'ytitle': "Normalized Events",
+      'binning': [11,-0.5,10.5],
+      'var': "nwctrks",
+      'cuts': "",
+      'logy': True,
+      'normalize': True,
+    },
+    {
+      'name': "ntof",
+      'xtitle': "Number of Time of Flight Objects",
+      'ytitle': "Normalized Events",
+      'binning': [11,-0.5,10.5],
+      'var': "ntof",
+      'cuts': "",
+      'logy': True,
+      'normalize': True,
+    },
+    {
+      'name': "wctrk_momentum",
+      'xtitle': "WC Track Momentum [MeV/c]",
+      'ytitle': "Normalized Events",
+      'binning': [200,0,2000],
+      'var': "wctrk_momentum",
+      'cuts': "",
+      'normalize': True,
+    },
+    {
+      'name': "tofObject",
+      'xtitle': "Time of Flight [ns]",
+      'ytitle': "Normalized Events",
+      'binning': [360,10,55],
+      'var': "tofObject",
+      'cuts': "",
+      'normalize': True,
+    },
+    {
+      'name': "tofObject_wide",
+      'xtitle': "Time of Flight [ns]",
+      'ytitle': "Normalized Events",
+      'binning': [400,0,100],
+      'var': "tofObject",
+      'cuts': "",
+      'normalize': True,
+    },
+    {
+      'name': "mass",
+      'xtitle': "m [MeV/c^{2}]",
+      'ytitle': "Normalized Events",
+      'binning': [150,0.,1500],
+      'var': "sqrt(wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.))",
+      'cuts': "ntof == 1 && nwctrks == 1 && (wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.)) > 0.",
+      'captionright1': "6.684 m",
+      'drawvlines': [105.658,139.570,493.667,938.272],
+      'normalize': True,
+    },
+    {
+      'name': "mass2_narrow",
+      'xtitle': "m^{2} [MeV^{2}/c^{4}]",
+      'ytitle': "Events / bin",
+      'binning': [2000,-2.5e5,2.5e5],
+      'var': "wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.)",
+      'cuts': "ntof == 1 && nwctrks == 1",
+      'captionleft1': "6.684 m",
+      'drawvlines': [105.658**2,139.570**2,493.667**2,938.272**2]
+    },
+    {
+      'name': "mass2",
+      'xtitle': "m^{2} [MeV^{2}/c^{4}]",
+      'ytitle': "Events / bin",
+      'binning': [150,-1.5e6,1.5e6],
+      'var': "wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.)",
+      'cuts': "ntof == 1 && nwctrks == 1",
+      'captionleft1': "6.684 m",
+      'drawvlines': [105.658**2,139.570**2,493.667**2,938.272**2],
+      'logy': True,
+    },
+    {
+      'name': "mass2_wide",
+      'xtitle': "m^{2} [MeV^{2}/c^{4}]",
+      'ytitle': "Events / bin",
+      'binning': [250,-5e6,5e6],
+      'var': "wctrk_momentum[0]*wctrk_momentum[0] * (tofObject[0]*tofObject[0]*0.299*0.299/6.684/6.684 - 1.)",
+      'cuts': "ntof == 1 && nwctrks == 1",
+      'captionleft1': "6.684 m",
+      'drawvlines': [105.658**2,139.570**2,493.667**2,938.272**2,1875.6**2],
+      'logy': True,
+    },
+  ]
   plotManyFilesOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX,outPrefix="compare_")
