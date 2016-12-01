@@ -431,6 +431,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
   canvas is a root TCanvas
   treename is where to find the tree in each file
 
+  returns a list of histograms, profiles, or if profileXtoo=True, (histograms, profiles).
+
   fileConfig options:
     fn: filename str or list of str for a chain. REQUIRED
     name: name of sample, used for savename REQUIRED
@@ -478,6 +480,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     profileXtoo: if True, draw profileX of 2D hist, on top of 2D hist
   """
   
+  allHists = []
+  allProfilesToo = []
   for fileConfig in fileConfigs:
     fileConfig['tree'] = root.TChain(treename)
     if type(fileConfig['fn']) is str:
@@ -621,6 +625,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         hist.Draw("colz")
         if doProfileXtoo:
             prof.Draw("Esame")
+            allProfilesToo.append(prof)
       else:
         axisHist = makeStdAxisHist([hist],logy=logy,freeTopSpace=0.05,xlim=xlim,ylim=ylim)
         axisHist.Draw()
@@ -644,6 +649,11 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         setupCOLZFrame(canvas,True) #reset frame
       canvas.SetLogy(False)
       canvas.SetLogx(False)
+      allHists.append(hist)
+  if len(allProfilesToo) == 0:
+    return allHists
+  else:
+    return allHists, allProfilesToo
 
 def getOrdinalStr(inInt):
   result = str(inInt)
