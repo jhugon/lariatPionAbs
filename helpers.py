@@ -478,6 +478,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     profileY: if True, draw profileY of 2D hist
     profileStdDev: if True, profile errors are std deviation instead of std error on mean
     profileXtoo: if True, draw profileX of 2D hist, on top of 2D hist
+    funcs: List of TF1's to draw on top of the histogram
   """
   
   allHists = []
@@ -562,6 +563,9 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         vlineXs = histConfig["drawvlines"]
       if "drawhlines" in histConfig and type(histConfig["drawhlines"]) == list:
         hlineYs = histConfig["drawhlines"]
+      funcs = []
+      if "funcs" in histConfig and type(histConfig["funcs"]) == list:
+        funcs = histConfig["funcs"]
       # now on to the real work
       hist = None
       if is2D:
@@ -640,6 +644,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       for vlineX in vlineXs:
         vlines.append(drawVline(axisHist,vlineX))
       setHistTitles(axisHist,xtitle,ytitle)
+      for func in funcs:
+        func.Draw("LSAME")
       drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
       canvas.RedrawAxis()
       saveNameBase = outPrefix + histConfig['name'] + "_" + fileConfig['name'] + outSuffix
