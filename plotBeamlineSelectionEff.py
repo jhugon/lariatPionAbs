@@ -213,6 +213,14 @@ if __name__ == "__main__":
     #  'cuts': "",
     #},
     {
+      'name': "wctrk_y_kink",
+      'xtitle': "WC Track Y-kink [deg]",
+      'ytitle': "Tracks / bin",
+      'binning': [180,-180,180],
+      'var': "Y_Kink*180/pi",
+      'cuts': "",
+    },
+    {
       'name': "wctrk_momentum",
       'xtitle': "WC Track Momentum [MeV/c]",
       'ytitle': "Tracks / bin",
@@ -259,7 +267,7 @@ if __name__ == "__main__":
       'name': "tofVP",
       'ytitle': "Time of Flight [ns]",
       'xtitle': "WC Track Momentum [MeV/c]",
-      'binning': [200,250,1250.,200,10,55],
+      'binning': [230,100,1250.,200,10,55],
       'var': "tofObject[0]:wctrk_momentum[0]",
       'cuts': "ntof == 1 && nwctrks == 1",
       #'logz': True,
