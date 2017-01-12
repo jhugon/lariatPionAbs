@@ -4,13 +4,13 @@
   unsigned maxEvents = 100000000;
   //unsigned maxEvents = 10000;
 
-  makeFriendTree("anaTree_pip_v2.root","friendTree_pip_v2.root",maxEvents);
-  makeFriendTree("anaTree_p_v2.root","friendTree_p_v2.root",maxEvents);
-  makeFriendTree("anaTree_mup_v2.root","friendTree_mup_v2.root",maxEvents);
-  makeFriendTree("anaTree_kp_v2.root","friendTree_kp_v2.root",maxEvents);
-  makeFriendTree("anaTree_ep_v2.root","friendTree_ep_v2.root",maxEvents);
+  TString datafn = "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/data_Pos_RunI_piAbsSelector.root";
 
-  makeFriendTree("anaTree_data_Lovely1_Pos_RunI_elanag_v02_v01.root","friendTree_data_Lovely1_Pos_RunI_elanag_v02_v01.root",maxEvents);
-  makeFriendTree("anaTree_data_runI_pos_v0.1.root","friendTree_data_runI_pos_v0.1.root",maxEvents);
-
+  makeFriendTree(datafn,"friendTree_Pos_RunI_v0.root",datafn,maxEvents);
+  makeFriendTree("/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/pip_piAbsSelector.root","friendTree_pip_v0.root",datafn,maxEvents);
+  makeFriendTree("/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/p_piAbsSelector.root","friendTree_p_v0.root",datafn,maxEvents);
+  makeFriendTree("/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/ep_piAbsSelector.root","friendTree_ep_v0.root",datafn,maxEvents);
+  makeFriendTree("/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/mup_piAbsSelector.root","friendTree_mup_v0.root",datafn,maxEvents);
+  makeFriendTree("/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/kp_piAbsSelector.root","friendTree_kp_v0.root",datafn,maxEvents);
+  makeFriendTree("/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/gam_piAbsSelector.root","friendTree_gam_v0.root",datafn,maxEvents);
 }
