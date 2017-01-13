@@ -17,6 +17,8 @@
 
 #define pi TMath::Pi()
 
+#define MAXTOFS 10
+
 float thetaxz(double theta, double phi)
 {
   return atan(tan(theta)*cos(phi));
@@ -38,6 +40,8 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString dataIn
 
   bool isMC;
   Float_t xWC, yWC, thetaWC, phiWC, pzWC, xWC4Hit, yWC4Hit, zWC4Hit;
+  UInt_t nTOFs;
+  Float_t TOFs[MAXTOFS];
 
   // datafile chain
   TChain * datatree = new TChain("PiAbsSelector/tree");
@@ -52,11 +56,16 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString dataIn
   datatree->SetBranchAddress("yWC4Hit",&yWC4Hit);
   datatree->SetBranchAddress("zWC4Hit",&zWC4Hit);
 
-  TH1F* pzHist = new TH1F("pzHist","",100,0,2000);
+  datatree->SetBranchAddress("nTOFs",&nTOFs);
+  datatree->SetBranchAddress("TOFs",&TOFs);
+
+  TH1F* pzHist = new TH1F("pzHist","",200,0,2000);
   TH1F* xWC4Hist = new TH1F("xWCHist","",20,20,40);
   TH1F* yWC4Hist = new TH1F("yWCHist","",20,-10,10);
-  TH1F* thetaxzHist = new TH1F("thetaxzHist","",20,-8*pi/180.,2*pi/180.);
-  TH1F* sinThetayzHist = new TH1F("sinThetayzHist","",20,-0.05,0.05);
+  TH1F* thetaxzHist = new TH1F("thetaxzHist","",50,-8*pi/180.,2*pi/180.);
+  TH1F* sinThetayzHist = new TH1F("sinThetayzHist","",50,-0.05,0.05);
+
+  TH1F* pzHistProton = new TH1F("pzHistProton","",100,0,2000);
   for(unsigned iEvent=0; iEvent<datatree->GetEntries();iEvent++)
   {
     if(iEvent >= maxEvents)
@@ -70,6 +79,8 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString dataIn
     float sthyz = sinthetayz(thetaWC,phiWC);
     thetaxzHist->Fill(thxz);
     sinThetayzHist->Fill(sthyz);
+
+    if(nTOFs > 0 && TOFs[0] > 28. && TOFs[0] < 55 && pzWC > 450 && pzWC < 1100) pzHistProton->Fill(pzWC);
   } // for iEvent
 
   delete datatree;
@@ -80,11 +91,13 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString dataIn
   cout << "yWC4Hist " << yWC4Hist->Integral(intOpt) << endl;
   cout << "thetaxzHist " << thetaxzHist->Integral(intOpt) << endl;
   cout << "sinThetayzHist " << sinThetayzHist->Integral(intOpt) << endl;
+  cout << "pzHistProton " << pzHistProton->Integral(intOpt) << endl;
   if (pzHist->Integral(intOpt) != 0) pzHist->Scale(1./pzHist->Integral(intOpt));
   if (xWC4Hist->Integral(intOpt) != 0) xWC4Hist->Scale(1./xWC4Hist->Integral(intOpt));
   if (yWC4Hist->Integral(intOpt) != 0) yWC4Hist->Scale(1./yWC4Hist->Integral(intOpt));
   if (thetaxzHist->Integral(intOpt) != 0) thetaxzHist->Scale(1./thetaxzHist->Integral(intOpt));
   if (sinThetayzHist->Integral(intOpt) != 0) sinThetayzHist->Scale(1./sinThetayzHist->Integral(intOpt));
+  if (pzHistProton->Integral(intOpt) != 0) pzHistProton->Scale(1./pzHistProton->Integral(intOpt));
   TCanvas c1;
   pzHist->Draw();
   c1.SaveAs("weights_pz.png");
@@ -96,6 +109,8 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString dataIn
   c1.SaveAs("weights_thetaxz.png");
   sinThetayzHist->Draw();
   c1.SaveAs("weights_sinThetayz.png");
+  pzHistProton->Draw();
+  c1.SaveAs("weights_pzProton.png");
 
   // infile chain
   TChain * tree = new TChain("PiAbsSelector/tree");
@@ -109,6 +124,9 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString dataIn
   tree->SetBranchAddress("xWC4Hit",&xWC4Hit);
   tree->SetBranchAddress("yWC4Hit",&yWC4Hit);
   tree->SetBranchAddress("zWC4Hit",&zWC4Hit);
+
+  tree->SetBranchAddress("nTOFs",&nTOFs);
+  tree->SetBranchAddress("TOFs",&TOFs);
 
   ///////////////////////////////
   ///////////////////////////////
@@ -130,6 +148,12 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString dataIn
   friendTree->Branch("angleWeight",&angleWeight,"angleWeight/F");
   friendTree->Branch("thetaxzWeight",&thetaxzWeight,"thetaxzWeight/F");
   friendTree->Branch("sinThetayzWeight",&sinThetayzWeight,"sinThetayzWeight/F");
+
+  float pzWeightProton;
+  friendTree->Branch("pzWeightProton",&pzWeightProton,"pzWeightProton/F");
+
+  float firstTOF;
+  friendTree->Branch("firstTOF",&firstTOF,"firstTOF/F");
 
   ///////////////////////////////
   ///////////////////////////////
@@ -154,6 +178,10 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString dataIn
     angleWeight = 1.;
     thetaxzWeight = 1.;
     sinThetayzWeight = 1.;
+    pzWeightProton = 1.;
+
+    firstTOF = -999999999;
+    if (nTOFs > 0) firstTOF = TOFs[0];
 
     if (isMC)
     {
@@ -169,6 +197,15 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString dataIn
       positionWeight = xWeight * yWeight;
       angleWeight = thetaxzWeight * sinThetayzWeight;
       allWeight = positionWeight * angleWeight * pzWeight;
+
+      if(nTOFs > 0 && TOFs[0] > 28. && TOFs[0] < 55 && pzWC > 450 && pzWC < 1100) 
+      {
+        pzWeightProton = pzHistProton->GetBinContent(pzHistProton->FindBin(pzWC));
+      }
+      else
+      {
+        pzWeightProton = 0;
+      }
     }
     friendTree->Fill();
   } // for iEvent

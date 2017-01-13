@@ -66,6 +66,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         the numerator in a TEfficiency.
     drawhlines: list of y locations to draw horizontal lines
     drawvlines: list of x locations to draw vertical lines
+    printIntegral: if True, print integral after all scaling
   """
   #print("plotManyFilesOnePlot")
   
@@ -126,6 +127,9 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       vlineXs = histConfig["drawvlines"]
     if "drawhlines" in histConfig and type(histConfig["drawhlines"]) == list:
       hlineYs = histConfig["drawhlines"]
+    printIntegral = False
+    if "printIntegral" in histConfig and histConfig["printIntegral"]:
+      printIntegral = True
     # now on to the real work
     for fileConfig in fileConfigs:
       #print("   file: {}, {}".format(fileConfig["title"],fileConfig['fn']))
@@ -162,6 +166,8 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       if "color" in fileConfig:
         hist.SetLineColor(fileConfig['color'])
         hist.SetMarkerColor(fileConfig['color'])
+      if printIntegral:
+        print("{} {} Integral: {}".format(outPrefix+histConfig['name']+outSuffix,fileConfig['title'],hist.Integral()))
       hists.append(hist)
     canvas.SetLogy(logy)
     canvas.SetLogx(logx)
