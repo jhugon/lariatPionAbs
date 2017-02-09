@@ -16,218 +16,332 @@ in the file it is usually "anatree/anatree" and the branches are:
   ::
 
   ******************************************************************************
-  *Tree    :anatree   : analysis tree                                          *
-  *        :          : Tree compression factor =  12.31                       *
+  *Tree    :tree      : tree                                                   *
+  *Entries :     1000 : Total =         1569736 bytes  File  Size =     863570 *
+  *        :          : Tree compression factor =   1.78                       *
   ******************************************************************************
-  *Br    0 :run       : run/I                                                  *
-  *Br    1 :subrun    : subrun/I                                               *
-  *Br    2 :event     : event/I                                                *
-  *Br    3 :evttime   : evttime/D                                              *
-  *Br    4 :efield    : efield[3]/D                                            *
-  *Br    5 :t0        : t0/I                                                   *
-  *Br    6 :nclus     : nclus/I                                                *
-  *Br    7 :clustertwire : clustertwire[nclus]/D                               *
-  *Br    8 :clusterttick : clusterttick[nclus]/D                               *
-  *Br    9 :cluendwire : cluendwire[nclus]/D                                   *
-  *Br   10 :cluendtick : cluendtick[nclus]/D                                   *
-  *Br   11 :cluplane  : cluplane[nclus]/I                                      *
-  *Br   12 :ntracks_reco : ntracks_reco/I                                      *
-  *Br   13 :trkvtxx   : trkvtxx[ntracks_reco]/D                                *
-  *Br   14 :trkvtxy   : trkvtxy[ntracks_reco]/D                                *
-  *Br   15 :trkvtxz   : trkvtxz[ntracks_reco]/D                                *
-  *Br   16 :trkendx   : trkendx[ntracks_reco]/D                                *
-  *Br   17 :trkendy   : trkendy[ntracks_reco]/D                                *
-  *Br   18 :trkendz   : trkendz[ntracks_reco]/D                                *
-  *Br   19 :trkstartdcosx : trkstartdcosx[ntracks_reco]/D                      *
-  *Br   20 :trkstartdcosy : trkstartdcosy[ntracks_reco]/D                      *
-  *Br   21 :trkstartdcosz : trkstartdcosz[ntracks_reco]/D                      *
-  *Br   22 :trkenddcosx : trkenddcosx[ntracks_reco]/D                          *
-  *Br   23 :trkenddcosy : trkenddcosy[ntracks_reco]/D                          *
-  *Br   24 :trkenddcosz : trkenddcosz[ntracks_reco]/D                          *
-  *Br   25 :trkWCtoTPCMath : trkWCtoTPCMath/I                                  *
-  *Br   26 :trklength : trklength[ntracks_reco]/D                              *
-  *Br   27 :trkmomrange : trkmomrange[ntracks_reco]/D                          *
-  *Br   28 :trkmommschi2 : trkmommschi2[ntracks_reco]/D                        *
-  *Br   29 :trkmommsllhd : trkmommsllhd[ntracks_reco]/D                        *
-  *Br   30 :ntrkhits  : ntrkhits[ntracks_reco]/I                               *
-  *Br   31 :trkx      : trkx[ntracks_reco][1000]/D                             *
-  *Br   32 :trky      : trky[ntracks_reco][1000]/D                             *
-  *Br   33 :trkz      : trkz[ntracks_reco][1000]/D                             *
-  *Br   34 :trkpitch  : trkpitch[ntracks_reco][2]/D                            *
-  *Br   35 :trkhits   : trkhits[ntracks_reco][2]/I                             *
-  *Br   36 :trkdedx   : trkdedx[ntracks_reco][2][1000]/D                       *
-  *Br   37 :trkdqdx   : trkdqdx[ntracks_reco][2][1000]/D                       *
-  *Br   38 :trkrr     : trkrr[ntracks_reco][2][1000]/D                         *
-  *Br   39 :trkpitchhit : trkpitchhit[ntracks_reco][2][1000]/D                 *
-  *Br   40 :trkxyz    : trkxyz[ntracks_reco][2][1000][3]/D                     *
-  *Br   41 :trkke     : trkke[ntracks_reco][2]/D                               *
-  *Br   42 :trkpida   : trkpida[ntracks_reco][2]/D                             *
-  *Br   43 :trkpidchi2_p : trkpidchi2_p[ntracks_reco][2]/D                     *
-  *Br   44 :trkpidchi2_pi : trkpidchi2_pi[ntracks_reco][2]/D                   *
-  *Br   45 :trkpidchi2_mu : trkpidchi2_mu[ntracks_reco][2]/D                   *
-  *Br   46 :trkpidchi2_k : trkpidchi2_k[ntracks_reco][2]/D                     *
-  *Br   47 :trkpidlh_p : trkpidlh_p[ntracks_reco][2]/D                         *
-  *Br   48 :trkpidlh_pi : trkpidlh_pi[ntracks_reco][2]/D                       *
-  *Br   49 :trkpidlh_mu : trkpidlh_mu[ntracks_reco][2]/D                       *
-  *Br   50 :trkpidlh_k : trkpidlh_k[ntracks_reco][2]/D                         *
-  *Br   51 :nTrajPoint : nTrajPoint[ntracks_reco]/I                            *
-  *Br   52 :pHat0_X   : pHat0_X[ntracks_reco][1000]/D                          *
-  *Br   53 :pHat0_Y   : pHat0_Y[ntracks_reco][1000]/D                          *
-  *Br   54 :pHat0_Z   : pHat0_Z[ntracks_reco][1000]/D                          *
-  *Br   55 :trjPt_X   : trjPt_X[ntracks_reco][1000]/D                          *
-  *Br   56 :trjPt_Y   : trjPt_Y[ntracks_reco][1000]/D                          *
-  *Br   57 :trjPt_Z   : trjPt_Z[ntracks_reco][1000]/D                          *
-  *Br   58 :trkg4id   : trkg4id[ntracks_reco]/I                                *
-  *Br   59 :primarytrkkey : primarytrkkey/I                                    *
-  *Br   60 :nhits     : nhits/I                                                *
-  *Br   61 :hit_plane : hit_plane[nhits]/I                                     *
-  *Br   62 :hit_wire  : hit_wire[nhits]/I                                      *
-  *Br   63 :hit_channel : hit_channel[nhits]/I                                 *
-  *Br   64 :hit_peakT : hit_peakT[nhits]/D                                     *
-  *Br   65 :hit_charge : hit_charge[nhits]/D                                   *
-  *Br   66 :hit_ph    : hit_ph[nhits]/D                                        *
-  *Br   67 :hit_tstart : hit_tstart[nhits]/D                                   *
-  *Br   68 :hit_tend  : hit_tend[nhits]/D                                      *
-  *Br   69 :hit_trkid : hit_trkid[nhits]/I                                     *
-  *Br   70 :hit_trkkey : hit_trkkey[nhits]/I                                   *
-  *Br   71 :hit_clukey : hit_clukey[nhits]/I                                   *
-  *Br   72 :hit_pk    : hit_pk[nhits]/I                                        *
-  *Br   73 :hit_t     : hit_t[nhits]/I                                         *
-  *Br   74 :hit_ch    : hit_ch[nhits]/I                                        *
-  *Br   75 :hit_fwhh  : hit_fwhh[nhits]/I                                      *
-  *Br   76 :hit_rms   : hit_rms[nhits]/D                                       *
-  *Br   77 :hit_nelec : hit_nelec[nhits]/D                                     *
-  *Br   78 :hit_energy : hit_energy[nhits]/D                                   *
-  *Br   79 :hit_dQds  : hit_dQds[nhits]/F                                      *
-  *Br   80 :hit_dEds  : hit_dEds[nhits]/F                                      *
-  *Br   81 :hit_ds    : hit_ds[nhits]/F                                        *
-  *Br   82 :hit_resrange : hit_resrange[nhits]/F                               *
-  *Br   83 :hit_x     : hit_x[nhits]/F                                         *
-  *Br   84 :hit_y     : hit_y[nhits]/F                                         *
-  *Br   85 :hit_z     : hit_z[nhits]/F                                         *
-  *Br   86 :nwctrks   : nwctrks/I                                              *
-  *Br   87 :wctrk_XFaceCoor : wctrk_XFaceCoor[nwctrks]/D                       *
-  *Br   88 :wctrk_YFaceCoor : wctrk_YFaceCoor[nwctrks]/D                       *
-  *Br   89 :wctrk_momentum : wctrk_momentum[nwctrks]/D                         *
-  *Br   90 :wctrk_theta : wctrk_theta[nwctrks]/D                               *
-  *Br   91 :wctrk_phi : wctrk_phi[nwctrks]/D                                   *
-  *Br   92 :wctrk_XDist : wctrk_XDist[nwctrks]/D                               *
-  *Br   93 :wctrk_YDist : wctrk_YDist[nwctrks]/D                               *
-  *Br   94 :wctrk_ZDist : wctrk_ZDist[nwctrks]/D                               *
-  *Br   95 :XWireHist : XWireHist[nwctrks][1000]/D                             *
-  *Br   96 :YWireHist : YWireHist[nwctrks][1000]/D                             *
-  *Br   97 :XAxisHist : XAxisHist[nwctrks][1000]/D                             *
-  *Br   98 :YAxisHist : YAxisHist[nwctrks][1000]/D                             *
-  *Br   99 :Y_Kink    : Y_Kink[nwctrks]/D                                      *
-  *Br  100 :WC1xPos   : WC1xPos[nwctrks]/F                                     *
-  *Br  101 :WC1yPos   : WC1yPos[nwctrks]/F                                     *
-  *Br  102 :WC1zPos   : WC1zPos[nwctrks]/F                                     *
-  *Br  103 :WC2xPos   : WC2xPos[nwctrks]/F                                     *
-  *Br  104 :WC2yPos   : WC2yPos[nwctrks]/F                                     *
-  *Br  105 :WC2zPos   : WC2zPos[nwctrks]/F                                     *
-  *Br  106 :WC3xPos   : WC3xPos[nwctrks]/F                                     *
-  *Br  107 :WC3yPos   : WC3yPos[nwctrks]/F                                     *
-  *Br  108 :WC3zPos   : WC3zPos[nwctrks]/F                                     *
-  *Br  109 :WC4xPos   : WC4xPos[nwctrks]/F                                     *
-  *Br  110 :WC4yPos   : WC4yPos[nwctrks]/F                                     *
-  *Br  111 :WC4zPos   : WC4zPos[nwctrks]/F                                     *
-  *Br  112 :ntof      : ntof/I                                                 *
-  *Br  113 :tofObject : tofObject[ntof]/D                                      *
-  *Br  114 :tof_timestamp : tof_timestamp[ntof]/D                              *
-  *Br  115 :nAG       : nAG/I                                                  *
-  *Br  116 :HitTimeStamp1p10_1 : HitTimeStamp1p10_1[nAG]/D                     *
-  *Br  117 :HitTimeStamp1p10_2 : HitTimeStamp1p10_2[nAG]/D                     *
-  *Br  118 :HitTimeStamp1p06_1 : HitTimeStamp1p06_1[nAG]/D                     *
-  *Br  119 :HitTimeStamp1p06_2 : HitTimeStamp1p06_2[nAG]/D                     *
-  *Br  120 :HitPulseArea1p10_1 : HitPulseArea1p10_1[nAG]/F                     *
-  *Br  121 :HitPulseArea1p10_2 : HitPulseArea1p10_2[nAG]/F                     *
-  *Br  122 :HitPulseArea1p06_1 : HitPulseArea1p06_1[nAG]/F                     *
-  *Br  123 :HitPulseArea1p06_2 : HitPulseArea1p06_2[nAG]/F                     *
-  *Br  124 :HitExist1p10_1 : HitExist1p10_1[nAG]/O                             *
-  *Br  125 :HitExist1p10_2 : HitExist1p10_2[nAG]/O                             *
-  *Br  126 :HitExist1p06_1 : HitExist1p06_1[nAG]/O                             *
-  *Br  127 :HitExist1p06_2 : HitExist1p06_2[nAG]/O                             *
-  *Br  128 :maxTrackIDE : maxTrackIDE/I                                        *
-  *Br  129 :IDEEnergy : IDEEnergy[maxTrackIDE]/D                               *
-  *Br  130 :IDEPos    : IDEPos[maxTrackIDE][3]/D                               *
-  *Br  131 :no_primaries : no_primaries/I                                      *
-  *Br  132 :geant_list_size : geant_list_size/I                                *
-  *Br  133 :pdg       : pdg[geant_list_size]/I                                 *
-  *Br  134 :Eng       : Eng[geant_list_size]/D                                 *
-  *Br  135 :Px        : Px[geant_list_size]/D                                  *
-  *Br  136 :Py        : Py[geant_list_size]/D                                  *
-  *Br  137 :Pz        : Pz[geant_list_size]/D                                  *
-  *Br  138 :EndEng    : EndEng[geant_list_size]/D                              *
-  *Br  139 :EndPx     : EndPx[geant_list_size]/D                               *
-  *Br  140 :EndPy     : EndPy[geant_list_size]/D                               *
-  *Br  141 :EndPz     : EndPz[geant_list_size]/D                               *
-  *Br  142 :StartPointx : StartPointx[geant_list_size]/D                       *
-  *Br  143 :StartPointy : StartPointy[geant_list_size]/D                       *
-  *Br  144 :StartPointz : StartPointz[geant_list_size]/D                       *
-  *Br  145 :EndPointx : EndPointx[geant_list_size]/D                           *
-  *Br  146 :EndPointy : EndPointy[geant_list_size]/D                           *
-  *Br  147 :EndPointz : EndPointz[geant_list_size]/D                           *
-  *Br  148 :Process   : Process[geant_list_size]/I                             *
-  *Br  149 :NumberDaughters : NumberDaughters[geant_list_size]/I               *
-  *Br  150 :Mother    : Mother[geant_list_size]/I                              *
-  *Br  151 :TrackId   : TrackId[geant_list_size]/I                             *
-  *Br  152 :process_primary : process_primary[geant_list_size]/I               *
-  *Br  153 :G4Process : vector<string>                                         *
-  *Br  154 :G4FinalProcess : vector<string>                                    *
-  *Br  155 :NTrTrajPts : NTrTrajPts[no_primaries]/I                            *
-  *Br  156 :MidPosX   : MidPosX[no_primaries][5000]/D                          *
-  *Br  157 :MidPosY   : MidPosY[no_primaries][5000]/D                          *
-  *Br  158 :MidPosZ   : MidPosZ[no_primaries][5000]/D                          *
-  *Br  159 :MidPx     : MidPx[no_primaries][5000]/D                            *
-  *Br  160 :MidPy     : MidPy[no_primaries][5000]/D                            *
-  *Br  161 :MidPz     : MidPz[no_primaries][5000]/D                            *
-  *Br  162 :InteractionPoint : vector<int>                                     *
-  *Br  163 :InteractionPointType : vector<int>                                 *
-  *Br  164 :no_mcshowers : no_mcshowers/I                                      *
-  *Br  165 :mcshwr_origin : mcshwr_origin[no_mcshowers]/D                      *
-  *Br  166 :mcshwr_pdg : mcshwr_pdg[no_mcshowers]/D                            *
-  *Br  167 :mcshwr_TrackId : mcshwr_TrackId[no_mcshowers]/I                    *
-  *Br  168 :mcshwr_startX : mcshwr_startX[no_mcshowers]/D                      *
-  *Br  169 :mcshwr_startY : mcshwr_startY[no_mcshowers]/D                      *
-  *Br  170 :mcshwr_startZ : mcshwr_startZ[no_mcshowers]/D                      *
-  *Br  171 :mcshwr_endX : mcshwr_endX[no_mcshowers]/D                          *
-  *Br  172 :mcshwr_endY : mcshwr_endY[no_mcshowers]/D                          *
-  *Br  173 :mcshwr_endZ : mcshwr_endZ[no_mcshowers]/D                          *
-  *Br  174 :mcshwr_CombEngX : mcshwr_CombEngX[no_mcshowers]/D                  *
-  *Br  175 :mcshwr_CombEngY : mcshwr_CombEngY[no_mcshowers]/D                  *
-  *Br  176 :mcshwr_CombEngZ : mcshwr_CombEngZ[no_mcshowers]/D                  *
-  *Br  177 :mcshwr_CombEngPx : mcshwr_CombEngPx[no_mcshowers]/D                *
-  *Br  178 :mcshwr_CombEngPy : mcshwr_CombEngPy[no_mcshowers]/D                *
-  *Br  179 :mcshwr_CombEngPz : mcshwr_CombEngPz[no_mcshowers]/D                *
-  *Br  180 :mcshwr_CombEngE : mcshwr_CombEngE[no_mcshowers]/D                  *
-  *Br  181 :mcshwr_dEdx : mcshwr_dEdx[no_mcshowers]/D                          *
-  *Br  182 :mcshwr_StartDirX : mcshwr_StartDirX[no_mcshowers]/D                *
-  *Br  183 :mcshwr_StartDirY : mcshwr_StartDirY[no_mcshowers]/D                *
-  *Br  184 :mcshwr_StartDirZ : mcshwr_StartDirZ[no_mcshowers]/D                *
-  *Br  185 :mcshwr_isEngDeposited : mcshwr_isEngDeposited[no_mcshowers]/I      *
-  *Br  186 :mcshwr_Motherpdg : mcshwr_Motherpdg[no_mcshowers]/I                *
-  *Br  187 :mcshwr_MotherTrkId : mcshwr_MotherTrkId[no_mcshowers]/I            *
-  *Br  188 :mcshwr_MotherstartX : mcshwr_MotherstartX[no_mcshowers]/I          *
-  *Br  189 :mcshwr_MotherstartY : mcshwr_MotherstartY[no_mcshowers]/I          *
-  *Br  190 :mcshwr_MotherstartZ : mcshwr_MotherstartZ[no_mcshowers]/I          *
-  *Br  191 :mcshwr_MotherendX : mcshwr_MotherendX[no_mcshowers]/I              *
-  *Br  192 :mcshwr_MotherendY : mcshwr_MotherendY[no_mcshowers]/I              *
-  *Br  193 :mcshwr_MotherendZ : mcshwr_MotherendZ[no_mcshowers]/I              *
-  *Br  194 :mcshwr_Ancestorpdg : mcshwr_Ancestorpdg[no_mcshowers]/I            *
-  *Br  195 :mcshwr_AncestorTrkId : mcshwr_AncestorTrkId[no_mcshowers]/I        *
-  *Br  196 :mcshwr_AncestorstartX : mcshwr_AncestorstartX[no_mcshowers]/I      *
-  *Br  197 :mcshwr_AncestorstartY : mcshwr_AncestorstartY[no_mcshowers]/I      *
-  *Br  198 :mcshwr_AncestorstartZ : mcshwr_AncestorstartZ[no_mcshowers]/I      *
-  *Br  199 :mcshwr_AncestorendX : mcshwr_AncestorendX[no_mcshowers]/I          *
-  *Br  200 :mcshwr_AncestorendY : mcshwr_AncestorendY[no_mcshowers]/I          *
-  *Br  201 :mcshwr_AncestorendZ : mcshwr_AncestorendZ[no_mcshowers]/I          *
-  *Br  202 :nshowers  : nshowers/I                                             *
-  *Br  203 :shwID     : shwI[nshowers]/I                                       *
-  *Br  204 :BestPlaneShw : BestPlaneShw[nshowers]/I                            *
-  *Br  205 :LengthShw : LengthShw[nshowers]/D                                  *
-  *Br  206 :CosStartShw : CosStartShw[3][1000]/D                               *
-  *Br  207 :CosStartXYZShw : CosStartXYZShw[3][1000]/D                         *
-  *Br  208 :TotalEShw : TotalEShw[2][1000]/D                                   *
-  *Br  209 :dEdxPerPlaneShw : dEdxPerPlaneShw[2][1000]/D                       *
-  *Br  210 :TotalMIPEShw : TotalMIPEShw[2][1000]/D                             *
+  *Br    0 :isMC      : isMC/O                                                 *
+  *Entries :     1000 : Total  Size=       1535 bytes  File Size  =         99 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=  10.82     *
+  *............................................................................*
+  *Br    1 :nWCTracks : nWCTracks/i                                            *
+  *Entries :     1000 : Total  Size=       4566 bytes  File Size  =        126 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=  32.35     *
+  *............................................................................*
+  *Br    2 :xWC       : xWC/F                                                  *
+  *Entries :     1000 : Total  Size=       4536 bytes  File Size  =       3571 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.14     *
+  *............................................................................*
+  *Br    3 :yWC       : yWC/F                                                  *
+  *Entries :     1000 : Total  Size=       4536 bytes  File Size  =       3817 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.07     *
+  *............................................................................*
+  *Br    4 :thetaWC   : thetaWC/F                                              *
+  *Entries :     1000 : Total  Size=       4556 bytes  File Size  =       3651 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.12     *
+  *............................................................................*
+  *Br    5 :phiWC     : phiWC/F                                                *
+  *Entries :     1000 : Total  Size=       4546 bytes  File Size  =       3624 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.12     *
+  *............................................................................*
+  *Br    6 :pzWC      : pzWC/F                                                 *
+  *Entries :     1000 : Total  Size=       4541 bytes  File Size  =       3687 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.10     *
+  *............................................................................*
+  *Br    7 :pWC       : pWC/F                                                  *
+  *Entries :     1000 : Total  Size=       4536 bytes  File Size  =       3678 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.11     *
+  *............................................................................*
+  *Br    8 :eWC       : eWC/F                                                  *
+  *Entries :     1000 : Total  Size=       4536 bytes  File Size  =       3649 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.12     *
+  *............................................................................*
+  *Br    9 :kinWC     : kinWC/F                                                *
+  *Entries :     1000 : Total  Size=       4546 bytes  File Size  =       3719 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.09     *
+  *............................................................................*
+  *Br   10 :kinWCInTPC : kinWCInTPC/F                                          *
+  *Entries :     1000 : Total  Size=       4571 bytes  File Size  =       3728 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.09     *
+  *............................................................................*
+  *Br   11 :yKinkWC   : yKinkWC/F                                              *
+  *Entries :     1000 : Total  Size=       4556 bytes  File Size  =        134 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=  30.40     *
+  *............................................................................*
+  *Br   12 :nHitsWC   : nHitsWC/i                                              *
+  *Entries :     1000 : Total  Size=       4556 bytes  File Size  =        124 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=  32.85     *
+  *............................................................................*
+  *Br   13 :xWC4Hit   : xWC4Hit/F                                              *
+  *Entries :     1000 : Total  Size=       4556 bytes  File Size  =       3614 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.13     *
+  *............................................................................*
+  *Br   14 :yWC4Hit   : yWC4Hit/F                                              *
+  *Entries :     1000 : Total  Size=       4556 bytes  File Size  =       3727 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.09     *
+  *............................................................................*
+  *Br   15 :zWC4Hit   : zWC4Hit/F                                              *
+  *Entries :     1000 : Total  Size=       4556 bytes  File Size  =        132 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=  30.86     *
+  *............................................................................*
+  *Br   16 :nTOFs     : nTOFs/i                                                *
+  *Entries :     1000 : Total  Size=       4546 bytes  File Size  =        122 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=  33.38     *
+  *............................................................................*
+  *Br   17 :TOFs      : TOFs[nTOFs]/F                                          *
+  *Entries :     1000 : Total  Size=       4640 bytes  File Size  =        132 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=  30.90     *
+  *............................................................................*
+  *Br   18 :TOFTimeStamps : TOFTimeStamps[nTOFs]/i                             *
+  *Entries :     1000 : Total  Size=       4678 bytes  File Size  =        141 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=  28.99     *
+  *............................................................................*
+  *Br   19 :trueStartX : trueStartX/F                                          *
+  *Entries :     1000 : Total  Size=       4571 bytes  File Size  =       3617 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.13     *
+  *............................................................................*
+  *Br   20 :trueStartY : trueStartY/F                                          *
+  *Entries :     1000 : Total  Size=       4571 bytes  File Size  =       3730 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.09     *
+  *............................................................................*
+  *Br   21 :trueStartZ : trueStartZ/F                                          *
+  *Entries :     1000 : Total  Size=       4571 bytes  File Size  =        135 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=  30.20     *
+  *............................................................................*
+  *Br   22 :trueEndX  : trueEndX/F                                             *
+  *Entries :     1000 : Total  Size=       4561 bytes  File Size  =       3670 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.11     *
+  *............................................................................*
+  *Br   23 :trueEndY  : trueEndY/F                                             *
+  *Entries :     1000 : Total  Size=       4561 bytes  File Size  =       3851 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.06     *
+  *............................................................................*
+  *Br   24 :trueEndZ  : trueEndZ/F                                             *
+  *Entries :     1000 : Total  Size=       4561 bytes  File Size  =       3755 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.09     *
+  *............................................................................*
+  *Br   25 :trueStartTheta : trueStartTheta/F                                  *
+  *Entries :     1000 : Total  Size=       4591 bytes  File Size  =       3658 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.12     *
+  *............................................................................*
+  *Br   26 :trueStartPhi : trueStartPhi/F                                      *
+  *Entries :     1000 : Total  Size=       4581 bytes  File Size  =       3631 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.12     *
+  *............................................................................*
+  *Br   27 :trueStartMom : trueStartMom/F                                      *
+  *Entries :     1000 : Total  Size=       4581 bytes  File Size  =       3687 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.11     *
+  *............................................................................*
+  *Br   28 :trueStartE : trueStartE/F                                          *
+  *Entries :     1000 : Total  Size=       4571 bytes  File Size  =       3653 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.12     *
+  *............................................................................*
+  *Br   29 :trueStartKin : trueStartKin/F                                      *
+  *Entries :     1000 : Total  Size=       4581 bytes  File Size  =       3724 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.10     *
+  *............................................................................*
+  *Br   30 :trueEndMom : trueEndMom/F                                          *
+  *Entries :     1000 : Total  Size=       4571 bytes  File Size  =       1046 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   3.90     *
+  *............................................................................*
+  *Br   31 :trueEndE  : trueEndE/F                                             *
+  *Entries :     1000 : Total  Size=       4561 bytes  File Size  =       1043 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   3.91     *
+  *............................................................................*
+  *Br   32 :trueEndKin : trueEndKin/F                                          *
+  *Entries :     1000 : Total  Size=       4571 bytes  File Size  =       1032 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   3.95     *
+  *............................................................................*
+  *Br   33 :trueSecondToEndMom : trueSecondToEndMom/F                          *
+  *Entries :     1000 : Total  Size=       4611 bytes  File Size  =       3745 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.09     *
+  *............................................................................*
+  *Br   34 :trueSecondToEndE : trueSecondToEndE/F                              *
+  *Entries :     1000 : Total  Size=       4601 bytes  File Size  =       3619 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.13     *
+  *............................................................................*
+  *Br   35 :trueSecondToEndKin : trueSecondToEndKin/F                          *
+  *Entries :     1000 : Total  Size=       4611 bytes  File Size  =       3773 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+  *............................................................................*
+  *Br   36 :trueXFrontTPC : trueXFrontTPC/F                                    *
+  *Entries :     1000 : Total  Size=       4586 bytes  File Size  =       3581 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.14     *
+  *............................................................................*
+  *Br   37 :trueYFrontTPC : trueYFrontTPC/F                                    *
+  *Entries :     1000 : Total  Size=       4586 bytes  File Size  =       3827 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.07     *
+  *............................................................................*
+  *Br   38 :nTracks   : nTracks/i                                              *
+  *Entries :     1000 : Total  Size=       4556 bytes  File Size  =        852 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   4.78     *
+  *............................................................................*
+  *Br   39 :nTracksInFirstZ : nTracksInFirstZ[95]/i                            *
+  *Entries :     1000 : Total  Size=     381668 bytes  File Size  =       9573 *
+  *Baskets :       13 : Basket Size=      32000 bytes  Compression=  39.81     *
+  *............................................................................*
+  *Br   40 :nTracksLengthLt : nTracksLengthLt[20]/i                            *
+  *Entries :     1000 : Total  Size=      80768 bytes  File Size  =       3955 *
+  *Baskets :        3 : Basket Size=      32000 bytes  Compression=  20.29     *
+  *............................................................................*
+  *Br   41 :trackStartX : trackStartX[nTracks]/F                               *
+  *Entries :     1000 : Total  Size=      11443 bytes  File Size  =       7863 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.38     *
+  *............................................................................*
+  *Br   42 :trackStartY : trackStartY[nTracks]/F                               *
+  *Entries :     1000 : Total  Size=      11443 bytes  File Size  =       8192 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.32     *
+  *............................................................................*
+  *Br   43 :trackStartZ : trackStartZ[nTracks]/F                               *
+  *Entries :     1000 : Total  Size=      11443 bytes  File Size  =       8158 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.33     *
+  *............................................................................*
+  *Br   44 :trackStartTheta : trackStartTheta[nTracks]/F                       *
+  *Entries :     1000 : Total  Size=      11463 bytes  File Size  =       8075 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.34     *
+  *............................................................................*
+  *Br   45 :trackStartPhi : trackStartPhi[nTracks]/F                           *
+  *Entries :     1000 : Total  Size=      11453 bytes  File Size  =       8129 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.33     *
+  *............................................................................*
+  *Br   46 :trackEndX : trackEndX[nTracks]/F                                   *
+  *Entries :     1000 : Total  Size=      11433 bytes  File Size  =       7945 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.36     *
+  *............................................................................*
+  *Br   47 :trackEndY : trackEndY[nTracks]/F                                   *
+  *Entries :     1000 : Total  Size=      11433 bytes  File Size  =       8157 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.33     *
+  *............................................................................*
+  *Br   48 :trackEndZ : trackEndZ[nTracks]/F                                   *
+  *Entries :     1000 : Total  Size=      11433 bytes  File Size  =       7918 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.37     *
+  *............................................................................*
+  *Br   49 :trackLength : trackLength[nTracks]/F                               *
+  *Entries :     1000 : Total  Size=      11443 bytes  File Size  =       8036 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.35     *
+  *............................................................................*
+  *Br   50 :trackCaloKin : trackCaloKin[nTracks]/F                             *
+  *Entries :     1000 : Total  Size=      11448 bytes  File Size  =       8089 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.34     *
+  *............................................................................*
+  *Br   51 :trackLLHPion : trackLLHPion[nTracks]/F                             *
+  *Entries :     1000 : Total  Size=      11448 bytes  File Size  =       8052 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.35     *
+  *............................................................................*
+  *Br   52 :trackLLHProton : trackLLHProton[nTracks]/F                         *
+  *Entries :     1000 : Total  Size=      11458 bytes  File Size  =       7988 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.36     *
+  *............................................................................*
+  *Br   53 :trackLLHMuon : trackLLHMuon[nTracks]/F                             *
+  *Entries :     1000 : Total  Size=      11448 bytes  File Size  =       1574 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   6.89     *
+  *............................................................................*
+  *Br   54 :trackLLHKaon : trackLLHKaon[nTracks]/F                             *
+  *Entries :     1000 : Total  Size=      11448 bytes  File Size  =       1574 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   6.89     *
+  *............................................................................*
+  *Br   55 :iBestMatch : iBestMatch/I                                          *
+  *Entries :     1000 : Total  Size=       4571 bytes  File Size  =        710 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.74     *
+  *............................................................................*
+  *Br   56 :trackMatchDeltaX : trackMatchDeltaX[nTracks]/F                     *
+  *Entries :     1000 : Total  Size=      11468 bytes  File Size  =       8191 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.32     *
+  *............................................................................*
+  *Br   57 :trackMatchDeltaY : trackMatchDeltaY[nTracks]/F                     *
+  *Entries :     1000 : Total  Size=      11468 bytes  File Size  =       8324 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.30     *
+  *............................................................................*
+  *Br   58 :trackMatchDeltaR : trackMatchDeltaR[nTracks]/F                     *
+  *Entries :     1000 : Total  Size=      11468 bytes  File Size  =       8196 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.32     *
+  *............................................................................*
+  *Br   59 :trackMatchDeltaAngle : trackMatchDeltaAngle[nTracks]/F             *
+  *Entries :     1000 : Total  Size=      11488 bytes  File Size  =       8121 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.34     *
+  *............................................................................*
+  *Br   60 :trackMatchLowestZ : trackMatchLowestZ[nTracks]/F                   *
+  *Entries :     1000 : Total  Size=      11473 bytes  File Size  =       8178 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.33     *
+  *............................................................................*
+  *Br   61 :trackMatchLowestZX : trackMatchLowestZX[nTracks]/F                 *
+  *Entries :     1000 : Total  Size=      11478 bytes  File Size  =       7876 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.38     *
+  *............................................................................*
+  *Br   62 :trackMatchLowestZY : trackMatchLowestZY[nTracks]/F                 *
+  *Entries :     1000 : Total  Size=      11478 bytes  File Size  =       8196 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.32     *
+  *............................................................................*
+  *Br   63 :primTrkStartMomTrking : primTrkStartMomTrking/F                    *
+  *Entries :     1000 : Total  Size=       4626 bytes  File Size  =        506 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   8.08     *
+  *............................................................................*
+  *Br   64 :primTrkStartTheta : primTrkStartTheta/F                            *
+  *Entries :     1000 : Total  Size=       4606 bytes  File Size  =       3204 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.27     *
+  *............................................................................*
+  *Br   65 :primTrkStartPhi : primTrkStartPhi/F                                *
+  *Entries :     1000 : Total  Size=       4596 bytes  File Size  =       3205 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.27     *
+  *............................................................................*
+  *Br   66 :primTrkLength : primTrkLength/F                                    *
+  *Entries :     1000 : Total  Size=       4586 bytes  File Size  =       3135 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.30     *
+  *............................................................................*
+  *Br   67 :primTrkStartX : primTrkStartX/F                                    *
+  *Entries :     1000 : Total  Size=       4586 bytes  File Size  =       3063 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.33     *
+  *............................................................................*
+  *Br   68 :primTrkStartY : primTrkStartY/F                                    *
+  *Entries :     1000 : Total  Size=       4586 bytes  File Size  =       3256 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.25     *
+  *............................................................................*
+  *Br   69 :primTrkStartZ : primTrkStartZ/F                                    *
+  *Entries :     1000 : Total  Size=       4586 bytes  File Size  =       3238 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.26     *
+  *............................................................................*
+  *Br   70 :primTrkEndX : primTrkEndX/F                                        *
+  *Entries :     1000 : Total  Size=       4576 bytes  File Size  =       3124 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.31     *
+  *............................................................................*
+  *Br   71 :primTrkEndY : primTrkEndY/F                                        *
+  *Entries :     1000 : Total  Size=       4576 bytes  File Size  =       3272 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.25     *
+  *............................................................................*
+  *Br   72 :primTrkEndZ : primTrkEndZ/F                                        *
+  *Entries :     1000 : Total  Size=       4576 bytes  File Size  =       3149 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.30     *
+  *............................................................................*
+  *Br   73 :primTrkCaloKin : primTrkCaloKin/F                                  *
+  *Entries :     1000 : Total  Size=       4591 bytes  File Size  =       3193 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.28     *
+  *............................................................................*
+  *Br   74 :primTrkEndKin : primTrkEndKin/F                                    *
+  *Entries :     1000 : Total  Size=       4586 bytes  File Size  =       3020 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.35     *
+  *............................................................................*
+  *Br   75 :primTrkLLHPion : primTrkLLHPion/F                                  *
+  *Entries :     1000 : Total  Size=       4591 bytes  File Size  =       3192 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.28     *
+  *............................................................................*
+  *Br   76 :primTrkLLHProton : primTrkLLHProton/F                              *
+  *Entries :     1000 : Total  Size=       4601 bytes  File Size  =       3201 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.28     *
+  *............................................................................*
+  *Br   77 :primTrkLLHMuon : primTrkLLHMuon/F                                  *
+  *Entries :     1000 : Total  Size=       4591 bytes  File Size  =        495 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   8.24     *
+  *............................................................................*
+  *Br   78 :primTrkLLHKaon : primTrkLLHKaon/F                                  *
+  *Entries :     1000 : Total  Size=       4591 bytes  File Size  =        495 *
+  *Baskets :        1 : Basket Size=      32000 bytes  Compression=   8.24     *
+  *............................................................................*
+  *Br   79 :primTrkdEdxs : vector<float>                                       *
+  *Entries :     1000 : Total  Size=     307224 bytes  File Size  =     268566 *
+  *Baskets :       10 : Basket Size=      32000 bytes  Compression=   1.14     *
+  *............................................................................*
+  *Br   80 :primTrkResRanges : vector<float>                                   *
+  *Entries :     1000 : Total  Size=     307280 bytes  File Size  =     274107 *
+  *Baskets :       10 : Basket Size=      32000 bytes  Compression=   1.12     *
+  *............................................................................*
 
