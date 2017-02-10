@@ -425,7 +425,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     canvas.SetLogy(False)
     canvas.SetLogx(False)
 
-def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint):
+def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint,writeImages=True):
   """
   For each histogram in each file, plot a histogram on one plot. Works with 1D
     and 2D histograms.
@@ -487,8 +487,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     funcs: List of TF1's to draw on top of the histogram
   """
   
-  allHists = []
-  allProfilesToo = []
+  allHists = {}
+  allProfilesToo = {}
   for fileConfig in fileConfigs:
     fileConfig['tree'] = root.TChain(treename)
     if type(fileConfig['fn']) is str:
@@ -636,6 +636,9 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         if doProfileXtoo:
             prof.Draw("Esame")
             allProfilesToo.append(prof)
+            if not (histConfig['name'] in allProfilesToo):
+              allProfilesToo[histConfig['name']] = {}
+            allProfilesToo[histConfig['name']][fileConfig['name']] = prof
       else:
         axisHist = makeStdAxisHist([hist],logy=logy,freeTopSpace=0.05,xlim=xlim,ylim=ylim)
         axisHist.Draw()
@@ -645,23 +648,26 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
           hist.Draw("Esame")
         else:
           hist.Draw("histsame")
-      for hlineY in hlineYs:
-        hlines.append(drawHline(axisHist,hlineY))
-      for vlineX in vlineXs:
-        vlines.append(drawVline(axisHist,vlineX))
-      setHistTitles(axisHist,xtitle,ytitle)
-      for func in funcs:
-        func.Draw("LSAME")
-      drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
-      canvas.RedrawAxis()
-      saveNameBase = outPrefix + histConfig['name'] + "_" + fileConfig['name'] + outSuffix
-      canvas.SaveAs(saveNameBase+".png")
-      canvas.SaveAs(saveNameBase+".pdf")
+      if writeImages:
+        for hlineY in hlineYs:
+          hlines.append(drawHline(axisHist,hlineY))
+        for vlineX in vlineXs:
+          vlines.append(drawVline(axisHist,vlineX))
+        setHistTitles(axisHist,xtitle,ytitle)
+        for func in funcs:
+          func.Draw("LSAME")
+        drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
+        canvas.RedrawAxis()
+        saveNameBase = outPrefix + histConfig['name'] + "_" + fileConfig['name'] + outSuffix
+        canvas.SaveAs(saveNameBase+".png")
+        canvas.SaveAs(saveNameBase+".pdf")
       if hist.InheritsFrom("TH2"):
         setupCOLZFrame(canvas,True) #reset frame
       canvas.SetLogy(False)
       canvas.SetLogx(False)
-      allHists.append(hist)
+      if not (histConfig['name'] in allHists):
+        allHists[histConfig['name']] = {}
+      allHists[histConfig['name']][fileConfig['name']] = hist
   if len(allProfilesToo) == 0:
     return allHists
   else:
