@@ -6,7 +6,8 @@ root.gROOT.SetBatch(True)
 
 if __name__ == "__main__":
 
-  cuts = "*(iBestMatch >= 0 && fabs(trackMatchDeltaY[iBestMatch]) < 5. && fabs(trackMatchDeltaX[iBestMatch]) < 5. && trackMatchDeltaAngle[iBestMatch]*180/pi < 10.)"
+  #cuts = "*(iBestMatch >= 0 && fabs(trackMatchDeltaY[iBestMatch]) < 5. && fabs(trackMatchDeltaX[iBestMatch]) < 5. && trackMatchDeltaAngle[iBestMatch]*180/pi < 10.)"
+  cuts = "*(pWC > 100 && pWC < 1000 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3 && iBestMatch >= 0 && fabs(trackMatchDeltaY[iBestMatch]) < 5. && fabs(trackMatchDeltaX[iBestMatch]) < 5. && trackMatchDeltaAngle[iBestMatch]*180/pi < 10.)"
   secTrkCuts = "*(trackStartDistToPrimTrkEnd < 2. || trackEndDistToPrimTrkEnd < 2.)"
   #weightStr = "pzWeight"+cuts
   weightStr = "1"+cuts
@@ -63,28 +64,28 @@ if __name__ == "__main__":
     #  'color': root.kGreen+1,
     #  'scaleFactor': 1336.88, #AllWeightsCuts Proton
     #},
-    {
-      #'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_mup_v4/anahist.root",
-      #'addFriend': ["friend", "friendTree_mup_v4.root"],
-      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/mup_piAbsSelector.root",
-      'fn': "test_mup_piAbsSelector.root",
-      'name': "mup",
-      'title': "#mu^{+} MC",
-      'caption': "#mu^{+} MC",
-      'color': root.kCyan,
-      'scaleFactor': 97.422, #AllWeightsCuts Proton
-    },
-    {
-      #'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_kp_v4/anahist.root",
-      #'addFriend': ["friend", "friendTree_kp_v4.root"],
-      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/kp_piAbsSelector.root",
-      'fn': "test_kp_piAbsSelector.root",
-      'name': "kp",
-      'title': "K^{+} MC",
-      'caption': "K^{+} MC",
-      'color': root.kMagenta,
-      'scaleFactor': 199.43, #AllWeightsCuts Proton
-    },
+#    {
+#      #'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_mup_v4/anahist.root",
+#      #'addFriend': ["friend", "friendTree_mup_v4.root"],
+#      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/mup_piAbsSelector.root",
+#      'fn': "test_mup_piAbsSelector.root",
+#      'name': "mup",
+#      'title': "#mu^{+} MC",
+#      'caption': "#mu^{+} MC",
+#      'color': root.kCyan,
+#      'scaleFactor': 97.422, #AllWeightsCuts Proton
+#    },
+#    {
+#      #'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_kp_v4/anahist.root",
+#      #'addFriend': ["friend", "friendTree_kp_v4.root"],
+#      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/kp_piAbsSelector.root",
+#      'fn': "test_kp_piAbsSelector.root",
+#      'name': "kp",
+#      'title': "K^{+} MC",
+#      'caption': "K^{+} MC",
+#      'color': root.kMagenta,
+#      'scaleFactor': 199.43, #AllWeightsCuts Proton
+#    },
     #{
     #  #'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_gam_v4/anahist.root",
     #  #'addFriend': ["friend", "friendTree_gam_v4.root"],
@@ -791,6 +792,26 @@ if __name__ == "__main__":
       'ytitle': "Primary TPC Track Pion/Proton LLHR",
       'binning': [100,0,1500,100,-300,1000],
       'var': "primTrkLLHPion-primTrkLLHProton:pWC",
+      'cuts': weightStr,
+      #'normalize': True,
+      #'logz': logz,
+    },
+    {
+      'name': "primTrkLLRKPVpWC",
+      'xtitle': "WC Momentum [MeV/c]",
+      'ytitle': "Primary TPC Track Kaon/Proton LLHR",
+      'binning': [100,0,1500,100,-300,1000],
+      'var': "primTrkLLHKaon-primTrkLLHProton:pWC",
+      'cuts': weightStr,
+      #'normalize': True,
+      #'logz': logz,
+    },
+    {
+      'name': "primTrkPIDAPVpWC",
+      'xtitle': "WC Momentum [MeV/c]",
+      'ytitle': "Primary TPC Track PIDA",
+      'binning': [100,0,1500,100,0,50],
+      'var': "primTrkPIDA:pWC",
       'cuts': weightStr,
       #'normalize': True,
       #'logz': logz,

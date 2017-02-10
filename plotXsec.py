@@ -141,7 +141,7 @@ if __name__ == "__main__":
     molardensity = 39.948 #g / mol
     avagadro = 6.022140857e23
     numberdensity = density * avagadro / molardensity # particles / cm3
-    sliceThickness = 0.5 # cm
+    sliceThickness = 0.4/math.sin(60.*math.pi/180.) # cm
     scaleFactorcm = 1./(numberdensity*sliceThickness) # cm2 / particles
     scaleFactorBarn = 1e24 * scaleFactorcm # barn / particles
     #
