@@ -18,7 +18,7 @@ if __name__ == "__main__":
   #NMAX=100
   fileConfigs = [
     {
-      'fn': "piAbs_data_Pos_RunI_v4.root",
+      'fn': "piAbs_data_Pos_RunI_v03.root",
       #'addFriend': ["friend", "friendTree_Pos_RunI_v03.root"],
       #'fn': "test_data_Pos_RunI_piAbsSelector.root",
       'name': "RunI_Pos",
@@ -27,7 +27,7 @@ if __name__ == "__main__":
       'color': root.kBlack,
     },
     {
-      'fn': "piAbs_data_Pos_RunII_v4.root",
+      'fn': "piAbs_data_Pos_RunII_v03.root",
       #'addFriend': ["friend", "friendTree_Pos_RunII_v03.root"],
       #'fn': "test_data_Pos_RunII_piAbsSelector.root",
       'name': "RunII_Pos",
