@@ -27,6 +27,7 @@ if __name__ == "__main__":
       'title': "Run I Pos. Polarity",
       'caption': "Run I Pos. Polarity",
       'color': root.kBlack,
+      'isData': True,
     },
     #{
     #  'fn': "piAbs_data_Pos_RunII_v03.root",
@@ -36,6 +37,7 @@ if __name__ == "__main__":
     #  'title': "Run II Pos. Polarity",
     #  'caption': "Run II Pos. Polarity",
     #  'color': root.kGray+1,
+    #  'isData': True,
     #},
     {
       'fn': "piAbs_pip_v5.root",
@@ -736,7 +738,7 @@ if __name__ == "__main__":
   #  #if histConfigs[i]['name'] != "zWC4Hit":
   #    histConfigs.pop(i)
 
-  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
+#  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
 
   #for i in range(len(histConfigs)):
   #  histConfigs[i]['cuts'] = weightStr + "*(pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3) && (isMC || (firstTOF > 28 && firstTOF < 55))"
@@ -822,5 +824,24 @@ if __name__ == "__main__":
     },
   ]
 
-  plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
+  #plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
+
+  histConfigs = [
+    {
+      'name': "pWC",
+      'xtitle': "Momentum from WC [MeV/c]",
+      'ytitle': "Normalized Events / bin",
+      'binning': [100,0,2000],
+      'var': "pzWC",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': False,
+    },
+  ]
+  fileConfigMCs = copy.deepcopy(fileConfigs)
+  fileConfigData = None
+  for i in reversed(range(len(fileConfigMCs))):
+    if 'isData' in fileConfigMCs[i] and fileConfigMCs[i]['isData']:
+      fileConfigData = fileConfigMCs.pop(i)
+  DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
 
