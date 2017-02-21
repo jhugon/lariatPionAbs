@@ -7,13 +7,21 @@ root.gROOT.SetBatch(True)
 if __name__ == "__main__":
 
   cuts = ""
-  #cuts = "*(iBestMatch >= 0 && fabs(trackMatchDeltaY[iBestMatch]) < 5. && fabs(trackMatchDeltaX[iBestMatch]) < 5. && trackMatchDeltaAngle[iBestMatch]*180/pi < 10.)"
-  #cuts = "*(pWC > 100 && pWC < 1000 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3 && iBestMatch >= 0 && fabs(trackMatchDeltaY[iBestMatch]) < 5. && fabs(trackMatchDeltaX[iBestMatch]) < 5. && trackMatchDeltaAngle[iBestMatch]*180/pi < 10.)"
+  #cuts += "*( pWC > 100 && pWC < 1100 && (isMC || (firstTOF < 25)))" # pions
+  cuts += "*( pWC > 450 && pWC < 1100 && (isMC || (firstTOF > 28 && firstTOF < 55)))" # protons
+  cuts += "*(nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3)" # tpc tracks
+#  cuts += "*(trackMatchDeltaAngle*180/pi > 15.)"
+#  cuts += "*(sqrt(pow(xWC-23.75,2)+pow(yWC-0.2,2)) < 11.93)" # wc track in flange
+#  cuts += "*(sqrt(pow(trackXFront-23.75,2)+pow(trackYFront-0.2,2)) < 11.93)" # TPC track in flange
+#  cuts += "*(trackMatchLowestZ < 2.)" # matching
+  #cuts = "*(iBestMatch >= 0 && fabs(trackMatchDeltaY[iBestMatch]) < 5. && fabs(trackMatchDeltaX[iBestMatch]) < 5. && trackMatchDeltaAngle[iBestMatch]*180/pi < 10.)" # matching
+  ###
+  ###
   secTrkCuts = "*(trackStartDistToPrimTrkEnd < 2. || trackEndDistToPrimTrkEnd < 2.)"
   #weightStr = "pzWeight"+cuts
   weightStr = "1"+cuts
   nData = 30860.0
-  logy = True
+  logy = False
 
   c = root.TCanvas()
   NMAX=10000000000
@@ -21,7 +29,7 @@ if __name__ == "__main__":
   fileConfigs = [
     {
       'fn': "piAbs_data_Pos_RunI_v03.root",
-      #'addFriend': ["friend", "friendTree_Pos_RunI_v03.root"],
+      'addFriend': ["friend", "friendTree_Pos_RunI_v03.root"],
       #'fn': "test_data_Pos_RunI_piAbsSelector.root",
       'name': "RunI_Pos",
       'title': "Run I Pos. Polarity",
@@ -39,59 +47,59 @@ if __name__ == "__main__":
     #  'color': root.kGray+1,
     #  'isData': True,
     #},
-    {
-      'fn': "piAbs_pip_v5.root",
-      #'addFriend': ["friend", "friendTree_pip_v4.root"],
-      #'fn': "test_pip_piAbsSelector.root",
-      'name': "pip",
-      'title': "#pi^{+} MC",
-      'caption': "#pi^{+} MC",
-      'color': root.kBlue,
-      'scaleFactor': 1./35250*nData*0.428, #No Cuts
-    },
+    #{
+    #  'fn': "piAbs_pip_v5.root",
+    #  'addFriend': ["friend", "friendTree_pip_v5.root"],
+    #  #'fn': "test_pip_piAbsSelector.root",
+    #  'name': "pip",
+    #  'title': "#pi^{+} MC",
+    #  'caption': "#pi^{+} MC",
+    #  'color': root.kBlue-7,
+    #  #'scaleFactor': 1./35250*nData*0.428/(1.-0.086), #No Cuts
+    #  'scaleFactor': 1./35250*nData*0.428/(1.-0.086)*0.70, # pion/tpc tracks cuts
+    #},
     {
       'fn': "piAbs_p_v5.root",
-      #'addFriend': ["friend", "friendTree_p_v4.root"],
+      'addFriend': ["friend", "friendTree_p_v5.root"],
       #'fn': "test_p_piAbsSelector.root",
       'name': "p",
       'title': "proton MC",
       'caption': "proton MC",
-      'color': root.kRed,
-      'scaleFactor': 1./35200*nData*0.162, #No Cuts
+      'color': root.kRed-4,
+      'scaleFactor': 1./35200*nData*0.162/(1.-0.086), #No Cuts
     },
-    {
-      'fn': "piAbs_ep_v5.root",
-      #'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_ep_v4/anahist.root",
-      #'addFriend': ["friend", "friendTree_ep_v4.root"],
-      #'fn': "test_ep_piAbsSelector.root",
-      'name': "ep",
-      'title': "e^{+} MC",
-      'caption': "e^{+} MC",
-      'color': root.kGreen+1,
-      'scaleFactor': 1./35700*nData*0.301, #No Cuts
-    },
-    {
-      'fn': "piAbs_mup_v5.root",
-      #'addFriend': ["friend", "friendTree_mup_v4.root"],
-      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/mup_piAbsSelector.root",
-      #'fn': "test_mup_piAbsSelector.root",
-      'name': "mup",
-      'title': "#mu^{+} MC",
-      'caption': "#mu^{+} MC",
-      'color': root.kCyan,
-      'scaleFactor': 1./35200*nData*0.021, #No Cuts
-    },
-    {
-      'fn': "piAbs_kp_v5.root",
-      #'addFriend': ["friend", "friendTree_kp_v4.root"],
-      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/kp_piAbsSelector.root",
-      #'fn': "test_kp_piAbsSelector.root",
-      'name': "kp",
-      'title': "K^{+} MC",
-      'caption': "K^{+} MC",
-      'color': root.kMagenta,
-      'scaleFactor': 1./35700*nData*0.00057, #No Cuts
-    },
+    #{
+    #  'fn': "piAbs_ep_v5.root",
+    #  'addFriend': ["friend", "friendTree_ep_v5.root"],
+    #  #'fn': "test_ep_piAbsSelector.root",
+    #  'name': "ep",
+    #  'title': "e^{+} MC",
+    #  'caption': "e^{+} MC",
+    #  'color': root.kGreen,
+    #  #'scaleFactor': 1./35700*nData*0.301/(1.-0.086), #No Cuts
+    #  'scaleFactor': 1./35700*nData*0.301/(1.-0.086)*0.70, # pion/tpc tracks cuts
+    #},
+    #{
+    #  'fn': "piAbs_mup_v5.root",
+    #  'addFriend': ["friend", "friendTree_mup_v5.root"],
+    #  #'fn': "test_mup_piAbsSelector.root",
+    #  'name': "mup",
+    #  'title': "#mu^{+} MC",
+    #  'caption': "#mu^{+} MC",
+    #  'color': root.kMagenta-4,
+    #  #'scaleFactor': 1./35200*nData*0.021/(1.-0.086), #No Cuts
+    #  'scaleFactor': 1./35200*nData*0.021/(1.-0.086)*0.70, # pion/tpc tracks cuts
+    #},
+    #{
+    #  'fn': "piAbs_kp_v5.root",
+    #  'addFriend': ["friend", "friendTree_kp_v5.root"],
+    #  #'fn': "test_kp_piAbsSelector.root",
+    #  'name': "kp",
+    #  'title': "K^{+} MC",
+    #  'caption': "K^{+} MC",
+    #  'color': root.kOrange-3,
+    #  'scaleFactor': 1./35700*nData*0.00057/(1.-0.086), #No Cuts
+    #},
     #{
     #  #'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_gam_v4/anahist.root",
     #  #'addFriend': ["friend", "friendTree_gam_v4.root"],
@@ -108,7 +116,7 @@ if __name__ == "__main__":
     {
       'name': "xWC4Hit",
       'xtitle': "X Position at WC4 [cm]",
-      'ytitle': "Normalized Events / bin",
+      'ytitle': "Events / bin",
       'binning': [100,0,50],
       'var': "xWC4Hit",
       'cuts': weightStr,
@@ -118,7 +126,7 @@ if __name__ == "__main__":
     {
       'name': "yWC4Hit",
       'xtitle': "Y Position at WC4 [cm]",
-      'ytitle': "Normalized Events / bin",
+      'ytitle': "Events / bin",
       'binning': [100,-25,25],
       'var': "yWC4Hit",
       'cuts': weightStr,
@@ -128,7 +136,7 @@ if __name__ == "__main__":
     {
       'name': "zWC4Hit",
       'xtitle': "Z Position at WC4 [cm]",
-      'ytitle': "Normalized Events / bin",
+      'ytitle': "Events / bin",
       'binning': [100,-97,-95],
       'var': "zWC4Hit",
       'cuts': weightStr,
@@ -138,7 +146,7 @@ if __name__ == "__main__":
     {
       'name': "xWC",
       'xtitle': "X Position of WC track projection to TPC [cm]",
-      'ytitle': "Normalized Events / bin",
+      'ytitle': "Events / bin",
       'binning': [100,0,75],
       'var': "xWC",
       'cuts': weightStr,
@@ -148,7 +156,7 @@ if __name__ == "__main__":
     {
       'name': "yWC",
       'xtitle': "Y Position of WC track projection to TPC [cm]",
-      'ytitle': "Normalized Events / bin",
+      'ytitle': "Events / bin",
       'binning': [100,-50,50],
       'var': "yWC",
       'cuts': weightStr,
@@ -158,7 +166,7 @@ if __name__ == "__main__":
     {
       'name': "pzWC",
       'xtitle': "Z Momentum from WC [MeV/c]",
-      'ytitle': "Normalized Events / bin",
+      'ytitle': "Events / bin",
       'binning': [100,0,2000],
       'var': "pzWC",
       'cuts': weightStr,
@@ -169,7 +177,7 @@ if __name__ == "__main__":
     {
       'name': "pWC",
       'xtitle': "Momentum from WC [MeV/c]",
-      'ytitle': "Normalized Events / bin",
+      'ytitle': "Events / bin",
       'binning': [100,0,2000],
       'var': "pzWC",
       'cuts': weightStr,
@@ -179,7 +187,7 @@ if __name__ == "__main__":
     #{
     #  'name': "kinWC",
     #  'xtitle': "Kinetic Energy at WC [MeV/c] (m=m_{#pi^{#pm}})",
-    #  'ytitle': "Normalized Events / bin",
+    #  'ytitle': "Events / bin",
     #  'binning': [100,0,2000],
     #  'var': "kinWC",
     #  'cuts': weightStr,
@@ -189,7 +197,7 @@ if __name__ == "__main__":
     #{
     #  'name': "kinWCInTPC",
     #  'xtitle': "Kinetic Energy at TPC [MeV/c] (m=m_{#pi^{#pm}})",
-    #  'ytitle': "Normalized Events / bin",
+    #  'ytitle': "Events / bin",
     #  'binning': [100,0,2000],
     #  'var': "kinWCInTPC",
     #  'cuts': weightStr,
@@ -199,7 +207,7 @@ if __name__ == "__main__":
     {
       'name': "phiWC",
       'xtitle': "WC track #phi [deg]",
-      'ytitle': "Normalized Events / bin",
+      'ytitle': "Events / bin",
       'binning': [360,-180,180],
       'var': "phiWC*180/pi",
       'cuts': weightStr,
@@ -209,7 +217,7 @@ if __name__ == "__main__":
     {
       'name': "thetaWC",
       'xtitle': "WC track #theta [deg]",
-      'ytitle': "Normalized Events / bin",
+      'ytitle': "Events / bin",
       'binning': [40,0,10],
       'var': "thetaWC*180/pi",
       'cuts': weightStr,
@@ -219,7 +227,7 @@ if __name__ == "__main__":
     {
       'name': "thetaxzWC",
       'xtitle': "WC track #theta_{xz} [deg]",
-      'ytitle': "Normalized Events / bin",
+      'ytitle': "Events / bin",
       'binning': [100,-10,10],
       'var': "(atan(tan(thetaWC)*cos(phiWC)))*180/pi",
       'cuts': weightStr,
@@ -229,7 +237,7 @@ if __name__ == "__main__":
     {
       'name': "thetayzWC",
       'xtitle': "WC track #theta_{yz} [deg]",
-      'ytitle': "Normalized Events / bin",
+      'ytitle': "Events / bin",
       'binning': [100,-5,5],
       'var': "(asin(sin(thetaWC)*sin(phiWC)))*180/pi",
       'cuts': weightStr,
@@ -739,6 +747,12 @@ if __name__ == "__main__":
   #    histConfigs.pop(i)
 
 #  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
+  fileConfigMCs = copy.deepcopy(fileConfigs)
+  fileConfigData = None
+  for i in reversed(range(len(fileConfigMCs))):
+    if 'isData' in fileConfigMCs[i] and fileConfigMCs[i]['isData']:
+      fileConfigData = fileConfigMCs.pop(i)
+  DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
 
   #for i in range(len(histConfigs)):
   #  histConfigs[i]['cuts'] = weightStr + "*(pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3) && (isMC || (firstTOF > 28 && firstTOF < 55))"
@@ -825,23 +839,3 @@ if __name__ == "__main__":
   ]
 
   #plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
-
-  histConfigs = [
-    {
-      'name': "pWC",
-      'xtitle': "Momentum from WC [MeV/c]",
-      'ytitle': "Normalized Events / bin",
-      'binning': [100,0,2000],
-      'var': "pzWC",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': False,
-    },
-  ]
-  fileConfigMCs = copy.deepcopy(fileConfigs)
-  fileConfigData = None
-  for i in reversed(range(len(fileConfigMCs))):
-    if 'isData' in fileConfigMCs[i] and fileConfigMCs[i]['isData']:
-      fileConfigData = fileConfigMCs.pop(i)
-  DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
-
