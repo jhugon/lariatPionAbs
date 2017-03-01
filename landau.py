@@ -1,16 +1,19 @@
 #!/usr/bin/env python2
+
+import uuid
 import ROOT as root
 from ROOT import gStyle as gStyle
 root.gROOT.SetBatch(True)
 
-class RooLandau(object):
+class LandauMaker(object):
   def __init__(self,rooObservable,rooMpv,rooXi):
     self.mpv = rooMpv
     self.xi = rooXi
     self.observable = rooObservable
-    self.p2 = root.RooFormulaVar("wl","second landau param","4*@0",root.RooArgList(self.xi))
-    self.p1 = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(self.mpv,wl))
-    self.landau = root.RooLandau("lx","lx",rooObservable,self.ml,self.wl)
+    self.name = "landau_"+uuid.uuid4().get_hex()
+    self.p2 = root.RooFormulaVar(self.name+"p2","second landau param","4*@0",root.RooArgList(self.xi))
+    self.p1 = root.RooFormulaVar(self.name+"p1","first landau param","@0+0.22278*@1",root.RooArgList(self.mpv,self.p2))
+    self.landau = root.RooLandau(self.name,"landau",rooObservable,self.p1,self.p2)
   def getPdf(self):
     return self.landau
 
@@ -22,9 +25,8 @@ if __name__ == "__main__":
    # MIP Muon
    mpv = root.RooRealVar("mpv","mpv landau",1.7,-20,20)
    xi = root.RooRealVar("xi","xi landau",0.105,0,20)
-   wl = root.RooFormulaVar("wl","second landau param","4*@0",root.RooArgList(xi))
-   ml = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(mpv,wl))
-   landau = root.RooLandau("lx","lx",t,ml,wl)
+   landauObj = LandauMaker(t,mpv,xi)
+   landau = landauObj.getPdf()
 
    mg = root.RooRealVar("mg","mg",0)
    sg = root.RooRealVar("sg","sg",0.1)

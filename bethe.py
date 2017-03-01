@@ -47,14 +47,18 @@ class MuonTable(object):
     return numpy.interp(ke,self.Ts,self.ranges,left=float('nan'),right=float('nan'))
 
 class Bethe(object):
+    
   def __init__(self):
+    """
+    Setup everything for liquid argon
+    """
     self.K = 0.307075 # MeV/mol cm^2
     self.Z = 18
     self.A = 39.948 #g/mol
     self.rho = 1.396 #g/cm^3
     self.z = 1
-    self.hbarw = 22.85
-    self.I = 188.0*1e-6 # eV
+    self.hbarw = 22.85*1e-6 # MeV
+    self.I = 188.0*1e-6 # MeV
     self.mec2 = 0.410999 #Mev/c^2
     self.j = 0.200
     self.a = 0.19559
@@ -62,21 +66,47 @@ class Bethe(object):
     self.x0 = 0.2000
     self.x1 = 3.0000
     self.Cbar = 5.2146
+    self.delta0 = 0.
+    if False: # silicon
+      self.Z = 14
+      self.A = 28.0855
+      self.rho = 2.329
+      self.hbarw = 31.05*1e-6 # MeV
+      self.I = 173.0*1e-6 # MeV
+      self.a = 0.14921
+      self.k = 3.2546
+      self.x0 = 0.2015
+      self.x1 = 2.8716
+      self.Cbar = 4.4355
+      self.delta0 = 0.14
 
-  def mean(self, l, momentum, Mparticle):
+  def stoppingPower(self, l, momentum, Mparticle):
+    """
+    average -dE/dx in MeV cm^2 / g
+    """
     energy, gamma, beta = self.getEnergyGammaBeta(momentum,Mparticle)
     Wmax = self.Wmax(beta,gamma,Mparticle)
     delta = self.delta(momentum,Mparticle)
     term1 = 0.5*math.log((2*self.mec2*beta**2*gamma**2*Wmax)/(self.I**2))
     term2 = - beta**2
     term3 = - 0.5 * delta
-    stoppingPower = term1 + term2 + term3
-    stoppingPower *= self.K*(self.z)**2 * self.Z / self.A / (beta**2)
-    linearStoppingPower = stoppingPower * self.rho # now MeV/cm
-    result = l*linearStoppingPower  # now MeV
+    result = term1 + term2 + term3
+    result *= self.K*(self.z)**2 * self.Z / self.A / (beta**2) # now MeV cm^2 /g
+    return result
+
+  def mean(self, l, momentum, Mparticle):
+    """
+    average energy deposited in MeV for l in cm
+    """
+    result = self.stoppingPower(l,momentum, Mparticle) # in MeV cm^2 / g
+    result *= self.rho # now in MeV/cm
+    result *= l # now in MeV
     return result
 
   def mpv(self, l, momentum, Mparticle):
+    """
+    Most probable energy deposition in MeV
+    """
     energy, gamma, beta = self.getEnergyGammaBeta(momentum,Mparticle)
     xi = self.xi(beta,l)
     delta = self.delta(momentum,Mparticle)
@@ -84,6 +114,7 @@ class Bethe(object):
     term2 = math.log(xi/self.I)
     result = term1 + term2 + self.j - beta**2 - delta
     result *= xi
+    #result *= 1/(l*self.rho)# now in MeV cm^2 / g
     return result
 
   def width(self, l, momentum, Mparticle):
@@ -125,7 +156,7 @@ class Bethe(object):
     if x < self.x1 and x >= self.x0:
       return 2*math.log(10)*x - self.Cbar + self.a*(self.x1-x)**self.k
     if x < self.x0:
-      return 0
+      return self.delta0*10**(2*(x-self.x0))
     raise Exception("Shouldn't have gotten past if statments")
 
   def getEnergyGammaBeta(self,momentum,mass):
@@ -139,24 +170,31 @@ if __name__ == "__main__":
 
   b = Bethe()
   mt = MuonTable()
-
-  #masses = [MUONMASS, PIONMASS, KAONMASS, PROTONMASS]
-  mass = MUONMASS
-  #mass = KAONMASS
-  #mass = PROTONMASS
-  l = 1.
+  l = 1.0
   print -b.mean(1,357,MUONMASS), b.mpv(1,357,MUONMASS), b.width(1,357,MUONMASS)
   print -b.mean(1,500,PROTONMASS), b.mpv(1,500,PROTONMASS), b.width(1,501,PROTONMASS)
-  momentas = numpy.linspace(100,1500,50)
-  energies = numpy.sqrt(momentas**2+mass**2)
-  kes = energies - mass
-  means = [b.mean(l,m,mass) for m in momentas]
-  mpvs = [b.mpv(l,m,mass) for m in momentas]
-  tableVals = mt.dEdx(kes)*l
-  ax.plot(momentas,means,label="Mean")
-  ax.plot(momentas,mpvs,label="MPV")
-  ax.plot(momentas,tableVals,label="Table")
-  ax.legend(loc="best")
-  ax.set_xlabel("Momentum [MeV/c]")
-  ax.set_ylabel("-dE/dx [MeV/cm]")
-  fig.savefig("text.pdf")
+
+  masses = [MUONMASS, PIONMASS, KAONMASS, PROTONMASS]
+  labels = [r"$\mu^\pm$",r"$\pi^\pm$","$K^\pm$","p"]
+  colors = ["b","g","k","r"]
+  for mass,label,color in zip(masses,labels,colors):
+    momentas = numpy.linspace(200,1500,100)
+    energies = numpy.sqrt(momentas**2+mass**2)
+    kes = energies - mass
+    means = [b.mean(l,m,mass) for m in momentas]
+    mpvs = [b.mpv(l,m,mass) for m in momentas]
+    widths = [b.width(l,m,mass) for m in momentas]
+    distlows = [mpv-0.5*width for mpv, width in zip(mpvs,widths)]
+    disthighs = [mpv+0.5*width for mpv, width in zip(mpvs,widths)]
+    tableVals = mt.dEdx(kes)*l
+    ax.fill_between(momentas,distlows,disthighs,edgecolor="",facecolor=color,alpha=0.4)
+    ax.plot(momentas,means,color+"--")
+    ax.plot(momentas,mpvs,color+"-",label=label)
+    ax.legend(loc="best")
+    ax.set_xlabel("Momentum [MeV/c]")
+    ax.set_ylabel("Hit Energy [MeV]")
+    #ax.set_ylim(0,30)
+    fig.text(0.9,0.91,"Liquid Argon, $\ell$ = {:.2f} cm".format(l),ha='right',va='bottom')
+    fig.savefig("text.pdf")
+
+  
