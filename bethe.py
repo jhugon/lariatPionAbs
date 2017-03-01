@@ -159,4 +159,4 @@ if __name__ == "__main__":
   ax.legend(loc="best")
   ax.set_xlabel("Momentum [MeV/c]")
   ax.set_ylabel("-dE/dx [MeV/cm]")
-  fig.savefig("text.png")
+  fig.savefig("text.pdf")

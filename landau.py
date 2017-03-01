@@ -3,15 +3,27 @@ import ROOT as root
 from ROOT import gStyle as gStyle
 root.gROOT.SetBatch(True)
 
+class RooLandau(object):
+  def __init__(self,rooObservable,rooMpv,rooXi):
+    self.mpv = rooMpv
+    self.xi = rooXi
+    self.observable = rooObservable
+    self.p2 = root.RooFormulaVar("wl","second landau param","4*@0",root.RooArgList(self.xi))
+    self.p1 = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(self.mpv,wl))
+    self.landau = root.RooLandau("lx","lx",rooObservable,self.ml,self.wl)
+  def getPdf(self):
+    return self.landau
+
 if __name__ == "__main__":
 
    t = root.RooRealVar("t","dE/dx [MeV/cm]",-10,50)
    observables = root.RooArgSet(t)
 
    # MIP Muon
-   mpvl = root.RooRealVar("mpvl","mpv landau",1.7,-20,20)
-   wl = root.RooRealVar("wl","width landau",0.42,0.1,10)
-   ml = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(mpvl,wl))
+   mpv = root.RooRealVar("mpv","mpv landau",1.7,-20,20)
+   xi = root.RooRealVar("xi","xi landau",0.105,0,20)
+   wl = root.RooFormulaVar("wl","second landau param","4*@0",root.RooArgList(xi))
+   ml = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(mpv,wl))
    landau = root.RooLandau("lx","lx",t,ml,wl)
 
    mg = root.RooRealVar("mg","mg",0)
@@ -19,9 +31,10 @@ if __name__ == "__main__":
    gauss = root.RooGaussian("gauss","gauss",t,mg,sg)
 
    # 500 MeV proton
-   mpvl2 = root.RooRealVar("mpvl2","mpv landau",6.5,-20,20)
-   wl2 = root.RooRealVar("wl2","sigma landau",1.5,0.1,10)
-   ml2 = root.RooFormulaVar("ml2","first landau param","@0+0.22278*@1",root.RooArgList(mpvl2,wl2))
+   mpv2 = root.RooRealVar("mpv2","mpv landau",6.5,-20,20)
+   xi2 = root.RooRealVar("xi2","xi landau",0.375,0,20)
+   wl2 = root.RooFormulaVar("wl2","second landau param","4*@0",root.RooArgList(xi2))
+   ml2 = root.RooFormulaVar("ml2","first landau param","@0+0.22278*@1",root.RooArgList(mpv2,wl2))
    landau2 = root.RooLandau("lx2","lx",t,ml2,wl2)
 
    t.setBins(10000,"cache")
@@ -48,7 +61,7 @@ if __name__ == "__main__":
    frame.GetYaxis().SetTitleOffset(1.4)
    frame.Draw("same")
    axisHist = root.TH2F("axisHist","",1,0,50,1,0,1000)
-   #axisHist = root.TH2F("axisHist","",1,-1,1,1,1000,1300)
+   #axisHist = root.TH2F("axisHist","",1,-5,5,1,0,1200)
    axisHist.Draw()
    frame.Draw("same")
    c.SaveAs("roofit.pdf")
