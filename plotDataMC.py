@@ -185,7 +185,7 @@ if __name__ == "__main__":
       'xtitle': "Momentum from WC [MeV/c]",
       'ytitle': "Events / bin",
       'binning': [100,0,2000],
-      'var': "pzWC",
+      'var': "pWC",
       'cuts': weightStr,
       #'normalize': True,
       'logy': logy,
