@@ -9,9 +9,9 @@ if __name__ == "__main__":
   cuts = ""
 #  cuts += "*( pWC > 100 && pWC < 1100 && (isMC || (firstTOF > 0 && firstTOF < 25)))" # pions
 #  #cuts += "*( pWC > 450 && pWC < 1100 && (isMC || (firstTOF > 28 && firstTOF < 55)))" # protons
-#  cuts += "*(nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3)" # tpc tracks
-#
-#  cuts += "*( iBestMatch >= 0 && nMatchedTracks == 1)" # matching in analyzer
+  cuts += "*(nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3)" # tpc tracks
+
+  cuts += "*( iBestMatch >= 0 && nMatchedTracks == 1)" # matching in analyzer
 
   # matching debug
   #cuts += "*(sqrt(pow(xWC-23.75,2)+pow(yWC-0.2,2)) < 11.93)" # wc track in flange
@@ -26,22 +26,22 @@ if __name__ == "__main__":
   #weightStr = "pzWeight"+cuts
   weightStr = "1"+cuts
   nData = 30860.0
-  logy = False
+  logy = True
 
   c = root.TCanvas()
   NMAX=10000000000
   #NMAX=100
   fileConfigs = [
-    {
-      'fn': "piAbs_data_Pos_RunI_v03.root",
-      #'addFriend': ["friend", "friendTree_Pos_RunI_v03.root"],
-      #'fn': "test_data_Pos_RunI_piAbsSelector.root",
-      'name': "RunI_Pos",
-      'title': "Run I Pos. Polarity",
-      'caption': "Run I Pos. Polarity",
-      'color': root.kBlack,
-      'isData': True,
-    },
+    #{
+    #  'fn': "piAbs_data_Pos_RunI_v03.root",
+    #  #'addFriend': ["friend", "friendTree_Pos_RunI_v03.root"],
+    #  #'fn': "test_data_Pos_RunI_piAbsSelector.root",
+    #  'name': "RunI_Pos",
+    #  'title': "Run I Pos. Polarity",
+    #  'caption': "Run I Pos. Polarity",
+    #  'color': root.kBlack,
+    #  'isData': True,
+    #},
     #{
     #  'fn': "piAbs_data_Pos_RunII_v03.root",
     #  #'addFriend': ["friend", "friendTree_Pos_RunII_v03.root"],
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     #  'isData': True,
     #},
     {
-      'fn': "piAbs_pip_v5.root",
+      'fn': "piAbs_pip_v5.2.root",
       #'addFriend': ["friend", "friendTree_pip_v5.root"],
       #'fn': "test_pip_piAbsSelector.root",
       'name': "pip",
@@ -64,7 +64,7 @@ if __name__ == "__main__":
       #'scaleFactor': 1./35250*nData*0.428/(1.-0.086)*0.51, # pion, tpc, match cuts
     },
     {
-      'fn': "piAbs_p_v5.root",
+      'fn': "piAbs_p_v5.2.root",
       #'addFriend': ["friend", "friendTree_p_v5.root"],
       #'fn': "test_p_piAbsSelector.root",
       'name': "p",
@@ -75,7 +75,7 @@ if __name__ == "__main__":
       #'scaleFactor': 1./35200*nData*0.162/(1.-0.086)*0.7216, #proton, tpc, matching
     },
     {
-      'fn': "piAbs_ep_v5.root",
+      'fn': "piAbs_ep_v5.2.root",
       #'addFriend': ["friend", "friendTree_ep_v5.root"],
       #'fn': "test_ep_piAbsSelector.root",
       'name': "ep",
@@ -86,7 +86,7 @@ if __name__ == "__main__":
       #'scaleFactor': 1./35700*nData*0.301/(1.-0.086)*0.35, # pion, tpc, match cuts
     },
     {
-      'fn': "piAbs_mup_v5.root",
+      'fn': "piAbs_mup_v5.2.root",
       #'addFriend': ["friend", "friendTree_mup_v5.root"],
       #'fn': "test_mup_piAbsSelector.root",
       'name': "mup",
@@ -97,7 +97,7 @@ if __name__ == "__main__":
       #'scaleFactor': 1./35200*nData*0.021/(1.-0.086)*0.51, # pion, tpc, match cuts
     },
     {
-      'fn': "piAbs_kp_v5.root",
+      'fn': "piAbs_kp_v5.2.root",
       #'addFriend': ["friend", "friendTree_kp_v5.root"],
       #'fn': "test_kp_piAbsSelector.root",
       'name': "kp",
@@ -559,98 +559,98 @@ if __name__ == "__main__":
     #  'normalize': True,
     #  'integral': True
     #},
-    {
-      'name': "primTrkLLHPion",
-      'xtitle': "Primary TPC Track Pion -logLH",
-      'ytitle': "Events / bin",
-      'binning': [100,0,5000],
-      'var': "-primTrkLLHPion",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkLLHProton",
-      'xtitle': "Primary TPC Track Proton -logLH",
-      'ytitle': "Events / bin",
-      'binning': [100,0,5000],
-      'var': "-primTrkLLHProton",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkLLHMuon",
-      'xtitle': "Primary TPC Track Muon -logLH",
-      'ytitle': "Events / bin",
-      'binning': [100,0,5000],
-      'var': "-primTrkLLHMuon",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkLLHKaon",
-      'xtitle': "Primary TPC Track Kaon -logLH",
-      'ytitle': "Events / bin",
-      'binning': [100,0,5000],
-      'var': "-primTrkLLHKaon",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkLLR",
-      'xtitle': "Primary TPC Track Pion/Proton LLHR",
-      'ytitle': "Tracks / bin",
-      'binning': [100,-300,1000],
-      'var': "primTrkLLHPion-primTrkLLHProton",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkLLRInt",
-      'xtitle': "Primary TPC Track Pion/Proton LLHR",
-      'ytitle': "Efficiency for Cut >= X",
-      'binning': [100,-300,1000],
-      'var': "primTrkLLHPion-primTrkLLHProton",
-      'cuts': weightStr,
-      #'logy': logy,
-      'normalize': True,
-      'integral': True
-    },
-    {
-      'name': "primTrkLLRKP",
-      'xtitle': "Primary TPC Track Kaon/Proton LLHR",
-      'ytitle': "Tracks / bin",
-      'binning': [100,-300,1000],
-      'var': "primTrkLLHKaon-primTrkLLHProton",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkLLRKPInt",
-      'xtitle': "Primary TPC Track Kaon/Proton LLHR",
-      'ytitle': "Efficiency for Cut >= X",
-      'binning': [100,-300,1000],
-      'var': "primTrkLLHKaon-primTrkLLHProton",
-      'cuts': weightStr,
-      #'logy': logy,
-      'normalize': True,
-      'integral': True
-    },
-    {
-      'name': "primTrkPIDA",
-      'xtitle': "Primary TPC Track PIDA",
-      'ytitle': "Events / bin",
-      'binning': [100,0,50],
-      'var': "primTrkPIDA",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
+    #{
+    #  'name': "primTrkLLHPion",
+    #  'xtitle': "Primary TPC Track Pion -logLH",
+    #  'ytitle': "Events / bin",
+    #  'binning': [100,0,5000],
+    #  'var': "-primTrkLLHPion",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
+    #{
+    #  'name': "primTrkLLHProton",
+    #  'xtitle': "Primary TPC Track Proton -logLH",
+    #  'ytitle': "Events / bin",
+    #  'binning': [100,0,5000],
+    #  'var': "-primTrkLLHProton",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
+    #{
+    #  'name': "primTrkLLHMuon",
+    #  'xtitle': "Primary TPC Track Muon -logLH",
+    #  'ytitle': "Events / bin",
+    #  'binning': [100,0,5000],
+    #  'var': "-primTrkLLHMuon",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
+    #{
+    #  'name': "primTrkLLHKaon",
+    #  'xtitle': "Primary TPC Track Kaon -logLH",
+    #  'ytitle': "Events / bin",
+    #  'binning': [100,0,5000],
+    #  'var': "-primTrkLLHKaon",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
+    #{
+    #  'name': "primTrkLLR",
+    #  'xtitle': "Primary TPC Track Pion/Proton LLHR",
+    #  'ytitle': "Tracks / bin",
+    #  'binning': [100,-300,1000],
+    #  'var': "primTrkLLHPion-primTrkLLHProton",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
+    #{
+    #  'name': "primTrkLLRInt",
+    #  'xtitle': "Primary TPC Track Pion/Proton LLHR",
+    #  'ytitle': "Efficiency for Cut >= X",
+    #  'binning': [100,-300,1000],
+    #  'var': "primTrkLLHPion-primTrkLLHProton",
+    #  'cuts': weightStr,
+    #  #'logy': logy,
+    #  'normalize': True,
+    #  'integral': True
+    #},
+    #{
+    #  'name': "primTrkLLRKP",
+    #  'xtitle': "Primary TPC Track Kaon/Proton LLHR",
+    #  'ytitle': "Tracks / bin",
+    #  'binning': [100,-300,1000],
+    #  'var': "primTrkLLHKaon-primTrkLLHProton",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
+    #{
+    #  'name': "primTrkLLRKPInt",
+    #  'xtitle': "Primary TPC Track Kaon/Proton LLHR",
+    #  'ytitle': "Efficiency for Cut >= X",
+    #  'binning': [100,-300,1000],
+    #  'var': "primTrkLLHKaon-primTrkLLHProton",
+    #  'cuts': weightStr,
+    #  #'logy': logy,
+    #  'normalize': True,
+    #  'integral': True
+    #},
+    #{
+    #  'name': "primTrkPIDA",
+    #  'xtitle': "Primary TPC Track PIDA",
+    #  'ytitle': "Events / bin",
+    #  'binning': [100,0,50],
+    #  'var': "primTrkPIDA",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
     {
       'name': "trackStartDistToPrimTrkEnd",
       'xtitle': "TPC Track Start Distance to Primary End [cm]",
@@ -772,56 +772,66 @@ if __name__ == "__main__":
       #'normalize': True,
       'logy': logy,
     },
-    {
-      'name': "primTrkdEdxs",
-      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'ytitle': "Events / bin",
-      'binning': [200,0,50],
-      'var': "primTrkdEdxs",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkdEdxsFidCut",
-      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'ytitle': "Events / bin",
-      'binning': [200,0,50],
-      'var': "primTrkdEdxs",
-      'cuts': weightStr+"*primTrkInFids",
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkResRanges",
-      'xtitle': "Primary TPC Track Residual Range [cm]",
-      'ytitle': "Events / bin",
-      'binning': [200,0,100],
-      'var': "primTrkResRanges",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkEndKin",
-      'xtitle': "Primary TPC Track End Kinetic Energy [MeV]",
-      'ytitle': "Events / bin",
-      'binning': [50,0,1000],
-      'var': "primTrkEndKin",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkEndKinFid",
-      'xtitle': "Primary TPC Track End Kinetic Energy [MeV]",
-      'ytitle': "Events / bin",
-      'binning': [50,0,1000],
-      'var': "primTrkEndKinFid",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
+    #{
+    #  'name': "primTrkdEdxs",
+    #  'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
+    #  'ytitle': "Events / bin",
+    #  'binning': [200,0,50],
+    #  'var': "primTrkdEdxs",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
+    #{
+    #  'name': "primTrkdEdxsFidCut",
+    #  'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
+    #  'ytitle': "Events / bin",
+    #  'binning': [200,0,50],
+    #  'var': "primTrkdEdxs",
+    #  'cuts': weightStr+"*primTrkInFids",
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
+    #{
+    #  'name': "primTrkResRanges",
+    #  'xtitle': "Primary TPC Track Residual Range [cm]",
+    #  'ytitle': "Events / bin",
+    #  'binning': [200,0,100],
+    #  'var': "primTrkResRanges",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
+    #{
+    #  'name': "primTrkEndKin",
+    #  'xtitle': "Primary TPC Track End Kinetic Energy [MeV]",
+    #  'ytitle': "Events / bin",
+    #  'binning': [50,0,1000],
+    #  'var': "primTrkEndKin",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
+    #{
+    #  'name': "primTrkEndKinFid",
+    #  'xtitle': "Primary TPC Track End Kinetic Energy [MeV]",
+    #  'ytitle': "Events / bin",
+    #  'binning': [50,0,1000],
+    #  'var': "primTrkEndKinFid",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
+    #{
+    #  'name': "trueEndProcess",
+    #  'xtitle': "trueEndProcess",
+    #  'ytitle': "Events / bin",
+    #  'binning': [17,0,17],
+    #  'var': "trueEndProcess",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
   ]
 
   #for i in reversed(range(len(histConfigs))):
@@ -829,7 +839,7 @@ if __name__ == "__main__":
   #  #if histConfigs[i]['name'] != "zWC4Hit":
   #    histConfigs.pop(i)
 
-#  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
+  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
 #  fileConfigMCs = copy.deepcopy(fileConfigs)
 #  fileConfigData = None
 #  for i in reversed(range(len(fileConfigMCs))):
@@ -981,4 +991,4 @@ if __name__ == "__main__":
     },
   ]
 
-  plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
+  #plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
