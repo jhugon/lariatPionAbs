@@ -811,7 +811,6 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         hist.Draw("colz")
         if doProfileXtoo:
             prof.Draw("Esame")
-            allProfilesToo.append(prof)
             if not (histConfig['name'] in allProfilesToo):
               allProfilesToo[histConfig['name']] = {}
             allProfilesToo[histConfig['name']][fileConfig['name']] = prof

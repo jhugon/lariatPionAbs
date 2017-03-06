@@ -7,6 +7,7 @@ root.gROOT.SetBatch(True)
 if __name__ == "__main__":
 
   cuts = ""
+  #cuts += "*(pWC < 200.)"
   cuts += "*(nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3)" # tpc tracks
   cuts += "*( iBestMatch >= 0 && nMatchedTracks == 1)" # matching in analyzer
 
@@ -21,9 +22,9 @@ if __name__ == "__main__":
   #NMAX=100
   fileConfigs = [
     {
-      'fn': "piAbs_pip_v5.2.root",
+      #'fn': "piAbs_pip_v5.2.root",
       #'addFriend': ["friend", "friendTree_pip_v5.root"],
-      #'fn': "test_pip_piAbsSelector.root",
+      'fn': "test_pip_piAbsSelector.root",
       'name': "pip",
       'title': "#pi^{+} MC",
       'caption': "#pi^{+} MC",
@@ -32,9 +33,9 @@ if __name__ == "__main__":
       #'scaleFactor': 1./35250*nData*0.428/(1.-0.086)*0.51, # pion, tpc, match cuts
     },
     {
-      'fn': "piAbs_p_v5.2.root",
+      #'fn': "piAbs_p_v5.2.root",
       #'addFriend': ["friend", "friendTree_p_v5.root"],
-      #'fn': "test_p_piAbsSelector.root",
+      'fn': "test_p_piAbsSelector.root",
       'name': "p",
       'title': "proton MC",
       'caption': "proton MC",
@@ -43,9 +44,9 @@ if __name__ == "__main__":
       #'scaleFactor': 1./35200*nData*0.162/(1.-0.086)*0.7216, #proton, tpc, matching
     },
     {
-      'fn': "piAbs_ep_v5.2.root",
+      #'fn': "piAbs_ep_v5.2.root",
       #'addFriend': ["friend", "friendTree_ep_v5.root"],
-      #'fn': "test_ep_piAbsSelector.root",
+      'fn': "test_ep_piAbsSelector.root",
       'name': "ep",
       'title': "e^{+} MC",
       'caption': "e^{+} MC",
@@ -54,9 +55,9 @@ if __name__ == "__main__":
       #'scaleFactor': 1./35700*nData*0.301/(1.-0.086)*0.35, # pion, tpc, match cuts
     },
     {
-      'fn': "piAbs_mup_v5.2.root",
+      #'fn': "piAbs_mup_v5.2.root",
       #'addFriend': ["friend", "friendTree_mup_v5.root"],
-      #'fn': "test_mup_piAbsSelector.root",
+      'fn': "test_mup_piAbsSelector.root",
       'name': "mup",
       'title': "#mu^{+} MC",
       'caption': "#mu^{+} MC",
@@ -65,9 +66,9 @@ if __name__ == "__main__":
       #'scaleFactor': 1./35200*nData*0.021/(1.-0.086)*0.51, # pion, tpc, match cuts
     },
     {
-      'fn': "piAbs_kp_v5.2.root",
+      #'fn': "piAbs_kp_v5.2.root",
       #'addFriend': ["friend", "friendTree_kp_v5.root"],
-      #'fn': "test_kp_piAbsSelector.root",
+      'fn': "test_kp_piAbsSelector.root",
       'name': "kp",
       'title': "K^{+} MC",
       'caption': "K^{+} MC",
@@ -96,7 +97,39 @@ if __name__ == "__main__":
       'cuts': weightStr,
       #'normalize': True,
       'logy': logy,
-      'printIntegral': True,
+      #'printIntegral': True,
+    },
+#    {
+#      'name': "trackPIDA",
+#      'xtitle': "TPC Track PIDA",
+#      'ytitle': "Tracks / bin",
+#      'binning': [100,0,50],
+#      'var': "trackPIDA",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#    },
+#    {
+#      'name': "primTrkKins",
+#      'xtitle': "Hit Kinetic Energy [MeV]",
+#      'ytitle': "Events / bin",
+#      'binning': [100,0,1000],
+#      'var': "primTrkKins",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#      #'printIntegral': True,
+#    },
+    {
+      'name': "primTrkdEdxLast3Hits",
+      'xtitle': "Hit dE/dx [MeV/cm]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,50],
+      'var': "(primTrkIBackwards < 3)*primTrkdEdxs-(primTrkIBackwards >= 3)",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+      #'printIntegral': True,
     },
   ]
 
@@ -125,4 +158,4 @@ if __name__ == "__main__":
       hc["title"] = title
       hc["color"] = color
       hcs.append(hc)
-    plotManyHistsOnePlot(fileConfigs,hcs,c,"PiAbsSelector/tree",nMax=NMAX,outPrefix=name)
+    plotManyHistsOnePlot(fileConfigs,hcs,c,"PiAbsSelector/tree",nMax=NMAX,outPrefix=name+"_")
