@@ -961,6 +961,22 @@ def getYBinHist(inHist, yBin):
     outHist.SetBinError(i,inHist.GetBinError(i,yBin))
   return outHist
 
+def getHistMedian(hist):
+  """
+  Gets Median of 1D hist
+  """
+  nBins = hist.GetXaxis().GetNbins()
+  total = hist.Integral(1,nBins)
+  if total == 0:
+    return None
+  half = total/2.
+  count = 0.
+  for i in range(1,nBins+1):
+    n = hist.GetBinContent(i)
+    count += n
+    if count > half:
+        pass
+
 def divideYValByXVal(hist):
     nBinsX = hist.GetXaxis().GetNbins()
     for iBinX in range(1,nBinsX+1):

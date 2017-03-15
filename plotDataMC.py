@@ -7,7 +7,7 @@ root.gROOT.SetBatch(True)
 if __name__ == "__main__":
 
   cuts = ""
-#  cuts += "*( pWC > 100 && pWC < 1100 && (isMC || (firstTOF > 0 && firstTOF < 25)))" # pions
+  cuts += "*( pWC > 100 && pWC < 1100 && (isMC || (firstTOF > 0 && firstTOF < 25)))" # pions
 #  #cuts += "*( pWC > 450 && pWC < 1100 && (isMC || (firstTOF > 28 && firstTOF < 55)))" # protons
   cuts += "*(nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3)" # tpc tracks
 
@@ -22,7 +22,7 @@ if __name__ == "__main__":
   #cuts += "*(trackMatchDeltaAngle*180/pi < 10.)" # matching
   ###
   ###
-  secTrkCuts = "*(trackStartDistToPrimTrkEnd < 2. || trackEndDistToPrimTrkEnd < 2.)"
+  secTrkCuts = "*(trackStartDistToPrimTrkEnd < 2.)"
   #weightStr = "pzWeight"+cuts
   weightStr = "1"+cuts
   nData = 30860.0
@@ -528,37 +528,37 @@ if __name__ == "__main__":
     #  #'normalize': True,
     #  'logy': logy,
     #},
-    #{
-    #  'name': "trackPIDA",
-    #  'xtitle': "TPC Track PIDA",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [100,0,50],
-    #  'var': "trackPIDA",
-    #  'cuts': weightStr,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
-    #{
-    #  'name': "trackLLR",
-    #  'xtitle': "TPC Track Pion/Proton LLHR",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [100,-300,1000],
-    #  'var': "trackLLHPion-trackLLHProton",
-    #  'cuts': weightStr,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
-    #{
-    #  'name': "trackLLRInt",
-    #  'xtitle': "TPC Track Pion/Proton LLHR",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [100,-300,1000],
-    #  'var': "primTrkLLHPion-primTrkLLHProton",
-    #  'cuts': weightStr,
-    #  #'logy': logy,
-    #  'normalize': True,
-    #  'integral': True
-    #},
+    {
+      'name': "trackPIDA",
+      'xtitle': "TPC Track PIDA",
+      'ytitle': "Tracks / bin",
+      'binning': [100,0,50],
+      'var': "trackPIDA",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "trackLLR",
+      'xtitle': "TPC Track Pion/Proton LLHR",
+      'ytitle': "Tracks / bin",
+      'binning': [100,-300,1000],
+      'var': "trackLLHPion-trackLLHProton",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "trackLLRInt",
+      'xtitle': "TPC Track Pion/Proton LLHR",
+      'ytitle': "Tracks / bin",
+      'binning': [100,-300,1000],
+      'var': "primTrkLLHPion-primTrkLLHProton",
+      'cuts': weightStr,
+      #'logy': logy,
+      'normalize': True,
+      'integral': True
+    },
     #{
     #  'name': "primTrkLLHPion",
     #  'xtitle': "Primary TPC Track Pion -logLH",
@@ -599,27 +599,27 @@ if __name__ == "__main__":
     #  #'normalize': True,
     #  'logy': logy,
     #},
-    #{
-    #  'name': "primTrkLLR",
-    #  'xtitle': "Primary TPC Track Pion/Proton LLHR",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [100,-300,1000],
-    #  'var': "primTrkLLHPion-primTrkLLHProton",
-    #  'cuts': weightStr,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
-    #{
-    #  'name': "primTrkLLRInt",
-    #  'xtitle': "Primary TPC Track Pion/Proton LLHR",
-    #  'ytitle': "Efficiency for Cut >= X",
-    #  'binning': [100,-300,1000],
-    #  'var': "primTrkLLHPion-primTrkLLHProton",
-    #  'cuts': weightStr,
-    #  #'logy': logy,
-    #  'normalize': True,
-    #  'integral': True
-    #},
+    {
+      'name': "primTrkLLR",
+      'xtitle': "Primary TPC Track Pion/Proton LLHR",
+      'ytitle': "Tracks / bin",
+      'binning': [100,-300,1000],
+      'var': "primTrkLLHPion-primTrkLLHProton",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "primTrkLLRInt",
+      'xtitle': "Primary TPC Track Pion/Proton LLHR",
+      'ytitle': "Efficiency for Cut >= X",
+      'binning': [100,-300,1000],
+      'var': "primTrkLLHPion-primTrkLLHProton",
+      'cuts': weightStr,
+      #'logy': logy,
+      'normalize': True,
+      'integral': True
+    },
     #{
     #  'name': "primTrkLLRKP",
     #  'xtitle': "Primary TPC Track Kaon/Proton LLHR",
@@ -641,16 +641,16 @@ if __name__ == "__main__":
     #  'normalize': True,
     #  'integral': True
     #},
-    #{
-    #  'name': "primTrkPIDA",
-    #  'xtitle': "Primary TPC Track PIDA",
-    #  'ytitle': "Events / bin",
-    #  'binning': [100,0,50],
-    #  'var': "primTrkPIDA",
-    #  'cuts': weightStr,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
+    {
+      'name': "primTrkPIDA",
+      'xtitle': "Primary TPC Track PIDA",
+      'ytitle': "Events / bin",
+      'binning': [100,0,50],
+      'var': "primTrkPIDA",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
     {
       'name': "trackStartDistToPrimTrkEnd",
       'xtitle': "TPC Track Start Distance to Primary End [cm]",
@@ -731,37 +731,37 @@ if __name__ == "__main__":
     #  #'normalize': True,
     #  'logy': logy,
     #},
-    #{
-    #  'name': "secTrkLLR",
-    #  'xtitle': "Secondary TPC Track Pion/Proton LLHR",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [100,-300,1000],
-    #  'var': "trackLLHPion-trackLLHProton",
-    #  'cuts': weightStr+secTrkCuts,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
-    #{
-    #  'name': "secTrkLLRInt",
-    #  'xtitle': "Secondary TPC Track Pion/Proton LLHR",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [100,-300,1000],
-    #  'var': "primTrkLLHPion-primTrkLLHProton",
-    #  'cuts': weightStr+secTrkCuts,
-    #  #'logy': logy,
-    #  'normalize': True,
-    #  'integral': True
-    #},
-    #{
-    #  'name': "secTrkPIDA",
-    #  'xtitle': "Secondary TPC Track PIDA",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [100,0,50],
-    #  'var': "trackPIDA",
-    #  'cuts': weightStr+secTrkCuts,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
+    {
+      'name': "secTrkLLR",
+      'xtitle': "Secondary TPC Track Pion/Proton LLHR",
+      'ytitle': "Tracks / bin",
+      'binning': [100,-300,1000],
+      'var': "trackLLHPion-trackLLHProton",
+      'cuts': weightStr+secTrkCuts,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "secTrkLLRInt",
+      'xtitle': "Secondary TPC Track Pion/Proton LLHR",
+      'ytitle': "Tracks / bin",
+      'binning': [100,-300,1000],
+      'var': "primTrkLLHPion-primTrkLLHProton",
+      'cuts': weightStr+secTrkCuts,
+      #'logy': logy,
+      'normalize': True,
+      'integral': True
+    },
+    {
+      'name': "secTrkPIDA",
+      'xtitle': "Secondary TPC Track PIDA",
+      'ytitle': "Tracks / bin",
+      'binning': [100,0,50],
+      'var': "trackPIDA",
+      'cuts': weightStr+secTrkCuts,
+      #'normalize': True,
+      'logy': logy,
+    },
     {
       'name': "primTrkLength",
       'xtitle': "Primary TPC Track Length [cm]",
