@@ -936,7 +936,7 @@ def getXBinHist(inHist, xBin):
   Makes a TH1 hisogram from a TH2
   A vertical slice of a 2D histo
   """
-  outHist = inHist.ProjectionY()
+  outHist = inHist.ProjectionY("_slice{}".format(xBin))
   outHist.Reset()
   outHist.SetName(inHist.GetName()+"XSliceBin"+str(xBin))
   outHist.Sumw2()
@@ -2337,9 +2337,9 @@ def drawNormalLegend(hists,labels,option="l"):
     options = itertools.repeat(option,len(labels))
   else:
     raise Exception("option must be a str or a list of str with length == lenght of labels")
-  #leg = root.TLegend(0.55,0.6,0.91,0.89)
+  leg = root.TLegend(0.55,0.7,0.91,0.89)
   #leg = root.TLegend(0.35,0.6,0.91,0.89)
-  leg = root.TLegend(0.40,0.7,0.91,0.89)
+  #leg = root.TLegend(0.40,0.7,0.91,0.89)
   leg.SetLineColor(root.kWhite)
   for hist,label,op in zip(hists,labels,options):
     leg.AddEntry(hist,label,op)
@@ -2457,6 +2457,15 @@ def drawHline(axisHist,y):
   result.SetLineColor(root.kGray+1)
   result.Draw("lsame")
   return result
+
+COLORLIST=[
+      root.kBlue-7,
+      root.kRed-4,
+      root.kGreen,
+      root.kMagenta-4,
+      root.kOrange-3,
+      root.kGray+1,
+]*10
 
 if __name__ == "__main__":
 
