@@ -82,13 +82,88 @@ def makeGraphsModeAndFWHM(hist):
     graphFWHM.SetPoint(iBin-1,x,fwhm)
   return graph, graphFWHM
 
+def fitLandaus(c,hist):
+
+  t = root.RooRealVar("t","dE/dx [MeV/cm]",0.,10)
+  observables = root.RooArgSet(t)
+
+  data = root.RooDataHist("data_"+hist.GetName(),"Data Hist",root.RooArgList(t),hist)
+
+  ##############
+  mpvl = root.RooRealVar("mpvl","mpv landau",1.7,0,5)
+  wl = root.RooRealVar("wl","width landau",0.42,0.01,10)
+  ml = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(mpvl,wl))
+  landau = root.RooLandau("lx","lx",t,ml,wl)
+
+  mg = root.RooRealVar("mg","mg",0)
+  sg = root.RooRealVar("sg","sg",0.1,0.01,2.)
+  gauss = root.RooGaussian("gauss","gauss",t,mg,sg)
+
+  t.setBins(10000,"cache")
+  langaus = root.RooFFTConvPdf("langaus","landau (X) gauss",t,landau,gauss)
+  langaus.setBufferFraction(0.2)
+
+  mpvl2 = root.RooRealVar("mpvl2","mpv landau",1.7,0,5)
+  wl2 = root.RooRealVar("wl2","width landau",0.42,0.01,10)
+  ml2 = root.RooFormulaVar("ml2","first landau param","@0+0.22278*@1",root.RooArgList(mpvl2,wl2))
+  landau2 = root.RooLandau("lx2","lx2",t,ml2,wl2)
+  langaus2 = root.RooFFTConvPdf("langaus2","landau (X) gauss",t,landau2,gauss)
+  langaus2.setBufferFraction(0.2)
+  
+  mpvl3 = root.RooRealVar("mpvl3","mpv landau",1.7,0,5)
+  wl3 = root.RooRealVar("wl3","width landau",0.42,0.01,10)
+  ml3 = root.RooFormulaVar("ml3","first landau param","@0+0.22278*@1",root.RooArgList(mpvl3,wl3))
+  landau3 = root.RooLandau("lx3","lx3",t,ml3,wl3)
+  langaus3 = root.RooFFTConvPdf("langaus3","landau (X) gauss",t,landau3,gauss)
+  langaus3.setBufferFraction(0.2)
+  
+  ratio = root.RooRealVar("ratio","ratio",0.18,0,1)
+  ratio2 = root.RooRealVar("ratio2","ratio2",0.18,0,1)
+  twolandaus = root.RooAddPdf("twolandaus","twolandaus",landau,landau2,ratio)
+  threelandaus = root.RooAddPdf("threelandaus","threelandaus",root.RooArgList(landau,landau2,landau3),root.RooArgList(ratio,ratio2))
+  twolangaus = root.RooAddPdf("twolangaus","twolandaus",langaus,langaus2,ratio)
+  threelangaus = root.RooAddPdf("threelangaus","threelandaus",root.RooArgList(langaus,langaus2,langaus3),root.RooArgList(ratio,ratio2))
+
+
+  model = threelandaus
+
+  ##############
+
+  model.fitTo(data)
+
+  frame = t.frame(root.RooFit.Title("landau (x) gauss convolution"))
+  data.plotOn(frame)
+  model.plotOn(frame)
+
+  model.plotOn(frame,root.RooFit.Components("lx"),root.RooFit.LineStyle(root.kDashed))
+  model.plotOn(frame,root.RooFit.Components("lx2"),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kRed))
+  model.plotOn(frame,root.RooFit.Components("lx3"),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kGreen))
+
+  #model.plotOn(frame,root.RooFit.Components("langaus"),root.RooFit.LineStyle(root.kDashed))
+  #model.plotOn(frame,root.RooFit.Components("langaus2"),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kRed))
+  #model.plotOn(frame,root.RooFit.Components("langaus3"),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kGreen))
+
+  #root.gPad.SetLeftMargin(0.15)
+  #frame.GetYaxis().SetTitleOffset(1.4)
+  #frame.Draw("same")
+  #axisHist = root.TH2F("axisHist","",1,0,50,1,0,1000)
+  ##axisHist = root.TH2F("axisHist","",1,-1,1,1,1000,1300)
+  #axisHist.Draw()
+  #frame.Draw("same")
+  frame.Draw()
+  c.SaveAs("roofit.pdf")
+
+def fitSlicesLandaus(c,hist):
+  histAll = hist.ProjectionY("_pyAll",1,hist.GetNbinsX())
+  fitLandaus(c,histAll)
+
 if __name__ == "__main__":
 
   c = root.TCanvas("c")
   fHalo = root.TFile("halo_hists.root")
   #fHalo.ls()
   fCosmics = root.TFile("cosmics_hists.root")
-  fCosmics.ls()
+  #fCosmics.ls()
 
   for logy,xmax,outext,ytitle in [(False,4,"","Normalized--Hits"),(True,50,"_logy","Hits/bin")]:
     c.SetLogy(logy)
@@ -135,3 +210,6 @@ if __name__ == "__main__":
     setHistTitles(axisHist,xtitle,ytitle)
     c.SaveAs(savename+".png")
     c.SaveAs(savename+".pdf")
+
+  #fitSlicesLandaus(c,fCosmics.Get("primTrkdEdxsVy_RunIIPos"))
+  #fitSlicesLandaus(c,fCosmics.Get("primTrkdEdxsVy_CosmicMC"))
