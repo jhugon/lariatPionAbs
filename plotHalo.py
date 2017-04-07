@@ -16,7 +16,7 @@ if __name__ == "__main__":
   logy = True
 
   c = root.TCanvas()
-  NMAX=1000000
+  NMAX=10000000
   #NMAX=100
   fileConfigs = [
     {
@@ -430,6 +430,26 @@ if __name__ == "__main__":
       'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
       'binning': [200,8000,10000,500,0,50],
       'var': "primTrkdEdxs:runNumber",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': True,
+    },
+    {
+      'name': "primTrkdEdxsVyFromCenter",
+      'xtitle': "Hit |y| [cm]",
+      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+      'binning': [40,0,25,1000,0,50],
+      'var': "primTrkdEdxs:fabs(primTrkYs)",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': True,
+    },
+    {
+      'name': "primTrkdEdxsVzFromCenter",
+      'xtitle': "Hit |z-45| [cm]",
+      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+      'binning': [40,0,50,1000,0,50],
+      'var': "primTrkdEdxs:fabs(primTrkZs-45.)",
       'cuts': weightStr,
       #'normalize': True,
       'logz': True,

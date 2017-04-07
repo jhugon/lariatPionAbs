@@ -2291,21 +2291,35 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
   assert(len(xlim)==0 or len(xlim)==2)
   assert(len(ylim)==0 or len(ylim)==2)
   multiplier = 1./(1.-freeTopSpace)
-  yMin = 0.
-  yMax = 0.
+  yMin = 1e15
+  yMax = -1e15
   xMin = 1e15
   xMax = -1e15
   for hist in histList:
-    histMax = getHistMax(hist)
-    yMax = max(yMax,histMax)
-    histX = hist
-    if hist.InheritsFrom("TEfficiency"):
-        histX = hist.GetTotalHistogram()
-    nBins = histX.GetNbinsX()
-    xMax = max(xMax,histX.GetXaxis().GetBinUpEdge(nBins))
-    xMin = min(xMin,histX.GetBinLowEdge(1))
-  if yMax == 0.:
+    if isinstance(hist,root.TH1):
+        histMax = getHistMax(hist)
+        yMax = max(yMax,histMax)
+        histX = hist
+        if hist.InheritsFrom("TEfficiency"):
+            histX = hist.GetTotalHistogram()
+        nBins = histX.GetNbinsX()
+        xMax = max(xMax,histX.GetXaxis().GetBinUpEdge(nBins))
+        xMin = min(xMin,histX.GetBinLowEdge(1))
+    elif isinstance(hist,root.TGraph):
+        x = root.Double(0.)
+        y = root.Double(0.)
+        for i in range(hist.GetN()):
+            hist.GetPoint(i,x,y)
+            xMax = max(xMax,float(x))
+            yMax = max(yMax,float(y))
+            xMin = min(xMin,float(x))
+            yMin = min(yMin,float(y))
+  if yMax == -1e15:
     yMax = 1.
+  if yMin == 1e15:
+    yMin = 0.
+  else:
+    yMin -= (yMax-yMin)*0.1
   if logy:
     yMin = 10**(-1)
     yMax = (math.log10(yMax) + 1.)*multiplier - 1.
@@ -2465,7 +2479,7 @@ COLORLIST=[
       root.kMagenta-4,
       root.kOrange-3,
       root.kGray+1,
-]*10
+]*100
 
 if __name__ == "__main__":
 
