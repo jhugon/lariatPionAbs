@@ -2254,6 +2254,15 @@ def drawHline(axisHist,y):
   result.Draw("lsame")
   return result
 
+COLORLIST=[
+      root.kBlue-7,
+      root.kRed-4,
+      root.kGreen,
+      root.kMagenta-4,
+      root.kOrange-3,
+      root.kGray+1,
+]*100
+
 if __name__ == "__main__":
 
   root.gROOT.SetBatch(True)

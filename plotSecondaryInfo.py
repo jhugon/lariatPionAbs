@@ -31,25 +31,114 @@ def printAllPDGs(tree):
 
 if __name__ == "__main__":
 
-  NMAX=50000
+  NMAX=500000
   fileConfigs = [
+    #{
+    #  'fn': "anaTree_p_v1.root",
+    #  'addFriend': ["friend","friendTree_p_v1.root"],
+    #  'pdg': 2212,
+    #  'name': "p",
+    #  'title': "p MC Sample",
+    #  'caption': "p MC Sample",
+    #  'color': root.kGreen+1,
+    #},
     {
-      'fn': "anaTree_p_v1.root",
-      'addFriend': ["friend","friendTree_p_v1.root"],
-      'pdg': 2212,
-      'name': "p",
-      'title': "p MC Sample",
-      'caption': "p MC Sample",
-      'color': root.kGreen+1,
+      'fn': "/pnfs/dune/scratch/users/jhugon/v06_18_01/ana/ProtoDUNE_pion_0p5GeV_mono_3ms_mcc8.0_v2/anahist.root",
+      'addFriend': ["friend","friendTree_ProtoDUNE_pion_0p5GeV_mono_3ms_mcc8.0_v2.root"],
+      'name': "0p5GeV",
+      'title': "0.5 GeV #pi^{+} MC Sample",
+      'caption': "0.5 GeV #pi^{+} MC Sample",
+      'color': root.kBlue,
+      #'scaleFactor' : 0.5,
     },
     {
-      'fn': "anaTree_pip_v1.root",
-      'addFriend': ["friend","friendTree_pip_v1.root"],
-      'pdg': 211,
-      'name': "pip",
-      'title': "#pi^{+} MC Sample",
-      'caption': "#pi^{+} MC Sample",
+      'fn': "/pnfs/dune/scratch/users/jhugon/v06_18_01/ana/ProtoDUNE_pion_1GeV_mono_3ms_mcc8.0_v2/anahist.root",
+      'addFriend': ["friend","friendTree_ProtoDUNE_pion_1GeV_mono_3ms_mcc8.0_v2.root"],
+      'name': "1GeV",
+      'title': "1 GeV #pi^{+} MC Sample",
+      'caption': "1 GeV #pi^{+} MC Sample",
       'color': root.kBlack,
+      #'scaleFactor' : 0.5,
+    },
+    {
+      'fn': "/pnfs/dune/scratch/users/jhugon/v06_18_01/ana/ProtoDUNE_pion_1p5GeV_mono_3ms_mcc8.0_v2/anahist.root",
+      'addFriend': ["friend","friendTree_ProtoDUNE_pion_1p5GeV_mono_3ms_mcc8.0_v2.root"],
+      'name': "1p5GeV",
+      'title': "1.5 GeV #pi^{+} MC Sample",
+      'caption': "1.5 GeV #pi^{+} MC Sample",
+      'color': root.kBlue,
+      #'scaleFactor' : 0.5,
+    },
+    {
+      'fn': "/pnfs/dune/scratch/users/jhugon/v06_18_01/ana/ProtoDUNE_pion_3p5GeV_mono_3ms_mcc8.0_v2/anahist.root",
+      'addFriend': ["friend","friendTree_ProtoDUNE_pion_3p0GeV_mono_3ms_mcc8.0_v2.root"],
+      'name': "3p5GeV",
+      'title': "3.5 GeV #pi^{+} MC Sample",
+      'caption': "3.5 GeV #pi^{+} MC Sample",
+      'color': root.kBlue,
+      #'scaleFactor' : 0.5,
+    },
+    {
+      'fn': "/pnfs/dune/scratch/users/jhugon/v06_18_01/ana/ProtoDUNE_pion_4p0GeV_mono_3ms_mcc8.0_v2/anahist.root",
+      'addFriend': ["friend","friendTree_ProtoDUNE_pion_4p0GeV_mono_3ms_mcc8.0_v2.root"],
+      'name': "4p0GeV",
+      'title': "4.0 GeV #pi^{+} MC Sample",
+      'caption': "4.0 GeV #pi^{+} MC Sample",
+      'color': root.kBlue,
+      #'scaleFactor' : 0.5,
+    },
+    {
+      'fn': "/pnfs/dune/scratch/users/jhugon/v06_18_01/ana/ProtoDUNE_pion_4p5GeV_mono_3ms_mcc8.0_v2/anahist.root",
+      'addFriend': ["friend","friendTree_ProtoDUNE_pion_4p5GeV_mono_3ms_mcc8.0_v2.root"],
+      'name': "4p5GeV",
+      'title': "4.5 GeV #pi^{+} MC Sample",
+      'caption': "4.5 GeV #pi^{+} MC Sample",
+      'color': root.kBlue,
+      #'scaleFactor' : 0.5,
+    },
+    {
+      'fn': "/pnfs/dune/scratch/users/jhugon/v06_18_01/ana/ProtoDUNE_pion_5p0GeV_mono_3ms_mcc8.0_v2/anahist.root",
+      'addFriend': ["friend","friendTree_ProtoDUNE_pion_5p0GeV_mono_3ms_mcc8.0_v2.root"],
+      'name': "5p0GeV",
+      'title': "5.0 GeV #pi^{+} MC Sample",
+      'caption': "5.0 GeV #pi^{+} MC Sample",
+      'color': root.kBlue,
+      #'scaleFactor' : 0.5,
+    },
+    {
+      'fn': "/pnfs/dune/scratch/users/jhugon/v06_18_01/ana/ProtoDUNE_pion_5p5GeV_mono_3ms_mcc8.0_v2/anahist.root",
+      'addFriend': ["friend","friendTree_ProtoDUNE_pion_5p5GeV_mono_3ms_mcc8.0_v2.root"],
+      'name': "5p5GeV",
+      'title': "5.5 GeV #pi^{+} MC Sample",
+      'caption': "5.5 GeV #pi^{+} MC Sample",
+      'color': root.kBlue,
+      #'scaleFactor' : 0.5,
+    },
+    {
+      'fn': "/pnfs/dune/scratch/users/jhugon/v06_18_01/ana/ProtoDUNE_pion_6p0GeV_mono_3ms_mcc8.0_v2/anahist.root",
+      'addFriend': ["friend","friendTree_ProtoDUNE_pion_6p0GeV_mono_3ms_mcc8.0_v2.root"],
+      'name': "6p0GeV",
+      'title': "6.0 GeV #pi^{+} MC Sample",
+      'caption': "6.0 GeV #pi^{+} MC Sample",
+      'color': root.kBlue,
+      #'scaleFactor' : 0.5,
+    },
+    #{
+    #  'fn': "/pnfs/dune/scratch/users/jhugon/v06_18_01/ana/ProtoDUNE_pion_6p5GeV_mono_3ms_mcc8.0_v2/anahist.root",
+    #  'addFriend': ["friend","friendTree_ProtoDUNE_pion_6p5GeV_mono_3ms_mcc8.0_v2.root"],
+    #  'name': "6p5GeV",
+    #  'title': "6.5 GeV #pi^{+} MC Sample",
+    #  'caption': "6.5 GeV #pi^{+} MC Sample",
+    #  'color': root.kBlue,
+    #  #'scaleFactor' : 0.5,
+    #},
+    {
+      'fn': "/pnfs/dune/scratch/users/jhugon/v06_18_01/ana/ProtoDUNE_pion_7p0GeV_mono_3ms_mcc8.0_v2/anahist.root",
+      'addFriend': ["friend","friendTree_ProtoDUNE_pion_7p0GeV_mono_3ms_mcc8.0_v2.root"],
+      'name': "7p0GeV",
+      'title': "7.0 GeV #pi^{+} MC Sample",
+      'caption': "7.0 GeV #pi^{+} MC Sample",
+      'color': root.kBlue,
       #'scaleFactor' : 0.5,
     },
     #{
@@ -72,13 +161,16 @@ if __name__ == "__main__":
     #},
   ]
 
+  for iFile in range(len(fileConfigs)):
+      fileConfigs[iFile]['color'] = COLORLIST[iFile]
+
   histConfigs = [
     {
       'name': "pPrimary",
       'xtitle': "Primary particle |p| [MeV/c]",
       'ytitle': "Particles per MeV/c",
       'normToBinWidth': True,
-      'binning': [100,0,2000],
+      'binning': [100,0,7500],
       'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
       'cuts': "process_primary",
     },
@@ -87,7 +179,7 @@ if __name__ == "__main__":
       'xtitle': "Secondary particle |p| [MeV/c]",
       'ytitle': "Particles per MeV/c",
       'normToBinWidth': True,
-      'binning': [100,0,1000],
+      'binning': [100,0,1500],
       'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
       'cuts': "!process_primary && Mother == 1 && sqrt(Px*Px+Py*Py+Pz*Pz)>0.01 && abs(pdg) < 1000000",
       #'cuts': "!process_primary && pdg != 2112",
@@ -97,7 +189,7 @@ if __name__ == "__main__":
       'xtitle': "Tertiary particle |p| [MeV/c]",
       'ytitle': "Particles per MeV/c",
       'normToBinWidth': True,
-      'binning': [100,0,1000],
+      'binning': [100,0,1500],
       'var': "sqrt(Px*Px+Py*Py+Pz*Pz)*1000",
       'cuts': "!process_primary && Mother != 1 && sqrt(Px*Px+Py*Py+Pz*Pz)>0.01 && abs(pdg) < 1000000",
       #'cuts': "!process_primary && pdg != 2112",
@@ -122,7 +214,7 @@ if __name__ == "__main__":
       'name': "thetaz",
       'xtitle': "Primary particle #theta w.r.t. z-axis [deg]",
       'ytitle': "Events / bin",
-      'binning': [30,0,30],
+      'binning': [30,0,90],
       'var': "acos(Pz/sqrt(Px*Px+Py*Py+Pz*Pz))*180/pi",
       'cuts': "process_primary",
     },
@@ -130,7 +222,7 @@ if __name__ == "__main__":
       'name': "costhetaz",
       'xtitle': "Primary particle cos(#theta) w.r.t. z-axis",
       'ytitle': "Events / bin",
-      'binning': [20,0.99,1],
+      'binning': [100,0,1],
       'var': "Pz/sqrt(Px*Px+Py*Py+Pz*Pz)",
       'cuts': "process_primary",
     },
@@ -138,7 +230,7 @@ if __name__ == "__main__":
       'name': "thetaxz",
       'xtitle': "Primary particle #theta in x-z plane",
       'ytitle': "Events / bin",
-      'binning': [80,-10,10],
+      'binning': [90,-90,90],
       'var': "TMath::ATan2(Px,Pz)*180/pi",
       'cuts': "process_primary",
     },
@@ -146,14 +238,17 @@ if __name__ == "__main__":
       'name': "thetayz",
       'xtitle': "Primary particle #theta in y-z plane",
       'ytitle': "Events / bin",
-      'binning': [80,-10,10],
+      'binning': [90,-90,90],
       'var': "TMath::ATan2(Py,Pz)*180/pi",
       'cuts': "process_primary",
     },
   ]
 
+#  TDirectoryFile*               analysistree    analysistree (dune/AnaTree/AnalysisTree) folder
+#   KEY: TTree   anatree;1       analysis tree
+
   c = root.TCanvas()
-  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX)
+  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"analysistree/anatree",nMax=NMAX)
 
   histConfigs = [
     {
@@ -223,8 +318,10 @@ if __name__ == "__main__":
       'color': root.kBlue,
     },
   ]
+  for iHist in range(len(histConfigs)):
+      histConfigs[iHist]['color'] = COLORLIST[iHist]
 
-  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX,outPrefix="pSecondary_")
+  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"analysistree/anatree",nMax=NMAX,outPrefix="pSecondary_")
 
   histConfigs = [
     {
@@ -261,7 +358,9 @@ if __name__ == "__main__":
       'color': root.kBlue,
     },
   ]
-  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX,outPrefix="pPrimaryStopped_")
+  for iHist in range(len(histConfigs)):
+      histConfigs[iHist]['color'] = COLORLIST[iHist]
+  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"analysistree/anatree",nMax=NMAX,outPrefix="pPrimaryStopped_")
 
   histConfigs = [
     {
@@ -321,33 +420,35 @@ if __name__ == "__main__":
       'color': root.kBlue,
     },
   ]
-  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX,outPrefix="pAllStopped_")
+  for iHist in range(len(histConfigs)):
+      histConfigs[iHist]['color'] = COLORLIST[iHist]
+  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"analysistree/anatree",nMax=NMAX,outPrefix="pAllStopped_")
 
   histConfigs = [
-    {
-      'name': "yVxPrimary",
-      'xtitle': "Primary start x [cm]",
-      'ytitle': "Primary start y [cm]",
-      'ztitle': "Events/bin",
-      'binning': [50,10,40,50,-15,15],
-      'var': "StartPointy:StartPointx",
-      'cuts': "process_primary",
-    },
-    {
-      'name': "yVzPrimary",
-      'xtitle': "Primary start z [cm]",
-      'ytitle': "Primary start y [cm]",
-      'ztitle': "Events/bin",
-      'binning': [50,-50,200,50,-15,15],
-      'var': "StartPointy:StartPointz",
-      'cuts': "process_primary",
-    },
+    #{
+    #  'name': "yVxPrimary",
+    #  'xtitle': "Primary start x [cm]",
+    #  'ytitle': "Primary start y [cm]",
+    #  'ztitle': "Events/bin",
+    #  'binning': [100,-500,500,100,0,600],
+    #  'var': "StartPointy:StartPointx",
+    #  'cuts': "process_primary",
+    #},
+    #{
+    #  'name': "yVzPrimary",
+    #  'xtitle': "Primary start z [cm]",
+    #  'ytitle': "Primary start y [cm]",
+    #  'ztitle': "Events/bin",
+    #  'binning': [100,-300,500,100,0,600],
+    #  'var': "StartPointy:StartPointz",
+    #  'cuts': "process_primary",
+    #},
     {
       'name': "yVxEndPrimary",
       'xtitle': "Primary end x [cm]",
       'ytitle': "Primary end y [cm]",
       'ztitle': "Events/bin",
-      'binning': [50,-100,100,50,-100,100],
+      'binning': [100,-500,500,100,0,600],
       'var': "EndPointy:EndPointx",
       'cuts': "process_primary",
     },
@@ -356,7 +457,7 @@ if __name__ == "__main__":
       'xtitle': "Primary end z [cm]",
       'ytitle': "Primary end y [cm]",
       'ztitle': "Events/bin",
-      'binning': [50,-50,200,50,-50,50],
+      'binning': [100,-300,800,100,0,600],
       'var': "EndPointy:EndPointz",
       'cuts': "process_primary",
     },
@@ -365,12 +466,12 @@ if __name__ == "__main__":
       'xtitle': "Primary end z [cm]",
       'ytitle': "Primary end x [cm]",
       'ztitle': "Events/bin",
-      'binning': [50,-50,200,50,-50,100],
+      'binning': [100,-300,800,100,-500,500],
       'var': "EndPointx:EndPointz",
       'cuts': "process_primary",
     },
   ]
-  plotOneHistOnePlot(fileConfigs[:1],histConfigs,c,"anatree/anatree",nMax=NMAX,outPrefix="")
+  plotOneHistOnePlot(fileConfigs,histConfigs,c,"analysistree/anatree",nMax=NMAX,outPrefix="")
 
   histConfigs = [
     {
@@ -435,7 +536,9 @@ if __name__ == "__main__":
       'color': root.kMagenta,
     },
   ]
-  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX,outPrefix="nPrimaryStopped_")
+  for iHist in range(len(histConfigs)):
+      histConfigs[iHist]['color'] = COLORLIST[iHist]
+  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"analysistree/anatree",nMax=NMAX,outPrefix="nPrimaryStopped_")
 
   histConfigs = [
     {
@@ -458,4 +561,4 @@ if __name__ == "__main__":
     },
   ]
 
-  plotOneHistOnePlot(fileConfigs,histConfigs,c,"anatree/anatree",nMax=NMAX,outPrefix="")
+  plotOneHistOnePlot(fileConfigs,histConfigs,c,"analysistree/anatree",nMax=NMAX,outPrefix="")
