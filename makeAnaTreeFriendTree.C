@@ -12,51 +12,43 @@
 #include <iostream>
 #include <vector>
 
-#define MAXGEANT 1000
-#define MAXTRACKS 1000
-#define MAXTRACKHITS 1000
+#define MAXGEANT 10000
+#define MAXTRACKS 10000
+#define MAXTRACKHITS 100000
 
-const double minx = -0.8;
-const double miny = -25;
-const double minz = -5;
-const double maxx = 49.17;
-const double maxy = 25;
-const double maxz = 95;
+const double minx = -380.434;
+const double miny = 0.;
+const double minz = -0.49375;
+const double maxx = 380.434;
+const double maxy = 607.499;
+const double maxz = 695.286;
 
-void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxEvents)
+void makeAnaTreeFriendTree(TString inputFileName,TString outputFileName, unsigned maxEvents)
 {
   using namespace std;
 
   cout << "makeFriendTree for "<< inputFileName.Data() << " in file " << outputFileName.Data() << endl;
 
-  TChain * tree = new TChain("anatree/anatree");
+  TChain * tree = new TChain("analysistree/anatree");
   tree->Add(inputFileName);
+  //tree->Print();
 
-  int no_primaries, geant_list_size;
+  Int_t no_primaries, geant_list_size;
   tree->SetBranchAddress("no_primaries",&no_primaries);
   tree->SetBranchAddress("geant_list_size",&geant_list_size);
 
-  int pdg[MAXGEANT], Process[MAXGEANT], NumberDaughters[MAXGEANT], Mother[MAXGEANT], TrackId[MAXGEANT], process_primary[MAXGEANT];
+  Int_t pdg[MAXGEANT], NumberDaughters[MAXGEANT], Mother[MAXGEANT], TrackId[MAXGEANT], process_primary[MAXGEANT];
   tree->SetBranchAddress("pdg",&pdg);
-  tree->SetBranchAddress("Process",&Process);
   tree->SetBranchAddress("NumberDaughters",&NumberDaughters);
   tree->SetBranchAddress("Mother",&Mother);
   tree->SetBranchAddress("TrackId",&TrackId);
   tree->SetBranchAddress("process_primary",&process_primary);
 
-  double Eng[MAXGEANT], Px[MAXGEANT], Py[MAXGEANT], Pz[MAXGEANT];
-  double EndEng[MAXGEANT], EndPx[MAXGEANT], EndPy[MAXGEANT], EndPz[MAXGEANT];
-  tree->SetBranchAddress("Eng",&Eng);
-  tree->SetBranchAddress("Px",&Px);
-  tree->SetBranchAddress("Py",&Py);
-  tree->SetBranchAddress("Pz",&Pz);
-  tree->SetBranchAddress("EndEng",&EndEng);
-  tree->SetBranchAddress("EndPx",&EndPx);
-  tree->SetBranchAddress("EndPy",&EndPy);
-  tree->SetBranchAddress("EndPz",&EndPz);
+  Float_t P[MAXGEANT];
+  tree->SetBranchAddress("P",&P);
 
-  double StartPointx[MAXGEANT], StartPointy[MAXGEANT], StartPointz[MAXGEANT];
-  double EndPointx[MAXGEANT], EndPointy[MAXGEANT], EndPointz[MAXGEANT];
+  Float_t StartPointx[MAXGEANT], StartPointy[MAXGEANT], StartPointz[MAXGEANT];
+  Float_t EndPointx[MAXGEANT], EndPointy[MAXGEANT], EndPointz[MAXGEANT];
   tree->SetBranchAddress("StartPointx",&StartPointx);
   tree->SetBranchAddress("StartPointy",&StartPointy);
   tree->SetBranchAddress("StartPointz",&StartPointz);
@@ -64,21 +56,21 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
   tree->SetBranchAddress("EndPointy",&EndPointy);
   tree->SetBranchAddress("EndPointz",&EndPointz);
 
-  int ntracks_reco;
-  tree->SetBranchAddress("ntracks_reco",&ntracks_reco);
+  //int ntracks_reco;
+  //tree->SetBranchAddress("ntracks_reco",&ntracks_reco);
 
-  int ntrkhits[MAXTRACKS];
-  tree->SetBranchAddress("ntrkhits",&ntrkhits);
+  //int ntrkhits[MAXTRACKS];
+  //tree->SetBranchAddress("ntrkhits",&ntrkhits);
 
-  double trklength[MAXTRACKS];
-  tree->SetBranchAddress("trklength",&trklength);
+  //double trklength[MAXTRACKS];
+  //tree->SetBranchAddress("trklength",&trklength);
 
-  double trkpidlh_pi[MAXTRACKS][2], trkpidlh_p[MAXTRACKS][2];
-  tree->SetBranchAddress("trkpidlh_pi",&trkpidlh_pi);
-  tree->SetBranchAddress("trkpidlh_p",&trkpidlh_p);
+  //double trkpidlh_pi[MAXTRACKS][2], trkpidlh_p[MAXTRACKS][2];
+  //tree->SetBranchAddress("trkpidlh_pi",&trkpidlh_pi);
+  //tree->SetBranchAddress("trkpidlh_p",&trkpidlh_p);
 
-  double trkz[MAXTRACKS][MAXTRACKHITS];
-  tree->SetBranchAddress("trkz",&trkz);
+  //double trkz[MAXTRACKS][MAXTRACKHITS];
+  //tree->SetBranchAddress("trkz",&trkz);
 
   ///////////////////////////////
   ///////////////////////////////
@@ -89,7 +81,6 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
   outFile->cd();
 
   TTree* friendTree = new TTree("friend","");
-  double P[MAXGEANT];
   bool startsInTPC[MAXGEANT];
   bool endsInTPC[MAXGEANT];
   bool allSecondariesEndInTPC;
@@ -97,9 +88,8 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
   bool allSecondaryProtonsEndInTPC;
   bool allSecondaryPhotonsEndInTPC;
 
-  friendTree->Branch("geant_list_size",&geant_list_size,"geant_list_size/I"); // just in case
-  friendTree->Branch("ntracks_reco",&ntracks_reco,"ntracks_reco/I"); // just in case
-  friendTree->Branch("P",P,"P[geant_list_size]/D");
+  friendTree->Branch("geant_list_size",&geant_list_size,"geant_list_size/I");
+  //friendTree->Branch("ntracks_reco",&ntracks_reco,"ntracks_reco/I"); // just in case
   friendTree->Branch("startsInTPC",startsInTPC,"startsInTPC[geant_list_size]/O");
   friendTree->Branch("endsInTPC",endsInTPC,"endsInTPC[geant_list_size]/O");
   friendTree->Branch("allSecondariesEndInTPC",&allSecondariesEndInTPC,"allSecondariesEndInTPC/O");
@@ -121,15 +111,15 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
   friendTree->Branch("nSecondaryPhoton",&nSecondaryPhoton,"nSecondaryPhoton/I");
   friendTree->Branch("nSecondaryNeutron",&nSecondaryNeutron,"nSecondaryNeutron/I");
 
-  float trkpidlhr_pi_p[MAXTRACKS][2];
-  friendTree->Branch("trkpidlhr_pi_p",&trkpidlhr_pi_p,"trkpidlhr_pi_p[ntracks_reco][2]/O");
+  //float trkpidlhr_pi_p[MAXTRACKS][2];
+  //friendTree->Branch("trkpidlhr_pi_p",&trkpidlhr_pi_p,"trkpidlhr_pi_p[ntracks_reco][2]/O");
 
-  int nTracksFirst2cm, nTracksFirst14cm;
-  friendTree->Branch("nTracksFirst2cm",&nTracksFirst2cm,"nTracksFirst2cm/I");
-  friendTree->Branch("nTracksFirst14cm",&nTracksFirst14cm,"nTracksFirst14cm/I");
+  //int nTracksFirst2cm, nTracksFirst14cm;
+  //friendTree->Branch("nTracksFirst2cm",&nTracksFirst2cm,"nTracksFirst2cm/I");
+  //friendTree->Branch("nTracksFirst14cm",&nTracksFirst14cm,"nTracksFirst14cm/I");
 
-  int nTracksLengthLt5cm;
-  friendTree->Branch("nTracksLengthLt5cm",&nTracksLengthLt5cm,"nTracksLengthLt5cm/I");
+  //int nTracksLengthLt5cm;
+  //friendTree->Branch("nTracksLengthLt5cm",&nTracksLengthLt5cm,"nTracksLengthLt5cm/I");
 
   ///////////////////////////////
   ///////////////////////////////
@@ -149,7 +139,6 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
     // reset friend tree variables
     for (unsigned iGeant= 0; iGeant < MAXGEANT; iGeant++)
     {
-      P[iGeant] = -1.;
       startsInTPC[iGeant] = false;
       endsInTPC[iGeant] = false;
     }
@@ -163,12 +152,13 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
     nSecondaryProton = 0;
     nSecondaryPhoton = 0;
     nSecondaryNeutron = 0;
-    nTracksFirst2cm = 0;
-    nTracksFirst14cm = 0;
-    nTracksLengthLt5cm = 0;
+    //nTracksFirst2cm = 0;
+    //nTracksFirst14cm = 0;
+    //nTracksLengthLt5cm = 0;
 
     tree->GetEvent(iEvent);
     if (iEvent % reportEach == 0) cout << "Event: " << iEvent << endl;
+//    cout << "Event: " << iEvent << " geant_list_size: " << geant_list_size << endl;
 
     for (int iPart=0; iPart<geant_list_size; iPart++)
     {
@@ -178,7 +168,13 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
       endsInTPC[iPart] = EndPointx[iPart] > minx && EndPointx[iPart] < maxx 
                     && EndPointy[iPart] > miny && EndPointy[iPart] < maxy
                     && EndPointz[iPart] > minz && EndPointz[iPart] < maxz;
-      P[iPart] = pow(Px[iPart]*Px[iPart] + Py[iPart]*Py[iPart] + Pz[iPart]*Pz[iPart],0.5);
+//      std::cout << "iPart: " << iPart << " P " << P[iPart] << " startsInTPC: " << startsInTPC[iPart]<< " endsInTPC: " << endsInTPC[iPart]<< std::endl;
+//      std::cout << "StartPoint: " << StartPointx[iPart] << ", "
+//                                    << StartPointy[iPart] << ", "
+//                                    << StartPointz[iPart] << "\n";
+//      std::cout << "EndPoint: " << EndPointx[iPart] << ", "
+//                                    << EndPointy[iPart] << ", "
+//                                    << EndPointz[iPart] << "\n";
       if (Mother[iPart] == 1 && !endsInTPC[iPart] && abs(pdg[iPart]) < 1000000000)
       {
         allSecondariesEndInTPC = false;
@@ -238,41 +234,41 @@ void makeFriendTree (TString inputFileName,TString outputFileName, unsigned maxE
     //  } // for iPart in geant_list_size
     //} // if primary ends in tpc and allSecondariesEndInTPC
 
-    for(int iTrack=0; iTrack<ntracks_reco; iTrack++)
-    {
-      for(int iPlane=0; iPlane<2; iPlane++)
-      {
-        trkpidlhr_pi_p[iTrack][iPlane] = trkpidlh_pi[iTrack][iPlane] - trkpidlh_p[iTrack][iPlane];
-      }
-
-      if(trklength[iTrack] < 5.0)
-      {
-        nTracksLengthLt5cm++;
-      }
-
-      bool trkInFirst2cm = false;
-      bool trkInFirst14cm = false;
-      for(int iTrkHit=0; iTrkHit < ntrkhits[iTrack]; iTrkHit++)
-      {
-        if (trkz[iTrack][iTrkHit] < 2.)
-        {
-            trkInFirst2cm = true;
-        }
-        if (trkz[iTrack][iTrkHit] < 14.)
-        {
-            trkInFirst14cm = true;
-            break;
-        }
-      } // for iTrkHit
-      if(trkInFirst2cm)
-      {
-        nTracksFirst2cm++;
-      }
-      if(trkInFirst14cm)
-      {
-        nTracksFirst14cm++;
-      }
-    } // for iTrack
+//    for(int iTrack=0; iTrack<ntracks_reco; iTrack++)
+//    {
+//      for(int iPlane=0; iPlane<2; iPlane++)
+//      {
+//        trkpidlhr_pi_p[iTrack][iPlane] = trkpidlh_pi[iTrack][iPlane] - trkpidlh_p[iTrack][iPlane];
+//      }
+//
+//      if(trklength[iTrack] < 5.0)
+//      {
+//        nTracksLengthLt5cm++;
+//      }
+//
+//      bool trkInFirst2cm = false;
+//      bool trkInFirst14cm = false;
+//      for(int iTrkHit=0; iTrkHit < ntrkhits[iTrack]; iTrkHit++)
+//      {
+//        if (trkz[iTrack][iTrkHit] < 2.)
+//        {
+//            trkInFirst2cm = true;
+//        }
+//        if (trkz[iTrack][iTrkHit] < 14.)
+//        {
+//            trkInFirst14cm = true;
+//            break;
+//        }
+//      } // for iTrkHit
+//      if(trkInFirst2cm)
+//      {
+//        nTracksFirst2cm++;
+//      }
+//      if(trkInFirst14cm)
+//      {
+//        nTracksFirst14cm++;
+//      }
+//    } // for iTrack
 
     friendTree->Fill();
   } // for iEvent
