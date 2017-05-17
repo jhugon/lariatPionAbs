@@ -24,22 +24,39 @@ if __name__ == "__main__":
   fileConfigs = [
     {
       #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/CosmicAna_Pos_RunII.root",
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_data_Lovely1_Pos_RunII_elanag_v02_v05/anahist.root",
-      'name': "RunIIPos",
-      'title': "Run II Pos. Polarity",
-      'caption': "Run II Pos. Polarity",
+      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_data_Lovely1_RunII_run8300to8500_jhugon_v01_v01/anahist.root",
+      'name': "RunII8300to8500",
+      'title': "Run II 8300-8500",
+      'caption': "Run II 8300-8500",
       'color': root.kBlack,
       'isData': True,
     },
     {
-      #'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_v1/anahist.root",
-      #'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_v2/anahist.root",
-      'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/CosmicAnalyzer.root",
+      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_v3/anahist.root",
       'name': "CosmicMC",
       'title': "Cosmic MC",
       'caption': "Cosmic MC",
       'color': root.kRed-4,
       'isData': False,
+      'scaleFactor': 10888./19032.
+    },
+    {
+      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_smear10perc_v1/anahist.root",
+      'name': "CosmicMC_smear10perc",
+      'title': "Cosmic MC Smear 10% ",
+      'caption': "Cosmic MC Smear 10%",
+      'color': root.kCyan,
+      'isData': False,
+      'scaleFactor': 10888./6434.
+    },
+    {
+      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_smear50perc_v1/anahist.root",
+      'name': "CosmicMC_smear50perc",
+      'title': "Cosmic MC Smear 50% ",
+      'caption': "Cosmic MC Smear 50%",
+      'color': root.kMagenta,
+      'isData': False,
+      'scaleFactor': 10888./6316.
     },
 #    {
 #      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_halo_v1/anahist.root",
@@ -245,23 +262,35 @@ if __name__ == "__main__":
     },
     {
       'name': "primTrkdQdxs",
-      'xtitle': "Primary TPC Track dQ/dx [10*ADC/cm]",
+      'xtitle': "Primary TPC Track dQ/dx [ADC/cm]",
       'ytitle': "Events / bin",
-      'binning': [200,0,1e6],
-      'var': "10*primTrkdQdxs",
+      'binning': [300,0,3e4],
+      'var': "primTrkdQdxs*((0.5-1.)*isMC + 1.)",
       'cuts': weightStr,
       #'normalize': True,
       'logy': logy,
     },
     {
       'name': "primTrkdQdxs_zoom",
-      'xtitle': "Primary TPC Track dQ/dx [10*ADC/cm]",
+      'xtitle': "Primary TPC Track dQ/dx [ADC/cm]",
       'ytitle': "Events / bin",
-      'binning': [200,0,1e5],
-      'var': "10*primTrkdQdxs",
+      'binning': [200,0,8e3],
+      'var': "primTrkdQdxs*((0.5-1.)*isMC + 1.)",
       'cuts': weightStr,
       #'normalize': True,
       'logy': logy,
+      'printIntegral' : True,
+    },
+    {
+      'name': "primTrkdQdxs_zoom2",
+      'xtitle': "Primary TPC Track dQ/dx [ADC/cm]",
+      'ytitle': "Events / bin",
+      'binning': [200,0,8e3],
+      'var': "primTrkdQdxs*((0.5-1.)*isMC + 1.)",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': not logy,
+      'printIntegral' : True,
     },
     {
       'name': "primTrkTruedQdxs",
@@ -460,6 +489,16 @@ if __name__ == "__main__":
 #      #'logz': True,
 #    },
     {
+      'name': "primTrkdEdxVwire",
+      'xtitle': "Primary Track Hit Wire Number",
+      'ytitle': "Primary Track Hit dE/dx [MeV/cm]",
+      'binning': [240,0,240,100,0,50],
+      'var': "primTrkdEdxs:primTrkTrueWires",
+      'cuts': weightStr,
+      #'normalize': True,
+      #'logz': True,
+    },
+    {
       'name': "primTrkStartThetaVPhi",
       'xtitle': "Primary TPC Track #phi [deg]",
       'ytitle': "Primary TPC Track #theta [deg]",
@@ -631,18 +670,17 @@ if __name__ == "__main__":
     },
   ]
 
-  hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
-  outfile = root.TFile("cosmics_hists.root","recreate")
-  outfile.cd()
-  for var in hists:
-    for ds in hists[var]:
-        newname = var+"_"+ds
-        hist = hists[var][ds]
-        hist.SetName(newname)
-        hist.Print()
-        hist.Write()
-  outfile.Close()
-
+#  hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
+#  outfile = root.TFile("cosmics_hists.root","recreate")
+#  outfile.cd()
+#  for var in hists:
+#    for ds in hists[var]:
+#        newname = var+"_"+ds
+#        hist = hists[var][ds]
+#        hist.SetName(newname)
+#        hist.Print()
+#        hist.Write()
+#  outfile.Close()
 
 ######################################################################################
 ######################################################################################
@@ -686,7 +724,7 @@ if __name__ == "__main__":
   ]
   for i in range(len(histConfigs)):
     histConfigs[i]["color"] = COLORLIST[i]
-  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="CosmicsTrue_dEdx")
+#  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="CosmicsTrue_dEdx")
 
   histConfigs = [
     {
@@ -725,7 +763,7 @@ if __name__ == "__main__":
   ]
   for i in range(len(histConfigs)):
     histConfigs[i]["color"] = COLORLIST[i]
-  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="CosmicsTrue_dEdxZoom")
+#  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="CosmicsTrue_dEdxZoom")
 
   histConfigs = [
     {
@@ -753,4 +791,4 @@ if __name__ == "__main__":
   ]
   for i in range(len(histConfigs)):
     histConfigs[i]["color"] = COLORLIST[i]
-  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="CosmicsTrue_dQdxZoom")
+#  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="CosmicsTrue_dQdxZoom")
