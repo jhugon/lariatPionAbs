@@ -277,7 +277,7 @@ if __name__ == "__main__":
         else:
             oldCaption = " " + oldCaption
         thisHistConfigs[i]['caption'] = "Wire {}".format(wire) + oldCaption
-      plotManyFilesOnePlot(fileConfigs,thisHistConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Wires{}_".format(wire))
+      #plotManyFilesOnePlot(fileConfigs,thisHistConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Wires{}_".format(wire))
 
   histConfigs = [
     {
@@ -286,6 +286,26 @@ if __name__ == "__main__":
       'ytitle': "Primary TPC Track Hit dE/dx [MeV/cm]",
       'binning': [50,0,10000,50,0,10],
       'var': "primTrkdEdxs:primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.)",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': True,
+    },
+    {
+      'name': "primTrkdQdxsVQ",
+      'xtitle': "Primary TPC Track Hit Q [ADC]",
+      'ytitle': "Primary TPC Track Hit dQ/dx [ADC/cm]",
+      'binning': [50,0,10000,50,0,10000],
+      'var': "primTrkdQdxs:primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.)",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': True,
+    },
+    {
+      'name': "primTrkPitchesVQ",
+      'ytitle': "Primary TPC Track Hit Q [ADC]",
+      'xtitle': "Primary TPC Track Hit Pitch [cm]",
+      'binning': [50,0,10,50,0,10000],
+      'var': "primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.):primTrkPitches",
       'cuts': weightStr,
       #'normalize': True,
       'logz': True,
