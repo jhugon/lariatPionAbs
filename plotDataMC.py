@@ -6,44 +6,45 @@ root.gROOT.SetBatch(True)
 
 if __name__ == "__main__":
 
-  weightStr = "pzWeight"
+  #weightStr = "pzWeight"
+  weightStr = "1."
   logy = False
 
   c = root.TCanvas()
   NMAX=10000000000
   #NMAX=100
   fileConfigs = [
-    {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_data_Lovely1_Pos_RunI_elanag_v02_v03/anahist.root",
-      'addFriend': ["friend", "friendTree_Pos_RunI_v3.root"],
-      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/data_Pos_RunI_piAbsSelector.root",
-      'name': "RunI_Pos",
-      'title': "Run I Pos. Polarity",
-      'caption': "Run I Pos. Polarity",
-      'color': root.kBlack,
-    },
     #{
-    #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_pip_v3/anahist.root",
-    #  'addFriend': ["friend", "friendTree_pip_v3.root"],
-    #  #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/pip_piAbsSelector.root",
-    #  'name': "pip",
-    #  'title': "#pi^{+} MC",
-    #  'caption': "#pi^{+} MC",
-    #  'color': root.kBlue,
-    #  'scaleFactor': 0.28946*1.888,
-    #  #'scaleFactor': 1275.21,
+    #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_data_Lovely1_Pos_RunI_elanag_v02_v03/anahist.root",
+    #  'addFriend': ["friend", "friendTree_Pos_RunI_v3.root"],
+    #  #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/data_Pos_RunI_piAbsSelector.root",
+    #  'name': "RunI_Pos",
+    #  'title': "Run I Pos. Polarity",
+    #  'caption': "Run I Pos. Polarity",
+    #  'color': root.kBlack,
     #},
     {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_p_v3/anahist.root",
-      'addFriend': ["friend", "friendTree_p_v3.root"],
-      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/p_piAbsSelector.root",
-      'name': "p",
-      'title': "proton MC",
-      'caption': "proton MC",
-      'color': root.kRed,
-      'scaleFactor': 1.0587,
-      #'scaleFactor': 1e4*0.19955,
+      'fn': "/dune/app/users/jhugon/likelihoodPID/dunetpc_v06_33_01_01/srcs/dunetpc/dune/PionAna/pionana_pi1GeV.root",
+      #'addFriend': ["friend", "friendTree_pip_v3.root"],
+      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/pip_piAbsSelector.root",
+      'name': "pip1GeV",
+      'title': "#pi^{+} 1 GeV MC",
+      'caption': "#pi^{+} 1 GeV MC",
+      'color': root.kBlue,
+      #'scaleFactor': 0.28946*1.888,
+      #'scaleFactor': 1275.21,
     },
+    #{
+    #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_p_v3/anahist.root",
+    #  'addFriend': ["friend", "friendTree_p_v3.root"],
+    #  #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/p_piAbsSelector.root",
+    #  'name': "p",
+    #  'title': "proton MC",
+    #  'caption': "proton MC",
+    #  'color': root.kRed,
+    #  'scaleFactor': 1.0587,
+    #  #'scaleFactor': 1e4*0.19955,
+    #},
     #{
     #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_ep_v3/anahist.root",
     #  'addFriend': ["friend", "friendTree_ep_v3.root"],
@@ -358,63 +359,59 @@ if __name__ == "__main__":
       #'normalize': True,
       'logy': logy,
     },
-    #{
-    #  'name': "trackEndX",
-    #  'xtitle': "TPC Track End X [cm]",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [100,-20,60],
-    #  'var': "trackEndX",
-    #  'cuts': weightStr,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
-    #{
-    #  'name': "trackEndY",
-    #  'xtitle': "TPC Track End Y [cm]",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [100,-50,50],
-    #  'var': "trackEndY",
-    #  'cuts': weightStr,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
-    #{
-    #  'name': "trackEndZ",
-    #  'xtitle': "TPC Track End Z [cm]",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [100,-20,110],
-    #  'var': "trackEndZ",
-    #  'cuts': weightStr,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
-    #{
-    #  'name': "trackLength",
-    #  'xtitle': "TPC Track Length [cm]",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [100,-10,100],
-    #  'var': "trackLength",
-    #  'cuts': weightStr,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
+    {
+      'name': "trackEndX",
+      'xtitle': "TPC Track End X [cm]",
+      'ytitle': "Tracks / bin",
+      'binning': [100,-20,60],
+      'var': "trackEndX",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "trackEndY",
+      'xtitle': "TPC Track End Y [cm]",
+      'ytitle': "Tracks / bin",
+      'binning': [100,-50,50],
+      'var': "trackEndY",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "trackEndZ",
+      'xtitle': "TPC Track End Z [cm]",
+      'ytitle': "Tracks / bin",
+      'binning': [100,-20,110],
+      'var': "trackEndZ",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "trackLength",
+      'xtitle': "TPC Track Length [cm]",
+      'ytitle': "Tracks / bin",
+      'binning': [100,-10,100],
+      'var': "trackLength",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
   ]
 
-  for i in reversed(range(len(histConfigs))):
-    if histConfigs[i]['name'] != "pzWC":
-      histConfigs.pop(i)
+  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"pionabs/tree",nMax=NMAX)
 
-  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
+  #for i in range(len(histConfigs)):
+  #  histConfigs[i]['cuts'] = weightStr + "*(pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3) && (isMC || (firstTOF > 28 && firstTOF < 55))"
+  #  #histConfigs[i]['cuts'] = weightStr + "*(pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3) && (isMC || (firstTOF < 25))"
+  #plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX,outSuffix="HistCuts")
 
-  for i in range(len(histConfigs)):
-    histConfigs[i]['cuts'] = weightStr + "*(pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3) && (isMC || (firstTOF > 28 && firstTOF < 55))"
-    #histConfigs[i]['cuts'] = weightStr + "*(pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3) && (isMC || (firstTOF < 25))"
-  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX,outSuffix="HistCuts")
-
-  for i in range(len(histConfigs)):
-    histConfigs[i]['cuts'] = " allWeight *( pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3 && (isMC || (firstTOF > 28 && firstTOF < 55)))"
-    #histConfigs[i]['cuts'] = " allWeight *( pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3 && (isMC || (firstTOF < 25)))"
-  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX,outSuffix="HistAllWeightsCuts")
+  #for i in range(len(histConfigs)):
+  #  histConfigs[i]['cuts'] = " allWeight *( pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3 && (isMC || (firstTOF > 28 && firstTOF < 55)))"
+  #  #histConfigs[i]['cuts'] = " allWeight *( pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3 && (isMC || (firstTOF < 25)))"
+  #plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX,outSuffix="HistAllWeightsCuts")
 
   histConfigs = [
     {
@@ -449,4 +446,4 @@ if __name__ == "__main__":
     },
   ]
 
-  #plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
+  #plotOneHistOnePlot(fileConfigs,histConfigs,c,"pionabs/tree",nMax=NMAX)
