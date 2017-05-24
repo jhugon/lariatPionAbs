@@ -8,106 +8,33 @@ if __name__ == "__main__":
 
   cuts = ""
   #cuts += "*( pWC > 100 && pWC < 1100 && (isMC || (firstTOF > 0 && firstTOF < 25)))" # pions
-  cuts += "*( pWC > 450 && pWC < 1100 && (isMC || (firstTOF > 28 && firstTOF < 55)))" # protons
-  cuts += "*(nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3)" # tpc tracks
+  #cuts += "*( pWC > 450 && pWC < 1100 && (isMC || (firstTOF > 28 && firstTOF < 55)))" # protons
+  #cuts += "*(nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3)" # tpc tracks
 
-  cuts = "*(iBestMatch >= 0  && nMatchedTracks == 1)" # matching in analyzer
+  #cuts = "*(iBestMatch >= 0  && nMatchedTracks == 1)" # matching in analyzer
 
   ###
   ###
-  secTrkCuts = "*(trackStartDistToPrimTrkEnd < 2. || trackEndDistToPrimTrkEnd < 2.)"
+  #secTrkCuts = "*(trackStartDistToPrimTrkEnd < 2. || trackEndDistToPrimTrkEnd < 2.)"
   #weightStr = "pzWeight"+cuts
   weightStr = "1"+cuts
-  nData = 30860.0
-  logy = True
+  logy = False
 
   c = root.TCanvas()
   NMAX=10000000000
   #NMAX=100
   fileConfigs = [
     {
-      #'fn': "piAbs_data_Pos_RunI_v03.root",
-      #'addFriend': ["friend", "friendTree_Pos_RunI_v03.root"],
-      'fn': "test_data_Pos_RunI_piAbsSelector.root",
-      'name': "RunI_Pos",
-      'title': "Run I Pos. Polarity",
-      'caption': "Run I Pos. Polarity",
-      'color': root.kBlack,
-      'isData': True,
+      'fn': "/dune/app/users/jhugon/likelihoodPID/dunetpc_v06_33_01_01/srcs/dunetpc/dune/PionAna/pionana_pi1GeV.root",
+      #'addFriend': ["friend", "friendTree_pip_v3.root"],
+      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/pip_piAbsSelector.root",
+      'name': "pip1GeV",
+      'title': "#pi^{+} 1 GeV MC",
+      'caption': "#pi^{+} 1 GeV MC",
+      'color': root.kBlue,
+      #'scaleFactor': 0.28946*1.888,
+      #'scaleFactor': 1275.21,
     },
-    {
-      #'fn': "piAbs_data_Pos_RunII_v03.root",
-      #'addFriend': ["friend", "friendTree_Pos_RunII_v03.root"],
-      'fn': "test_data_Pos_RunII_piAbsSelector.root",
-      'name': "RunII_Pos",
-      'title': "Run II Pos. Polarity",
-      'caption': "Run II Pos. Polarity",
-      'color': root.kGray+1,
-      'isData': True,
-    },
-    {
-      #'fn': "piAbs_pip_v5.root",
-      #'addFriend': ["friend", "friendTree_pip_v5.root"],
-      'fn': "test_pip_piAbsSelector.root",
-      'name': "pip",
-      'title': "#pi^{+} MC",
-      'caption': "#pi^{+} MC",
-      'color': root.kBlue-7,
-      #'scaleFactor': 1./35250*nData*0.428/(1.-0.086), #No Cuts
-      'scaleFactor': 1./35250*nData*0.428/(1.-0.086)*0.70, # pion/tpc tracks cuts
-    },
-    {
-      #'fn': "piAbs_p_v5.root",
-      #'addFriend': ["friend", "friendTree_p_v5.root"],
-      'fn': "test_p_piAbsSelector.root",
-      'name': "p",
-      'title': "proton MC",
-      'caption': "proton MC",
-      'color': root.kRed-4,
-      'scaleFactor': 1./35200*nData*0.162/(1.-0.086), #No Cuts
-    },
-    {
-      #'fn': "piAbs_ep_v5.root",
-      #'addFriend': ["friend", "friendTree_ep_v5.root"],
-      'fn': "test_ep_piAbsSelector.root",
-      'name': "ep",
-      'title': "e^{+} MC",
-      'caption': "e^{+} MC",
-      'color': root.kGreen,
-      #'scaleFactor': 1./35700*nData*0.301/(1.-0.086), #No Cuts
-      'scaleFactor': 1./35700*nData*0.301/(1.-0.086)*0.70, # pion/tpc tracks cuts
-    },
-    {
-      #'fn': "piAbs_mup_v5.root",
-      #'addFriend': ["friend", "friendTree_mup_v5.root"],
-      'fn': "test_mup_piAbsSelector.root",
-      'name': "mup",
-      'title': "#mu^{+} MC",
-      'caption': "#mu^{+} MC",
-      'color': root.kMagenta-4,
-      #'scaleFactor': 1./35200*nData*0.021/(1.-0.086), #No Cuts
-      'scaleFactor': 1./35200*nData*0.021/(1.-0.086)*0.70, # pion/tpc tracks cuts
-    },
-    #{
-    #  'fn': "piAbs_kp_v5.root",
-    #  'addFriend': ["friend", "friendTree_kp_v5.root"],
-    #  #'fn': "test_kp_piAbsSelector.root",
-    #  'name': "kp",
-    #  'title': "K^{+} MC",
-    #  'caption': "K^{+} MC",
-    #  'color': root.kOrange-3,
-    #  'scaleFactor': 1./35700*nData*0.00057/(1.-0.086), #No Cuts
-    #},
-    #{
-    #  #'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_gam_v4/anahist.root",
-    #  #'addFriend': ["friend", "friendTree_gam_v4.root"],
-    #  'fn': "test_gam_piAbsSelector.root",
-    #  'name': "gam",
-    #  'title': "#gamma MC",
-    #  'caption': "#gamma MC",
-    #  'color': root.kOrange-3,
-    #  'scaleFactor': 2953., #AllWeightsCuts Proton
-    #},
   ]
 
   histConfigs = [
@@ -136,8 +63,8 @@ if __name__ == "__main__":
     },
   ]
 
-  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX,outPrefix="RecoKin_")
-  kinHists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX,outPrefix="XsecPlot_",writeImages=False)
+  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"pionabs/tree",nMax=NMAX,outPrefix="RecoKin_")
+  kinHists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"pionabs/tree",nMax=NMAX,outPrefix="XsecPlot_",writeImages=False)
   print(kinHists)
 
   for fileConfig in fileConfigs:
