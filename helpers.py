@@ -314,6 +314,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         hist = Hist(*binning)
       else:
         hist = Hist(binning)
+      hist.Sumw2()
       varAndHist = var + " >> " + hist.GetName()
       tree = fileConfig['tree']
       thiscuts = copy.deepcopy(cuts)
@@ -421,6 +422,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     profileStdDev: if True, profile errors are std deviation instead of std error on mean
     drawhlines: list of y locations to draw horizontal lines
     drawvlines: list of x locations to draw vertical lines
+    printIntegral: if True, print integral after all scaling
   """
   
   #print("plotManyHistsOnePlot")
@@ -540,6 +542,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
           hist = Hist(*binning)
         else:
           hist = Hist(binning)
+      hist.Sumw2()
       varAndHist = var + " >> " + hist.GetName()
       tree.Draw(varAndHist,thiscuts,"",nMax)
       if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
@@ -574,6 +577,8 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       if 'color' in histConfig:
         hist.SetLineColor(histConfig['color'])
         hist.SetMarkerColor(histConfig['color'])
+      if "printIntegral" in histConfig and histConfig["printIntegral"]:
+        print("{} {} Integral: {}".format(outPrefix+histConfig['name']+outSuffix,fileConfig['title'],hist.Integral()))
       hists.append(hist)
     canvas.SetLogy(logy)
     canvas.SetLogx(logx)
@@ -661,6 +666,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     profileStdDev: if True, profile errors are std deviation instead of std error on mean
     profileXtoo: if True, draw profileX of 2D hist, on top of 2D hist
     funcs: List of TF1's to draw on top of the histogram
+    printIntegral: if True, print integral after all scaling
   """
   
   allHists = {}
@@ -762,6 +768,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
           hist = Hist(binning)
       if 'color' in histConfig:
         hist.SetLineColor(histConfig['color'])
+        hist.SetMarkerColor(histConfig['color'])
+      hist.Sumw2()
       varAndHist = var + " >> " + hist.GetName()
       tree.Draw(varAndHist,thiscuts,"",nMax)
       if "efficiencyDenomCuts" in histConfig and type(histConfig["efficiencyDenomCuts"]) == str:
@@ -783,6 +791,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
             hist.Scale(1./integral)
         if "integral" in histConfig and histConfig['integral']:
           hist = getIntegralHist(hist)
+      if "printIntegral" in histConfig and histConfig["printIntegral"]:
+        print("{} {} Integral: {}".format(outPrefix+histConfig['name']+outSuffix,fileConfig['title'],hist.Integral()))
       canvas.SetLogy(logy)
       canvas.SetLogx(logx)
       canvas.SetLogz(logz)
@@ -2377,18 +2387,22 @@ def normToBinWidth(hist):
     for iX in range(1,nBinsX+1):
       for iY in range(1,nBinsY+1):
         binContent = hist.GetBinContent(iX,iY)
+        binError = hist.GetBinError(iX,iY)
         binWidthX = hist.GetXaxis().GetBinWidth(iX)
         binWidthY = hist.GetYaxis().GetBinWidth(iY)
         binArea = binWidthX*binWidthY
         hist.SetBinContent(iX,iY,binContent/binArea)
+        hist.SetBinError(iX,iY,binError/binArea)
     return hist
   else:
     xaxis = hist.GetXaxis()
     nBins = xaxis.GetNbins()
     for i in range(1,nBins+1):
       binContent = hist.GetBinContent(i)
+      binError = hist.GetBinError(i)
       binWidth = hist.GetBinWidth(i)
       hist.SetBinContent(i,binContent/binWidth)
+      hist.SetBinError(i,binError/binWidth)
     return hist
 
 def Hist(*args,**kargs):
