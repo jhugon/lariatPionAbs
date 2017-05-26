@@ -360,7 +360,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       else:
         h.Draw("histsame")
     labels = [fileConfig['title'] for fileConfig in fileConfigs]
-    leg = drawNormalLegend(hists,labels)
+    leg = drawNormalLegend(hists,labels,wide=True)
     drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
     canvas.RedrawAxis()
     saveNameBase = outPrefix + histConfig['name'] + outSuffix
@@ -592,7 +592,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       else:
         h.Draw("histsame")
     labels = [histConfig['title'] for histConfig in histConfigs]
-    leg = drawNormalLegend(hists,labels)
+    leg = drawNormalLegend(hists,labels,wide=True)
     drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
     canvas.RedrawAxis()
     saveNameBase = outPrefix + fileConfig['name'] + outSuffix
@@ -811,7 +811,6 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         hist.Draw("colz")
         if doProfileXtoo:
             prof.Draw("Esame")
-            allProfilesToo.append(prof)
             if not (histConfig['name'] in allProfilesToo):
               allProfilesToo[histConfig['name']] = {}
             allProfilesToo[histConfig['name']][fileConfig['name']] = prof
@@ -937,7 +936,7 @@ def getXBinHist(inHist, xBin):
   Makes a TH1 hisogram from a TH2
   A vertical slice of a 2D histo
   """
-  outHist = inHist.ProjectionY()
+  outHist = inHist.ProjectionY("_slice{}".format(xBin))
   outHist.Reset()
   outHist.SetName(inHist.GetName()+"XSliceBin"+str(xBin))
   outHist.Sumw2()
@@ -961,6 +960,22 @@ def getYBinHist(inHist, yBin):
     outHist.SetBinContent(i,inHist.GetBinContent(i,yBin))
     outHist.SetBinError(i,inHist.GetBinError(i,yBin))
   return outHist
+
+def getHistMedian(hist):
+  """
+  Gets Median of 1D hist
+  """
+  nBins = hist.GetXaxis().GetNbins()
+  total = hist.Integral(1,nBins)
+  if total == 0:
+    return None
+  half = total/2.
+  count = 0.
+  for i in range(1,nBins+1):
+    n = hist.GetBinContent(i)
+    count += n
+    if count > half:
+        pass
 
 def divideYValByXVal(hist):
     nBinsX = hist.GetXaxis().GetNbins()
@@ -2276,21 +2291,35 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
   assert(len(xlim)==0 or len(xlim)==2)
   assert(len(ylim)==0 or len(ylim)==2)
   multiplier = 1./(1.-freeTopSpace)
-  yMin = 0.
-  yMax = 0.
+  yMin = 1e15
+  yMax = -1e15
   xMin = 1e15
   xMax = -1e15
   for hist in histList:
-    histMax = getHistMax(hist)
-    yMax = max(yMax,histMax)
-    histX = hist
-    if hist.InheritsFrom("TEfficiency"):
-        histX = hist.GetTotalHistogram()
-    nBins = histX.GetNbinsX()
-    xMax = max(xMax,histX.GetXaxis().GetBinUpEdge(nBins))
-    xMin = min(xMin,histX.GetBinLowEdge(1))
-  if yMax == 0.:
+    if isinstance(hist,root.TH1):
+        histMax = getHistMax(hist)
+        yMax = max(yMax,histMax)
+        histX = hist
+        if hist.InheritsFrom("TEfficiency"):
+            histX = hist.GetTotalHistogram()
+        nBins = histX.GetNbinsX()
+        xMax = max(xMax,histX.GetXaxis().GetBinUpEdge(nBins))
+        xMin = min(xMin,histX.GetBinLowEdge(1))
+    elif isinstance(hist,root.TGraph):
+        x = root.Double(0.)
+        y = root.Double(0.)
+        for i in range(hist.GetN()):
+            hist.GetPoint(i,x,y)
+            xMax = max(xMax,float(x))
+            yMax = max(yMax,float(y))
+            xMin = min(xMin,float(x))
+            yMin = min(yMin,float(y))
+  if yMax == -1e15:
     yMax = 1.
+  if yMin == 1e15:
+    yMin = 0.
+  else:
+    yMin -= (yMax-yMin)*0.1
   if logy:
     yMin = 10**(-1)
     yMax = (math.log10(yMax) + 1.)*multiplier - 1.
@@ -2313,7 +2342,7 @@ def getLogBins(nBins,xMin,xMax):
   delta = (math.log10(xMax)-xMinLog)/nBins
   return [10**(xMinLog + x*delta) for x in range(nBins+1)]
 
-def drawNormalLegend(hists,labels,option="l"):
+def drawNormalLegend(hists,labels,option="l",wide=False):
   assert(len(hists)==len(labels))
   options = None
   if type(option) is list and len(option) == len(labels):
@@ -2322,9 +2351,13 @@ def drawNormalLegend(hists,labels,option="l"):
     options = itertools.repeat(option,len(labels))
   else:
     raise Exception("option must be a str or a list of str with length == lenght of labels")
-  #leg = root.TLegend(0.55,0.6,0.91,0.89)
-  #leg = root.TLegend(0.35,0.6,0.91,0.89)
-  leg = root.TLegend(0.40,0.7,0.91,0.89)
+  leg = None
+  if wide:
+    leg = root.TLegend(0.2,0.7,0.91,0.89)
+  else:
+    leg = root.TLegend(0.55,0.7,0.91,0.89)
+    #leg = root.TLegend(0.35,0.6,0.91,0.89)
+    #leg = root.TLegend(0.40,0.7,0.91,0.89)
   leg.SetLineColor(root.kWhite)
   for hist,label,op in zip(hists,labels,options):
     leg.AddEntry(hist,label,op)
@@ -2442,6 +2475,17 @@ def drawHline(axisHist,y):
   result.SetLineColor(root.kGray+1)
   result.Draw("lsame")
   return result
+
+COLORLIST=[
+      root.kBlue-7,
+      root.kRed-4,
+      root.kGreen,
+      root.kMagenta-4,
+      root.kOrange-3,
+      root.kGray+1,
+      root.kAzure+10,
+      root.kYellow+1,
+]*100
 
 if __name__ == "__main__":
 
