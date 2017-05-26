@@ -2479,6 +2479,8 @@ COLORLIST=[
       root.kMagenta-4,
       root.kOrange-3,
       root.kGray+1,
+      root.kAzure+10,
+      root.kYellow+1,
 ]*100
 
 if __name__ == "__main__":

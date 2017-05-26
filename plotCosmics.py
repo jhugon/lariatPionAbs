@@ -13,6 +13,8 @@ if __name__ == "__main__":
   #cuts += "*(isMC || ((triggerBits >> 11) & 1))" # COSMIC trigger
   cuts += "*(isMC || (nWCTracks ==0 && nTOFs ==0))"
   #cuts += "*( iBestMatch >= 0)" # primary Track found
+  cuts += "*(acos(sin(primTrkStartTheta)*sin(primTrkStartPhi))*180./pi < 5.)" # theta zenith
+  cuts += "*((!isMC) || (trueStartMom>3000. && trueStartMom < 8000.))"
 
   weightStr = "1"+cuts
   nData = 30860.0
@@ -32,41 +34,66 @@ if __name__ == "__main__":
       'isData': True,
     },
     {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna2/lariat_PiAbsAndChEx_cosmics_v3/anahist.root",
+      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_v1/anahist.root",
       'name': "CosmicMC",
       'title': "Cosmic MC",
       'caption': "Cosmic MC",
-      'color': root.kRed-4,
       'isData': False,
-      'scaleFactor': 10888./19032.
+      'scaleFactor': 1367./99535.
     },
     {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna2/lariat_PiAbsAndChEx_cosmics_smear10perc_v1/anahist.root",
-      'name': "CosmicMC_smear10perc",
-      'title': "Cosmic MC Smear 10% ",
-      'caption': "Cosmic MC Smear 10%",
-      'color': root.kCyan,
+      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v1/anahist.root",
+      'name': "CosmicMC_presmear20perc",
+      'title': "Cosmic MC Pre-smear 20% ",
+      'caption': "Cosmic MC Pre-smear 20%",
       'isData': False,
-      'scaleFactor': 10888./6434.
+      'scaleFactor': 1367./99692.
     },
     {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna2/lariat_PiAbsAndChEx_cosmics_smear50perc_v1/anahist.root",
-      'name': "CosmicMC_smear50perc",
-      'title': "Cosmic MC Smear 50% ",
-      'caption': "Cosmic MC Smear 50%",
-      'color': root.kMagenta,
+      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_presmear40perc_v1/anahist.root",
+      'name': "CosmicMC_presmear40perc",
+      'title': "Cosmic MC Pre-smear 40% ",
+      'caption': "Cosmic MC Pre-smear 40%",
       'isData': False,
-      'scaleFactor': 10888./6316.
+      'scaleFactor': 1367./110166.
     },
-#    {
-#      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_halo_v1/anahist.root",
-#      'name': "HaloMC",
-#      'title': "Halo MC",
-#      'caption': "Halo MC",
-#      'color': root.kBlue+7,
-#      'isData': False,
-#    },
+    #{
+    #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear10perc_v1/anahist.root",
+    #  'name': "CosmicMC_postsmear10perc",
+    #  'title': "Cosmic MC Post-smear 10% ",
+    #  'caption': "Cosmic MC Post-smear 10%",
+    #  'isData': False,
+    #  'scaleFactor': 1367./109553.
+    #},
+    {
+      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear20perc_v1/anahist.root",
+      'name': "CosmicMC_postsmear20perc",
+      'title': "Cosmic MC Post-smear 20% ",
+      'caption': "Cosmic MC Post-smear 20%",
+      'isData': False,
+      'scaleFactor': 1367./112612.
+    },
+    {
+      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v1/anahist.root",
+      'name': "CosmicMC_postsmear40perc",
+      'title': "Cosmic MC Post-smear 40% ",
+      'caption': "Cosmic MC Post-smear 40%",
+      'isData': False,
+      'scaleFactor': 1367./110166.
+    },
+    {
+      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postnoise10perc_v1/anahist.root",
+      'name': "CosmicMC_2xNoise",
+      'title': "Cosmic MC 2x Noise",
+      'caption': "Cosmic MC 2x Noise",
+      'isData': False,
+      'scaleFactor': 1367./110413.
+    },
   ]
+
+  for i in range(len(fileConfigs)):
+    if not ('isData' in fileConfigs[i]) or not fileConfigs[i]['isData']:
+        fileConfigs[i]['color'] = COLORLIST[i-1]
 
   histConfigs = [
 #    {
@@ -224,7 +251,7 @@ if __name__ == "__main__":
       'name': "primTrkdEdxs",
       'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
       'ytitle': "Events / bin",
-      'binning': [200,0,50],
+      'binning': [100,0,50],
       'var': "primTrkdEdxs",
       'cuts': weightStr,
       #'normalize': True,
@@ -234,17 +261,27 @@ if __name__ == "__main__":
       'name': "primTrkdEdxs_zoom",
       'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
       'ytitle': "Events / bin",
-      'binning': [200,0,10],
+      'binning': [100,0,10],
       'var': "primTrkdEdxs",
       'cuts': weightStr,
-      #'normalize': True,
+      'normalize': not logy,
       'logy': logy,
+    },
+    {
+      'name': "primTrkdEdxs_zoom2",
+      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,10],
+      'var': "primTrkdEdxs",
+      'cuts': weightStr,
+      'normalize': logy,
+      'logy': not logy,
     },
     {
       'name': "primTrkTruedEdxs",
       'xtitle': "Primary TPC Track True dE/dx [MeV/cm]",
       'ytitle': "Events / bin",
-      'binning': [200,0,50],
+      'binning': [100,0,50],
       'var': "primTrkTruedEdxs",
       'cuts': weightStr,
       #'normalize': True,
@@ -254,7 +291,7 @@ if __name__ == "__main__":
       'name': "primTrkTruedEdxs_zoom",
       'xtitle': "Primary TPC Track True dE/dx [MeV/cm]",
       'ytitle': "Events / bin",
-      'binning': [200,0,10],
+      'binning': [100,0,10],
       'var': "primTrkTruedEdxs",
       'cuts': weightStr,
       #'normalize': True,
@@ -274,7 +311,7 @@ if __name__ == "__main__":
       'name': "primTrkdQdxs_zoom",
       'xtitle': "Primary TPC Track dQ/dx [ADC/cm]",
       'ytitle': "Events / bin",
-      'binning': [200,0,8e3],
+      'binning': [100,0,8e3],
       'var': "primTrkdQdxs*((0.5-1.)*isMC + 1.)",
       'cuts': weightStr,
       #'normalize': True,
@@ -285,7 +322,7 @@ if __name__ == "__main__":
       'name': "primTrkdQdxs_zoom2",
       'xtitle': "Primary TPC Track dQ/dx [ADC/cm]",
       'ytitle': "Events / bin",
-      'binning': [200,0,8e3],
+      'binning': [100,0,8e3],
       'var': "primTrkdQdxs*((0.5-1.)*isMC + 1.)",
       'cuts': weightStr,
       #'normalize': True,
@@ -356,50 +393,50 @@ if __name__ == "__main__":
       'logy': not logy,
       'logx': False,
     },
-    {
-      'name': "primTrkdEdxs_Q1000to1500_zoom2",
-      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,10],
-      'var': "primTrkdEdxs",
-      'cuts': weightStr+"*(primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) > 1000. && primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) < 1500.)",
-      #'normalize': True,
-      'logy': not logy,
-      'caption': "1000 ADC < Q < 1500 ADC",
-    },
-    {
-      'name': "primTrkdEdxs_Q1500to2000_zoom2",
-      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,10],
-      'var': "primTrkdEdxs",
-      'cuts': weightStr+"*(primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) > 1500. && primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) < 2000.)",
-      #'normalize': True,
-      'logy': not logy,
-      'caption': "1500 ADC < Q < 2000 ADC",
-    },
-    {
-      'name': "primTrkdEdxs_Q2000to3000_zoom2",
-      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,10],
-      'var': "primTrkdEdxs",
-      'cuts': weightStr+"*(primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) > 2000. && primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) < 3000.)",
-      #'normalize': True,
-      'logy': not logy,
-      'caption': "2000 ADC < Q < 3000 ADC",
-    },
-    {
-      'name': "primTrkdEdxs_Q3000to4000_zoom2",
-      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,10],
-      'var': "primTrkdEdxs",
-      'cuts': weightStr+"*(primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) > 3000. && primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) < 4000.)",
-      #'normalize': True,
-      'logy': not logy,
-      'caption': "3000 ADC < Q < 4000 ADC",
-    },
+#    {
+#      'name': "primTrkdEdxs_Q1000to1500_zoom2",
+#      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'ytitle': "Events / bin",
+#      'binning': [100,0,10],
+#      'var': "primTrkdEdxs",
+#      'cuts': weightStr+"*(primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) > 1000. && primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) < 1500.)",
+#      #'normalize': True,
+#      'logy': not logy,
+#      'caption': "1000 ADC < Q < 1500 ADC",
+#    },
+#    {
+#      'name': "primTrkdEdxs_Q1500to2000_zoom2",
+#      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'ytitle': "Events / bin",
+#      'binning': [100,0,10],
+#      'var': "primTrkdEdxs",
+#      'cuts': weightStr+"*(primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) > 1500. && primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) < 2000.)",
+#      #'normalize': True,
+#      'logy': not logy,
+#      'caption': "1500 ADC < Q < 2000 ADC",
+#    },
+#    {
+#      'name': "primTrkdEdxs_Q2000to3000_zoom2",
+#      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'ytitle': "Events / bin",
+#      'binning': [100,0,10],
+#      'var': "primTrkdEdxs",
+#      'cuts': weightStr+"*(primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) > 2000. && primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) < 3000.)",
+#      #'normalize': True,
+#      'logy': not logy,
+#      'caption': "2000 ADC < Q < 3000 ADC",
+#    },
+#    {
+#      'name': "primTrkdEdxs_Q3000to4000_zoom2",
+#      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'ytitle': "Events / bin",
+#      'binning': [100,0,10],
+#      'var': "primTrkdEdxs",
+#      'cuts': weightStr+"*(primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) > 3000. && primTrkdQdxs*primTrkPitches*((0.5-1.)*isMC + 1.) < 4000.)",
+#      #'normalize': True,
+#      'logy': not logy,
+#      'caption': "3000 ADC < Q < 4000 ADC",
+#    },
     #{
     #  'name': "primTrkdEdxsFidCut",
     #  'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
