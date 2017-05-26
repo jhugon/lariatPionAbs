@@ -360,7 +360,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       else:
         h.Draw("histsame")
     labels = [fileConfig['title'] for fileConfig in fileConfigs]
-    leg = drawNormalLegend(hists,labels)
+    leg = drawNormalLegend(hists,labels,wide=True)
     drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
     canvas.RedrawAxis()
     saveNameBase = outPrefix + histConfig['name'] + outSuffix
@@ -592,7 +592,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       else:
         h.Draw("histsame")
     labels = [histConfig['title'] for histConfig in histConfigs]
-    leg = drawNormalLegend(hists,labels)
+    leg = drawNormalLegend(hists,labels,wide=True)
     drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
     canvas.RedrawAxis()
     saveNameBase = outPrefix + fileConfig['name'] + outSuffix
@@ -2342,7 +2342,7 @@ def getLogBins(nBins,xMin,xMax):
   delta = (math.log10(xMax)-xMinLog)/nBins
   return [10**(xMinLog + x*delta) for x in range(nBins+1)]
 
-def drawNormalLegend(hists,labels,option="l"):
+def drawNormalLegend(hists,labels,option="l",wide=False):
   assert(len(hists)==len(labels))
   options = None
   if type(option) is list and len(option) == len(labels):
@@ -2351,9 +2351,13 @@ def drawNormalLegend(hists,labels,option="l"):
     options = itertools.repeat(option,len(labels))
   else:
     raise Exception("option must be a str or a list of str with length == lenght of labels")
-  leg = root.TLegend(0.55,0.7,0.91,0.89)
-  #leg = root.TLegend(0.35,0.6,0.91,0.89)
-  #leg = root.TLegend(0.40,0.7,0.91,0.89)
+  leg = None
+  if wide:
+    leg = root.TLegend(0.2,0.7,0.91,0.89)
+  else:
+    leg = root.TLegend(0.55,0.7,0.91,0.89)
+    #leg = root.TLegend(0.35,0.6,0.91,0.89)
+    #leg = root.TLegend(0.40,0.7,0.91,0.89)
   leg.SetLineColor(root.kWhite)
   for hist,label,op in zip(hists,labels,options):
     leg.AddEntry(hist,label,op)
