@@ -243,6 +243,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     drawhlines: list of y locations to draw horizontal lines
     drawvlines: list of x locations to draw vertical lines
     printIntegral: if True, print integral after all scaling
+    showMedian: if True, put median in legend
   """
   #print("plotManyFilesOnePlot")
   
@@ -360,6 +361,12 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       else:
         h.Draw("histsame")
     labels = [fileConfig['title'] for fileConfig in fileConfigs]
+    if "showMedian" in histConfig and histConfig["showMedian"]:
+        for iHist in range(len(hists)):
+            labels[iHist] += " median: {0}".format(getHistMedian(hists[iHist]))
+    if "showMode" in histConfig and histConfig["showMode"]:
+        for iHist in range(len(hists)):
+            labels[iHist] += " mode: {0}".format(getHistMode(hists[iHist]))
     leg = drawNormalLegend(hists,labels,wide=True)
     drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
     canvas.RedrawAxis()
@@ -971,11 +978,31 @@ def getHistMedian(hist):
     return None
   half = total/2.
   count = 0.
+  iLast = 0
   for i in range(1,nBins+1):
     n = hist.GetBinContent(i)
     count += n
+    iLast = i
     if count > half:
         pass
+  return iLast
+
+def getHistMode(hist):
+  """
+  Gets Mode of 1D hist
+  """
+  iMax = -1
+  histMax = -999999.
+  nBins = hist.GetXaxis().GetNbins()
+  for i in range(1,nBins+1):
+    n = hist.GetBinContent(i)
+    if n > histMax:
+        histMax = n
+        iMax = i
+  if iMax != -1:
+    return hist.GetXaxis().GetBinCenter(iMax)
+  else:
+    return None
 
 def divideYValByXVal(hist):
     nBinsX = hist.GetXaxis().GetNbins()
