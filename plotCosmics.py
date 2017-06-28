@@ -24,22 +24,23 @@ if __name__ == "__main__":
   NMAX=1000000000
   #NMAX=100
   fileConfigs = [
+    #{
+    #  #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/CosmicAna_Pos_RunII.root",
+    #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna2/lariat_data_Lovely1_RunII_run8300to8500_jhugon_v01_v01/anahist.root",
+    #  'name': "RunII8300to8500",
+    #  'title': "Run II 8300-8500",
+    #  'caption': "Run II 8300-8500",
+    #  'color': root.kBlack,
+    #  'isData': True,
+    #},
     {
-      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/CosmicAna_Pos_RunII.root",
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna2/lariat_data_Lovely1_RunII_run8300to8500_jhugon_v01_v01/anahist.root",
-      'name': "RunII8300to8500",
-      'title': "Run II 8300-8500",
-      'caption': "Run II 8300-8500",
-      'color': root.kBlack,
-      'isData': True,
-    },
-    {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_v1/anahist.root",
+      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_v3/anahist.root",
+      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/CosmicAnalyzer.root",
       'name': "CosmicMC",
       'title': "Cosmic MC",
       'caption': "Cosmic MC",
       'isData': False,
-      'scaleFactor': 1367./99535.
+      #'scaleFactor': 1367./99535.
     },
     #{
     #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v1/anahist.root",
@@ -89,30 +90,30 @@ if __name__ == "__main__":
     #  'isData': False,
     #  'scaleFactor': 1367./112612.
     #},
-    {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v1/anahist.root",
-      'name': "CosmicMC_postsmear40perc",
-      'title': "Cosmic MC Post-smear 40% ",
-      'caption': "Cosmic MC Post-smear 40%",
-      'isData': False,
-      'scaleFactor': 1367./110166.
-    },
-    {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v1/anahist.root",
-      'name': "CosmicMC_postsmear60perc",
-      'title': "Cosmic MC Post-smear 60% ",
-      'caption': "Cosmic MC Post-smear 60%",
-      'isData': False,
-      'scaleFactor': 1367./25596.
-    },
-    {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v1/anahist.root",
-      'name': "CosmicMC_postsmear80perc",
-      'title': "Cosmic MC Post-smear 80% ",
-      'caption': "Cosmic MC Post-smear 80%",
-      'isData': False,
-      'scaleFactor': 1367./25042.
-    },
+#    {
+#      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v1/anahist.root",
+#      'name': "CosmicMC_postsmear40perc",
+#      'title': "Cosmic MC Post-smear 40% ",
+#      'caption': "Cosmic MC Post-smear 40%",
+#      'isData': False,
+#      'scaleFactor': 1367./110166.
+#    },
+#    {
+#      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v1/anahist.root",
+#      'name': "CosmicMC_postsmear60perc",
+#      'title': "Cosmic MC Post-smear 60% ",
+#      'caption': "Cosmic MC Post-smear 60%",
+#      'isData': False,
+#      'scaleFactor': 1367./25596.
+#    },
+#    {
+#      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v1/anahist.root",
+#      'name': "CosmicMC_postsmear80perc",
+#      'title': "Cosmic MC Post-smear 80% ",
+#      'caption': "Cosmic MC Post-smear 80%",
+#      'isData': False,
+#      'scaleFactor': 1367./25042.
+#    },
     #{
     #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear120perc_v1/anahist.root",
     #  'name': "CosmicMC_postsmear120perc",
@@ -549,7 +550,7 @@ if __name__ == "__main__":
     #},
   ]
 
-  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
+#  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
 #  fileConfigMCs = copy.deepcopy(fileConfigs)
 #  fileConfigData = None
 #  for i in reversed(range(len(fileConfigMCs))):
@@ -843,7 +844,7 @@ if __name__ == "__main__":
 #    },
   ]
 
-  hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
+#  hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
 #  outfile = root.TFile("cosmics_hists.root","recreate")
 #  outfile.cd()
 #  for var in hists:
@@ -965,3 +966,219 @@ if __name__ == "__main__":
   for i in range(len(histConfigs)):
     histConfigs[i]["color"] = COLORLIST[i]
 #  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="CosmicsTrue_dQdxZoom")
+
+  histConfigs = [
+    {
+      'name': "primTrkZs",
+      "title": "All",
+      'xtitle': "Primary TPC Track Hit Y [cm]",
+      'ytitle': "Events / bin",
+      'binning': [100,-25,25],
+      'var': "primTrkYs",
+      'cuts': "",
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "primTrkZs",
+      "title": "Top",
+      'xtitle': "Primary TPC Track Hit Y [cm]",
+      'ytitle': "Events / bin",
+      'binning': [100,-25,25],
+      'var': "primTrkYs",
+      'cuts': "enterExitYp",
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "primTrkZs",
+      "title": "Bottom",
+      'xtitle': "Primary TPC Track Hit Y [cm]",
+      'ytitle': "Events / bin",
+      'binning': [100,-25,25],
+      'var': "primTrkYs",
+      'cuts': "enterExitYm",
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "primTrkZs",
+      "title": "Top && Bottom",
+      'xtitle': "Primary TPC Track Hit Y [cm]",
+      'ytitle': "Events / bin",
+      'binning': [100,-25,25],
+      'var': "primTrkYs",
+      'cuts': "enterExitYm*enterExitYp",
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "primTrkZs",
+      "title": "Top && Through Wires",
+      'xtitle': "Primary TPC Track Hit Y [cm]",
+      'ytitle': "Events / bin",
+      'binning': [100,-25,25],
+      'var': "primTrkYs",
+      'cuts': "enterExitXm",
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "primTrkZs",
+      "title": "Top && Through Cathode",
+      'xtitle': "Primary TPC Track Hit Y [cm]",
+      'ytitle': "Events / bin",
+      'binning': [100,-25,25],
+      'var': "primTrkYs",
+      'cuts': "enterExitXp",
+      #'normalize': True,
+      'logy': logy,
+    },
+  ]
+  for i in range(len(histConfigs)):
+    histConfigs[i]["color"] = COLORLIST[i]
+  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_Ys")
+
+  histConfigs = [
+    {
+      "title": "All",
+      'xtitle': "True Muon Initial Momentum [MeV]",
+      'ytitle': "Events / MeV",
+      'binning': getLogBins(20,100,10000),
+      'var': "trueStartMom",
+      'cuts': "",
+      #'normalize': True,
+      'logy': logy,
+      'logx': True,
+      'normToBinWidth': True,
+    },
+    {
+      "title": "Top",
+      'xtitle': "True Muon Initial Momentum [MeV]",
+      'ytitle': "Events / MeV",
+      'binning': getLogBins(20,100,10000),
+      'var': "trueStartMom",
+      'cuts': "enterExitYp",
+      #'normalize': True,
+      'logy': logy,
+      'logx': True,
+      'normToBinWidth': True,
+    },
+    {
+      "title": "Bottom",
+      'xtitle': "True Muon Initial Momentum [MeV]",
+      'ytitle': "Events / MeV",
+      'binning': getLogBins(20,100,10000),
+      'var': "trueStartMom",
+      'cuts': "enterExitYm",
+      #'normalize': True,
+      'logy': logy,
+      'logx': True,
+      'normToBinWidth': True,
+    },
+    {
+      "title": "Top && Bottom",
+      'xtitle': "True Muon Initial Momentum [MeV]",
+      'ytitle': "Events / MeV",
+      'binning': getLogBins(20,100,10000),
+      'var': "trueStartMom",
+      'cuts': "enterExitYm*enterExitYp",
+      #'normalize': True,
+      'logy': logy,
+      'logx': True,
+      'normToBinWidth': True,
+    },
+    {
+      "title": "Top && Through Wires",
+      'xtitle': "True Muon Initial Momentum [MeV]",
+      'ytitle': "Events / MeV",
+      'binning': getLogBins(20,100,10000),
+      'var': "trueStartMom",
+      'cuts': "enterExitXm",
+      #'normalize': True,
+      'logy': logy,
+      'logx': True,
+      'normToBinWidth': True,
+    },
+    {
+      "title": "Top && Through Cathode",
+      'xtitle': "True Muon Initial Momentum [MeV]",
+      'ytitle': "Events / MeV",
+      'binning': getLogBins(20,100,10000),
+      'var': "trueStartMom",
+      'cuts': "enterExitXp",
+      #'normalize': True,
+      'logy': logy,
+      'logx': True,
+      'normToBinWidth': True,
+    },
+  ]
+  for i in range(len(histConfigs)):
+    histConfigs[i]["color"] = COLORLIST[i]
+  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trueStartMom")
+
+  histConfigs = [
+    {
+      "title": "All",
+      'xtitle': "Primary TPC Track Length [cm]",
+      'ytitle': "Events / bin",
+      'binning': [60,0,60],
+      'var': "primTrkLength",
+      'cuts': "",
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      "title": "Top",
+      'xtitle': "Primary TPC Track Length [cm]",
+      'ytitle': "Events / bin",
+      'binning': [60,0,60],
+      'var': "primTrkLength",
+      'cuts': "enterExitYp",
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      "title": "Bottom",
+      'xtitle': "Primary TPC Track Length [cm]",
+      'ytitle': "Events / bin",
+      'binning': [60,0,60],
+      'var': "primTrkLength",
+      'cuts': "enterExitYm",
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      "title": "Top && Bottom",
+      'xtitle': "Primary TPC Track Length [cm]",
+      'ytitle': "Events / bin",
+      'binning': [60,0,60],
+      'var': "primTrkLength",
+      'cuts': "enterExitYm*enterExitYp",
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      "title": "Top && Through Wires",
+      'xtitle': "Primary TPC Track Length [cm]",
+      'ytitle': "Events / bin",
+      'binning': [60,0,60],
+      'var': "primTrkLength",
+      'cuts': "enterExitXm",
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      "title": "Top && Through Cathode",
+      'xtitle': "Primary TPC Track Length [cm]",
+      'ytitle': "Events / bin",
+      'binning': [60,0,60],
+      'var': "primTrkLength",
+      'cuts': "enterExitXp",
+      #'normalize': True,
+      'logy': logy,
+    },
+  ]
+  for i in range(len(histConfigs)):
+    histConfigs[i]["color"] = COLORLIST[i]
+  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_primTrkLength")
