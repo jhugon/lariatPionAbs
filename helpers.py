@@ -532,7 +532,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       hist = None
       if is2D:
         if len(binning) == 2:
-          hist = Hist(binning[0],binning[1])
+          hist = Hist2D(binning[0],binning[1])
         else:
           hist = Hist2D(*binning)
       else:
@@ -752,7 +752,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       hist = None
       if is2D:
         if len(binning) == 2:
-          hist = Hist(binning[0],binning[1])
+          hist = Hist2D(binning[0],binning[1])
         else:
           hist = Hist2D(*binning)
       else:
@@ -2337,12 +2337,16 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
   axisHist = root.TH2F(uuid.uuid1().hex,"",1,xMin,xMax,1,yMin,yMax)
   return axisHist
 
+def getLinBins(nBins,xMin,xMax):
+  delta = (xMax-xMin)/float(nBins)
+  return [xMin + x*delta for x in range(nBins+1)]
+
 def getLogBins(nBins,xMin,xMax):
   xMinLog = math.log10(xMin)
   delta = (math.log10(xMax)-xMinLog)/nBins
   return [10**(xMinLog + x*delta) for x in range(nBins+1)]
 
-def drawNormalLegend(hists,labels,option="l",wide=False):
+def drawNormalLegend(hists,labels,option="l",wide=False,position=None):
   assert(len(hists)==len(labels))
   options = None
   if type(option) is list and len(option) == len(labels):
@@ -2352,7 +2356,9 @@ def drawNormalLegend(hists,labels,option="l",wide=False):
   else:
     raise Exception("option must be a str or a list of str with length == lenght of labels")
   leg = None
-  if wide:
+  if position:
+    leg = root.TLegend(*position)
+  elif wide:
     leg = root.TLegend(0.2,0.7,0.91,0.89)
   else:
     leg = root.TLegend(0.55,0.7,0.91,0.89)
@@ -2475,6 +2481,41 @@ def drawHline(axisHist,y):
   result.SetLineColor(root.kGray+1)
   result.Draw("lsame")
   return result
+
+def drawGraphs(canvas,graphs,xTitle,yTitle):
+  xMin = 1e15
+  xMax = -1e15
+  yMin = 1e15
+  yMax = -1e15
+  xArr = array.array("d", [0.])
+  yArr = array.array("d", [0.])
+  for graph in graphs:
+    for iPoint in range(graph.GetN()):
+        graph.GetPoint(iPoint,xArr,yArr)
+        x = xArr[0]
+        y = yArr[0]
+        xMin = min(x,xMin)
+        xMax = max(x,xMax)
+        yMin = min(y,yMin)
+        yMax = max(y,yMax)
+        xMax = max(x+graph.GetErrorXhigh(iPoint),xMax)
+        xMin = min(x-graph.GetErrorXlow(iPoint),xMin)
+        yMax = max(y+graph.GetErrorYhigh(iPoint),yMax)
+        yMin = min(y-graph.GetErrorYlow(iPoint),yMin)
+  xRange = xMax-xMin
+  yRange = yMax-yMin
+  xMin -= xRange*0.1
+  xMax += xRange*0.1
+  yMin -= yRange*0.1
+  yMax += yRange*0.1
+  yMin = min(0,yMin)
+
+  axisHist = Hist2D(1,xMin,xMax,1,yMin,yMax)
+  setHistTitles(axisHist,xTitle,yTitle)
+  axisHist.Draw()
+  for graph in graphs:
+    graph.Draw("PEZ")
+  return axisHist
 
 COLORLIST=[
       root.kBlue-7,
