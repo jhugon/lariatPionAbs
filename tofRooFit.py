@@ -7,24 +7,26 @@ from helpers import *
 def fitMass2(c,hist):
 
     workspace = root.RooWorkspace("w")
-    mass2 = root.RooRealVar("mass2","Mass Squared",-5e4,3e6)
+    mass = root.RooRealVar("mass","Mass [MeV]",0,2000.)
+    mass2 = root.RooRealVar("mass2","Mass Squared [MeV^{2}]",-2e5,3e6)
     observables = root.RooArgSet(mass2)
 
     d = root.RooRealVar("d","Distance",6.683)
-    true_p = root.RooRealVar("true_p","",1000.)
-    sigma_p = root.RooRealVar("sigma_p","",100.)
-    sigma_dt = root.RooRealVar("sigma_dt","",0.1)
+    true_p = root.RooRealVar("true_p","",500)
+    sigma_p = root.RooRealVar("sigma_p","",50.)
+    sigma_dt = root.RooRealVar("sigma_dt","",0.5)
 
     particleConfigs = [
-      ("electron","Electron",0.511,0.05),
-      ("muon","Muon",105.658,0.02),
+      #("electron","Electron",0.511,0.1),
+      ("muon","Muon",105.658,0.1),
       ("pion","Pion",139.57,0.1),
-      ("kaon","Kaon",493.677,0.02),
+      ("kaon","Kaon",493.677,0.005),
       ("proton","Proton",938.27,0.2),
-      #("Deuteron","Deuteron",1875.6,0.02),
+      ("Deuteron","Deuteron",1875.6,0.002),
     ]
 
     gaussians = []
+    gaussians2 = []
     fractions = []
 
     allVars = []
@@ -56,6 +58,14 @@ def fitMass2(c,hist):
 
         d2 = root.RooFormulaVar("d2_"+particle_name,"Distance^{2} [m^{2}]","pow(@0,2)",root.RooArgList(d))
 
+        variance_mass = root.RooFormulaVar("variance_mass_"+particle_name,"Mass Variance [MeV^4]",
+                             "@4/@2*pow((@0+@1)/@5,2) + @0/@1*@3",
+                             root.RooArgList(true_mass2,true_p2,true_dt2,variance_p,variance_dt,true_mass))
+
+        sigma_mass = root.RooFormulaVar("sigma_mass_"+particle_name,"Mass Sigma [MeV^2]",
+                             "sqrt(@0)",
+                             root.RooArgList(variance_mass))
+
         variance_mass2 = root.RooFormulaVar("variance_mass2_"+particle_name,"Mass Squared Variance [MeV^4]",
                              "4/@2*pow(@0+@1,2)*@5 + 4*pow(@0,2)/@1*@4",
                              root.RooArgList(true_mass2,true_p2,true_dt2,d2,variance_p,variance_dt))
@@ -70,25 +80,30 @@ def fitMass2(c,hist):
         d2.Print()
         variance_p.Print()
         variance_dt.Print()
+        variance_mass.Print()
+        sigma_mass.Print()
         variance_mass2.Print()
         sigma_mass2.Print()
 
-        gauss = root.RooGaussian("gauss_"+particle_name,"Gaussian for "+particle_name,mass2,true_mass2,sigma_mass2);
+        gauss = root.RooGaussian("gauss_"+particle_name,"Mass Gaussian "+particle_name,mass,true_mass,sigma_mass);
+        gauss2 = root.RooGaussian("gauss2_"+particle_name,"Mass Squared Gaussian for "+particle_name,mass2,true_mass2,sigma_mass2);
         gaussians.append(gauss)
+        gaussians2.append(gauss2)
         fractions.append(fraction)
         wImport = getattr(workspace,"import")
         wImport(gauss)
         l = locals()
         for k in l:
           allVars.append(l[k])
-    model = root.RooAddPdf("model","ToF Mass Squared Model",root.RooArgList(*gaussians),root.RooArgList(*fractions))
+    model = root.RooAddPdf("model","ToF Mass Model",root.RooArgList(*gaussians),root.RooArgList(*fractions))
+    model2 = root.RooAddPdf("model2","ToF Mass Squared Model",root.RooArgList(*gaussians2),root.RooArgList(*fractions))
 
-    toy_data = model.generate(observables,5000.)
+    #toy_data2 = model2.generate(root.RooArgSet(mass2),5000.)
 
-    frame = mass2.frame(root.RooFit.Title(""))
+    frame2 = mass2.frame(root.RooFit.Title(""))
 
-    #toy_data.plotOn(frame)
-    model.plotOn(frame)
+    #toy_data2.plotOn(frame2)
+    model2.plotOn(frame2)
 
     #for gauss in gaussians:
     #    model.plotOn(frame,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kRed))
@@ -100,6 +115,23 @@ def fitMass2(c,hist):
     ##axisHist = root.TH2F("axisHist","",1,-1,1,1,1000,1300)
     #axisHist.Draw()
     #frame.Draw("same")
+    frame2.Draw()
+    c.SaveAs("TOFFit2.png")
+    c.SaveAs("TOFFit2.pdf")
+
+    frame2_zoom = mass2.frame(root.RooFit.Title(""),root.RooFit.Range(-2e5,2e5))
+    model2.plotOn(frame2_zoom)
+    frame2_zoom.Draw()
+    c.SaveAs("TOFFit2_zoom.png")
+    c.SaveAs("TOFFit2_zoom.pdf")
+
+    frame = mass.frame(root.RooFit.Title(""))
+
+    #toy_data.plotOn(frame)
+    model.plotOn(frame)
+
+    #for gauss in gaussians:
+    #    model.plotOn(frame,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kRed))
     frame.Draw()
     c.SaveAs("TOFFit.png")
     c.SaveAs("TOFFit.pdf")
