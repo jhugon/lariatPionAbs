@@ -17,7 +17,7 @@ def fitMass2(c,hist):
     sigma_dt = root.RooRealVar("sigma_dt","",0.5)
 
     particleConfigs = [
-      #("electron","Electron",0.511,0.1),
+      ("electron","Electron",0.511,0.1),
       ("muon","Muon",105.658,0.1),
       ("pion","Pion",139.57,0.1),
       ("kaon","Kaon",493.677,0.005),
@@ -85,8 +85,8 @@ def fitMass2(c,hist):
         variance_mass2.Print()
         sigma_mass2.Print()
 
-        gauss = root.RooGaussian("gauss_"+particle_name,"Mass Gaussian "+particle_name,mass,true_mass,sigma_mass);
-        gauss2 = root.RooGaussian("gauss2_"+particle_name,"Mass Squared Gaussian for "+particle_name,mass2,true_mass2,sigma_mass2);
+        gauss = root.RooGaussian("gauss_"+particle_name,particle_name,mass,true_mass,sigma_mass);
+        gauss2 = root.RooGaussian("gauss2_"+particle_name,particle_name,mass2,true_mass2,sigma_mass2);
         gaussians.append(gauss)
         gaussians2.append(gauss2)
         fractions.append(fraction)
@@ -100,39 +100,58 @@ def fitMass2(c,hist):
 
     #toy_data2 = model2.generate(root.RooArgSet(mass2),5000.)
 
+    c.SetRightMargin(0.1)
+
+    gaus_graphs = []
+    gaus_titles = []
     frame2 = mass2.frame(root.RooFit.Title(""))
-
-    #toy_data2.plotOn(frame2)
     model2.plotOn(frame2)
-
-    #for gauss in gaussians:
-    #    model.plotOn(frame,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kRed))
-
-    #root.gPad.SetLeftMargin(0.15)
-    #frame.GetYaxis().SetTitleOffset(1.4)
-    #frame.Draw("same")
-    #axisHist = root.TH2F("axisHist","",1,0,50,1,0,1000)
-    ##axisHist = root.TH2F("axisHist","",1,-1,1,1,1000,1300)
-    #axisHist.Draw()
-    #frame.Draw("same")
+    gaus_graphs.append(frame2.getObject(int(frame2.numItems())-1))
+    gaus_titles.append("All Particles")
+    for iGauss, gauss in enumerate(gaussians2):
+        gaus_graph = model2.plotOn(frame2,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iGauss+1]))
+        gaus_graph.SetLineColor(COLORLIST[iGauss+1])
+        gaus_graph.SetLineStyle(root.kDashed)
+        gaus_graphs.append(frame2.getObject(int(frame2.numItems())-1))
+        gaus_titles.append(gauss.GetTitle())
+    #toy_data2.plotOn(frame2)
     frame2.Draw()
+    leg = drawNormalLegend(gaus_graphs,gaus_titles,option="l",position=(0.55,0.7,0.85,0.89))
     c.SaveAs("TOFFit2.png")
     c.SaveAs("TOFFit2.pdf")
 
+    gaus_graphs = []
+    gaus_titles = []
     frame2_zoom = mass2.frame(root.RooFit.Title(""),root.RooFit.Range(-2e5,2e5))
     model2.plotOn(frame2_zoom)
+    gaus_graphs.append(frame2_zoom.getObject(int(frame2_zoom.numItems())-1))
+    gaus_titles.append("All Particles")
+    for iGauss, gauss in enumerate(gaussians2):
+        model2.plotOn(frame2_zoom,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iGauss+1]))
+        gaus_graph.SetLineColor(COLORLIST[iGauss+1])
+        gaus_graph.SetLineStyle(root.kDashed)
+        gaus_graphs.append(frame2_zoom.getObject(int(frame2_zoom.numItems())-1))
+        gaus_titles.append(gauss.GetTitle())
     frame2_zoom.Draw()
+    leg = drawNormalLegend(gaus_graphs,gaus_titles,option="l",position=(0.55,0.7,0.85,0.89))
     c.SaveAs("TOFFit2_zoom.png")
     c.SaveAs("TOFFit2_zoom.pdf")
 
+    gaus_graphs = []
+    gaus_titles = []
     frame = mass.frame(root.RooFit.Title(""))
-
-    #toy_data.plotOn(frame)
     model.plotOn(frame)
-
-    #for gauss in gaussians:
-    #    model.plotOn(frame,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kRed))
+    gaus_graphs.append(frame.getObject(int(frame.numItems())-1))
+    gaus_titles.append("All Particles")
+    for iGauss, gauss in enumerate(gaussians):
+        model.plotOn(frame,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iGauss+1]))
+        gaus_graph.SetLineColor(COLORLIST[iGauss+1])
+        gaus_graph.SetLineStyle(root.kDashed)
+        gaus_graphs.append(frame.getObject(int(frame.numItems())-1))
+        gaus_titles.append(gauss.GetTitle())
+    #toy_data.plotOn(frame)
     frame.Draw()
+    leg = drawNormalLegend(gaus_graphs,gaus_titles,option="l",position=(0.55,0.7,0.85,0.89))
     c.SaveAs("TOFFit.png")
     c.SaveAs("TOFFit.pdf")
 
