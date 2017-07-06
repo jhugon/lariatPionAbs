@@ -4,12 +4,16 @@ from ROOT import gStyle as gStyle
 root.gROOT.SetBatch(True)
 from helpers import *
 
-def fitMass2(c,hist):
+def fitMass2(c):
 
     workspace = root.RooWorkspace("w")
     mass = root.RooRealVar("mass","Mass [MeV]",0,2000.)
     mass2 = root.RooRealVar("mass2","Mass Squared [MeV^{2}]",-2e5,3e6)
     observables = root.RooArgSet(mass2)
+
+    infile = root.TFile("momentumTest.root")
+    intree = infile.Get("lowlevel/Mass Tree");
+    data = root.RooDataSet("data","data",root.RooArgSet(mass2,mass),root.RooFit.Import(intree))
 
     d = root.RooRealVar("d","Distance",6.683)
     true_p = root.RooRealVar("true_p","",500)
@@ -103,6 +107,7 @@ def fitMass2(c,hist):
     frame2 = mass2.frame(root.RooFit.Title(""))
 
     #toy_data2.plotOn(frame2)
+    data.plotOn(frame2)
     model2.plotOn(frame2)
 
     #for gauss in gaussians:
@@ -116,28 +121,30 @@ def fitMass2(c,hist):
     #axisHist.Draw()
     #frame.Draw("same")
     frame2.Draw()
-    c.SaveAs("TOFFit2.png")
-    c.SaveAs("TOFFit2.pdf")
+    c.SaveAs("ManyTOFFit2.png")
+    c.SaveAs("ManyTOFFit2.pdf")
 
     frame2_zoom = mass2.frame(root.RooFit.Title(""),root.RooFit.Range(-2e5,2e5))
+    data.plotOn(frame2_zoom)
     model2.plotOn(frame2_zoom)
     frame2_zoom.Draw()
-    c.SaveAs("TOFFit2_zoom.png")
-    c.SaveAs("TOFFit2_zoom.pdf")
+    c.SaveAs("ManyTOFFit2_zoom.png")
+    c.SaveAs("ManyTOFFit2_zoom.pdf")
 
     frame = mass.frame(root.RooFit.Title(""))
 
     #toy_data.plotOn(frame)
+    data.plotOn(frame)
     model.plotOn(frame)
 
     #for gauss in gaussians:
     #    model.plotOn(frame,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kRed))
     frame.Draw()
-    c.SaveAs("TOFFit.png")
-    c.SaveAs("TOFFit.pdf")
+    c.SaveAs("ManyTOFFit.png")
+    c.SaveAs("ManyTOFFit.pdf")
 
 if __name__ == "__main__":
 
   c = root.TCanvas("c")
-  fitMass2(c,None)
+  fitMass2(c)
   

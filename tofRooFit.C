@@ -46,13 +46,17 @@ void tofRooFit()
    RooRealVar true_mass("true_mass","True Mass [MeV]",938.27);
    RooRealVar d("d","Distance [m]",6.683);
    RooRealVar true_p("true_p","True Momentum [MeV]",700);
-   RooRealVar sigma_p("sigma_p","Momentum Smearing Sigma [MeV]",50,0.,200.);
+
+   RooRealVar sigma_p("sigma_p","Momentum Smearing Sigma [MeV]",50,1.,70.);
    RooRealVar sigma_dt("sigma_dt","#Delta t Smearing Sigma [ns]",0.5);
+   RooRealVar shift_p2("shift_p2","Shift in Momentum Squared [MeV^{2}]",0.);//,-100,100);
+   RooRealVar shift_dt2("shift_dt2","Shift in #Delta t Squared [ns^{2}]",250.,-1000,1000);
 
    // Construct dependent parameters
 
-   RooFormulaVar true_dt("true_dt","True #Delta t [ns]",
-                        "sqrt(@2*@2/0.29979/0.29979*(1+@1*@1/@0/@0))",
+   // Compute true_dt from d, true_mass, and true_p
+   RooFormulaVar true_dt2("true_dt2","True #Delta t Squared [ns^{2}]",
+                        "@2*@2/0.29979/0.29979*(1+@1*@1/@0/@0)",
                         RooArgList(true_p,true_mass,d));
 
    RooFormulaVar true_mass2("true_mass2","True Mass Squared [MeV^{2}]",
@@ -62,12 +66,21 @@ void tofRooFit()
    RooFormulaVar true_p2("true_p2","True Momentum Squared [MeV^{2}]",
                         "pow(@0,2)",
                         RooArgList(true_p));
-   RooFormulaVar true_dt2("true_dt2","True #Delta t Squared [ns^{2}]",
-                        "pow(@0,2)",
-                        RooArgList(true_dt));
+   RooFormulaVar true_dt("true_dt","True #Delta t [ns]",
+                        "sqrt(@0)",
+                        RooArgList(true_dt2));
+
+   RooFormulaVar measured_dt2_mean("measured_dt_mean","Mean Measured #Delta t Squared [ns^{2}]",
+                        "@0+@1",
+                        RooArgList(true_dt2,shift_dt2));
+   RooFormulaVar measured_p2_mean("measured_p2_mean","Mean Measured Momentum Squared [MeV^{2}]",
+                        "@0+@1",
+                        RooArgList(true_p2,shift_p2));
+
    RooFormulaVar variance_p("variance_p","Variance of Momentum [MeV^{2}]",
                         "pow(@0,2)",
                         RooArgList(sigma_p));
+
    RooFormulaVar variance_dt("variance_dt","Variance of #Delta t [ns^{2}]",
                         "pow(@0,2)",
                         RooArgList(sigma_dt));
@@ -81,6 +94,8 @@ void tofRooFit()
    RooFormulaVar sigma_mass2("sigma_mass2","Mass Squared Sigma [MeV^2]",
                         "sqrt(@0)",
                         RooArgList(variance_mass2));
+
+   RooFormulaVar measured_mass2_mean("measured_mass2_mean","Measured Mass Squared Mean [MeV]","@0*(@1*pow(0.29979,2)/@2-1)",RooArgList(measured_p2_mean,measured_dt2_mean,d2));
 
    //true_mass2.Print();
    //true_p2.Print();
@@ -96,7 +111,8 @@ void tofRooFit()
    //                     RooArgList(true_p,true_dt,d));
 
    // Construct PDFs
-   RooGaussian gauss("gauss","Gaussian",mass2,true_mass2,sigma_mass2);
+   //RooGaussian gauss("gauss","Gaussian",mass2,true_mass2,sigma_mass2);
+   RooGaussian gauss("gauss","Gaussian",mass2,measured_mass2_mean,sigma_mass2);
 
    RooAbsPdf* modelPtr = dynamic_cast<RooAbsPdf*>(&gauss);
 
@@ -106,13 +122,13 @@ void tofRooFit()
    // Sample 1000 events in x from gxlx
 //   RooDataSet* toy_data = gauss.generate(RooArgList(mass2),5000);
 
-   modelPtr->fitTo(*data);
+   modelPtr->fitTo(*data);//,Range(950e3,1150e3));
 
    // Plot data, landau pdf, landau (X) gauss pdf
    RooPlot* frame2 = mass2.frame(Title(""));
 //   toy_data->plotOn(frame);
    dataMassGt800Momo650to750->plotOn(frame2);
-   gauss.plotOn(frame2);
+   gauss.plotOn(frame2);//,Range(0.,3000.));
 
    // Draw frame on canvas
    TCanvas* c = new TCanvas("c");
