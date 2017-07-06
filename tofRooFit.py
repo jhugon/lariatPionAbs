@@ -4,35 +4,35 @@ from ROOT import gStyle as gStyle
 root.gROOT.SetBatch(True)
 from helpers import *
 
-def fitMass2(c,do_toy_data=True):
+def fitMass2(c,do_toy_data=False):
 
     workspace = root.RooWorkspace("w")
     mass = root.RooRealVar("mass","Mass [MeV]",0,2000.)
     mass2 = root.RooRealVar("mass2","Mass Squared [MeV^{2}]",-2e5,3e6)
+    true_p = root.RooRealVar("reco_momo","True Momentum [MeV]",500,0,2000.)
     observables = root.RooArgSet(mass2)
 
     data = None
     if not do_toy_data:
         infile = root.TFile("momentumTest.root")
         intree = infile.Get("lowlevel/Mass Tree");
-        data = root.RooDataSet("data","data",root.RooArgSet(mass2,mass),root.RooFit.Import(intree))
+        data = root.RooDataSet("data","data",root.RooArgSet(mass2,mass,true_p),root.RooFit.Import(intree))
 
     d = root.RooRealVar("d","Distance",6.683)
-    true_p = root.RooRealVar("true_p","True Momentum [MeV]",500,0,2000.)
     true_p.setBins(50) # speeds up data-avaraging projection
     sigma_p = root.RooRealVar("sigma_p","",50.)
     sigma_dt = root.RooRealVar("sigma_dt","",0.5)
 
     # Make true momentum distribution
-    true_p_norm1 = root.RooRealVar("true_p_norm1","",0.01)
+    true_p_norm1 = root.RooRealVar("true_p_norm1","",0.02)
     true_p_mean1 = root.RooRealVar("true_p_mean1","",100.)
-    true_p_sigma1 = root.RooRealVar("true_p_sigma1","",75.)
-    true_p_norm2 = root.RooRealVar("true_p_norm2","",0.35)
-    true_p_mean2 = root.RooRealVar("true_p_mean2","",400.)
-    true_p_sigma2 = root.RooRealVar("true_p_sigma2","",80.)
-    true_p_norm3 = root.RooRealVar("true_p_norm3","",0.6)
-    true_p_mean3 = root.RooRealVar("true_p_mean3","",700.)
-    true_p_sigma3 = root.RooRealVar("true_p_sigma3","",100.)
+    true_p_sigma1 = root.RooRealVar("true_p_sigma1","",20.)
+    true_p_norm2 = root.RooRealVar("true_p_norm2","",0.02)
+    true_p_mean2 = root.RooRealVar("true_p_mean2","",380.)
+    true_p_sigma2 = root.RooRealVar("true_p_sigma2","",40.)
+    true_p_norm3 = root.RooRealVar("true_p_norm3","",1.)
+    true_p_mean3 = root.RooRealVar("true_p_mean3","",660.)
+    true_p_sigma3 = root.RooRealVar("true_p_sigma3","",150.)
     true_p_gaus1 = root.RooGaussian("true_p_gaus1","True Momentum Gaus 1",true_p,true_p_mean1,true_p_sigma1)
     true_p_gaus2 = root.RooGaussian("true_p_gaus2","True Momentum Gaus 2",true_p,true_p_mean2,true_p_sigma2)
     true_p_gaus3 = root.RooGaussian("true_p_gaus3","True Momentum Gaus 3",true_p,true_p_mean3,true_p_sigma3)
@@ -137,48 +137,56 @@ def fitMass2(c,do_toy_data=True):
     toy_data = None
     toy_data2 = None
     if do_toy_data:
-        toy_data = model_mass_momentum.generate(root.RooArgSet(mass,true_p),50000.)
+        toy_data = model_mass_momentum.generate(root.RooArgSet(mass,true_p),500.)
 #        toy_data2 = model_mass2_momentum.generate(root.RooArgSet(mass2,true_p),1000.)
 
     c.SetRightMargin(0.1)
 
     gaus_graphs = []
     gaus_titles = []
-#    frame2 = mass2.frame(root.RooFit.Title(""))
-#    if do_toy_data2:
-#        toy_data2.plotOn(frame2)
-#     else:
-#        data.plotOn(frame2)
-#    model2.plotOn(frame2,root.RooFit.ProjWData(toy_data2))
-#    gaus_graphs.append(frame2.getObject(int(frame2.numItems())-1))
-#    gaus_titles.append("All Particles")
-##    for iGauss, gauss in enumerate(gaussians2):
-##        gaus_graph = model2.plotOn(frame2,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iGauss+1]))
-##        gaus_graphs.append(frame2.getObject(int(frame2.numItems())-1))
-##        gaus_titles.append(gauss.GetTitle())
-#    frame2.Draw()
-#    leg = drawNormalLegend(gaus_graphs,gaus_titles,option="l",position=(0.55,0.7,0.85,0.89))
-#    c.SaveAs("TOFFit2.png")
-#    c.SaveAs("TOFFit2.pdf")
-#
-#    gaus_graphs = []
-#    gaus_titles = []
-#    frame2_zoom = mass2.frame(root.RooFit.Title(""),root.RooFit.Range(-2e5,2e5))
-#    if do_toy_data2:
-#        toy_data2.plotOn(frame2_zoom)
-#    else:
-#        data.plotOn(frame2_zoom)
-#    model_mass2_momentum.plotOn(frame2_zoom,root.RooFit.ProjWData(toy_data2))
-#    gaus_graphs.append(frame2_zoom.getObject(int(frame2_zoom.numItems())-1))
-#    gaus_titles.append("All Particles")
-##    for iGauss, gauss in enumerate(gaussians2):
-##        model_mass2_momentum.plotOn(frame2_zoom,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iGauss+1]),root.RooFit.ProjWData(toy_data2))
-##        gaus_graphs.append(frame2_zoom.getObject(int(frame2_zoom.numItems())-1))
-##        gaus_titles.append(gauss.GetTitle())
-#    frame2_zoom.Draw()
-#    leg = drawNormalLegend(gaus_graphs,gaus_titles,option="l",position=(0.55,0.7,0.85,0.89))
-#    c.SaveAs("TOFFit2_zoom.png")
-#    c.SaveAs("TOFFit2_zoom.pdf")
+    frame2 = mass2.frame(root.RooFit.Title(""))
+    if do_toy_data:
+        toy_data2.plotOn(frame2)
+        model2.plotOn(frame2,root.RooFit.ProjWData(toy_data2,True))
+    else:
+        data.plotOn(frame2)
+        model2.plotOn(frame2,root.RooFit.ProjWData(data,True))
+    gaus_graphs.append(frame2.getObject(int(frame2.numItems())-1))
+    gaus_titles.append("All Particles")
+    for iGauss, gauss in enumerate(gaussians2):
+        if do_toy_data:
+            model2.plotOn(frame2,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iGauss+1]),root.RooFit.ProjWData(toy_data2,True))
+        else:
+            model2.plotOn(frame2,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iGauss+1]),root.RooFit.ProjWData(data,True))
+        gaus_graphs.append(frame2.getObject(int(frame2.numItems())-1))
+        gaus_titles.append(gauss.GetTitle())
+    frame2.Draw()
+    leg = drawNormalLegend(gaus_graphs,gaus_titles,option="l",position=(0.55,0.7,0.85,0.89))
+    c.SaveAs("TOFFit2.png")
+    c.SaveAs("TOFFit2.pdf")
+
+    gaus_graphs = []
+    gaus_titles = []
+    frame2_zoom = mass2.frame(root.RooFit.Title(""),root.RooFit.Range(-2e5,2e5))
+    if do_toy_data:
+        toy_data2.plotOn(frame2_zoom)
+        model_mass2_momentum.plotOn(frame2_zoom,root.RooFit.ProjWData(toy_data2,True))
+    else:
+        data.plotOn(frame2_zoom)
+        model_mass2_momentum.plotOn(frame2_zoom,root.RooFit.ProjWData(data,True))
+    gaus_graphs.append(frame2_zoom.getObject(int(frame2_zoom.numItems())-1))
+    gaus_titles.append("All Particles")
+    for iGauss, gauss in enumerate(gaussians2):
+        if do_toy_data:
+            model_mass2_momentum.plotOn(frame2_zoom,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iGauss+1]),root.RooFit.ProjWData(toy_data2,True))
+        else:
+            model_mass2_momentum.plotOn(frame2_zoom,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iGauss+1]),root.RooFit.ProjWData(data,True))
+        gaus_graphs.append(frame2_zoom.getObject(int(frame2_zoom.numItems())-1))
+        gaus_titles.append(gauss.GetTitle())
+    frame2_zoom.Draw()
+    leg = drawNormalLegend(gaus_graphs,gaus_titles,option="l",position=(0.55,0.7,0.85,0.89))
+    c.SaveAs("TOFFit2_zoom.png")
+    c.SaveAs("TOFFit2_zoom.pdf")
 
     gaus_graphs = []
     gaus_titles = []
@@ -186,14 +194,17 @@ def fitMass2(c,do_toy_data=True):
     #frame.updateNormVars(root.RooArgSet(mass,true_p)) # makes RooFit contionalize on true_p
     if do_toy_data:
         toy_data.plotOn(frame)
+        model_mass_momentum.plotOn(frame,root.RooFit.ProjWData(toy_data,True))
     else:
         data.plotOn(frame)
-    print(toy_data)
-    model_mass_momentum.plotOn(frame,root.RooFit.ProjWData(toy_data,True))
+        model_mass_momentum.plotOn(frame,root.RooFit.ProjWData(data,True))
     gaus_graphs.append(frame.getObject(int(frame.numItems())-1))
     gaus_titles.append("All Particles")
     for iGauss, gauss in enumerate(gaussians):
-        model_mass_momentum.plotOn(frame,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iGauss+1]),root.RooFit.ProjWData(toy_data))
+        if do_toy_data:
+            model_mass_momentum.plotOn(frame,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iGauss+1]),root.RooFit.ProjWData(toy_data,True))
+        else:
+            model_mass_momentum.plotOn(frame,root.RooFit.Components(gauss.GetName()),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iGauss+1]),root.RooFit.ProjWData(data,True))
         gaus_graphs.append(frame.getObject(int(frame.numItems())-1))
         gaus_titles.append(gauss.GetTitle())
     frame.Draw()
@@ -214,5 +225,5 @@ def fitMass2(c,do_toy_data=True):
 if __name__ == "__main__":
 
   c = root.TCanvas("c")
-  fitMass2(c,None)
+  fitMass2(c)
   
