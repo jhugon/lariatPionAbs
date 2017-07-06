@@ -4,12 +4,18 @@ from ROOT import gStyle as gStyle
 root.gROOT.SetBatch(True)
 from helpers import *
 
-def fitMass2(c,hist,do_toy_data=True):
+def fitMass2(c,do_toy_data=True):
 
     workspace = root.RooWorkspace("w")
     mass = root.RooRealVar("mass","Mass [MeV]",0,2000.)
     mass2 = root.RooRealVar("mass2","Mass Squared [MeV^{2}]",-2e5,3e6)
     observables = root.RooArgSet(mass2)
+
+    data = None
+    if not do_toy_data:
+        infile = root.TFile("momentumTest.root")
+        intree = infile.Get("lowlevel/Mass Tree");
+        data = root.RooDataSet("data","data",root.RooArgSet(mass2,mass),root.RooFit.Import(intree))
 
     d = root.RooRealVar("d","Distance",6.683)
     true_p = root.RooRealVar("true_p","True Momentum [MeV]",500,0,2000.)
@@ -139,8 +145,10 @@ def fitMass2(c,hist,do_toy_data=True):
     gaus_graphs = []
     gaus_titles = []
 #    frame2 = mass2.frame(root.RooFit.Title(""))
-#    if toy_data2:
+#    if do_toy_data2:
 #        toy_data2.plotOn(frame2)
+#     else:
+#        data.plotOn(frame2)
 #    model2.plotOn(frame2,root.RooFit.ProjWData(toy_data2))
 #    gaus_graphs.append(frame2.getObject(int(frame2.numItems())-1))
 #    gaus_titles.append("All Particles")
@@ -156,8 +164,10 @@ def fitMass2(c,hist,do_toy_data=True):
 #    gaus_graphs = []
 #    gaus_titles = []
 #    frame2_zoom = mass2.frame(root.RooFit.Title(""),root.RooFit.Range(-2e5,2e5))
-#    if toy_data2:
+#    if do_toy_data2:
 #        toy_data2.plotOn(frame2_zoom)
+#    else:
+#        data.plotOn(frame2_zoom)
 #    model_mass2_momentum.plotOn(frame2_zoom,root.RooFit.ProjWData(toy_data2))
 #    gaus_graphs.append(frame2_zoom.getObject(int(frame2_zoom.numItems())-1))
 #    gaus_titles.append("All Particles")
@@ -174,8 +184,10 @@ def fitMass2(c,hist,do_toy_data=True):
     gaus_titles = []
     frame = mass.frame(root.RooFit.Title(""))
     #frame.updateNormVars(root.RooArgSet(mass,true_p)) # makes RooFit contionalize on true_p
-    if toy_data:
+    if do_toy_data:
         toy_data.plotOn(frame)
+    else:
+        data.plotOn(frame)
     print(toy_data)
     model_mass_momentum.plotOn(frame,root.RooFit.ProjWData(toy_data,True))
     gaus_graphs.append(frame.getObject(int(frame.numItems())-1))
@@ -190,8 +202,10 @@ def fitMass2(c,hist,do_toy_data=True):
     c.SaveAs("TOFFit.pdf")
 
     frame_p = true_p.frame()
-    if toy_data:
+    if do_toy_data:
         toy_data.plotOn(frame_p)
+    else:
+        data.plotOn(frame_p)
     true_p_distribution.plotOn(frame_p)
     frame_p.Draw()
     c.SaveAs("TOFFit_p.png")

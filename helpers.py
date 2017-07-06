@@ -2322,7 +2322,10 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
     yMin -= (yMax-yMin)*0.1
   if logy:
     yMin = 10**(-1)
-    yMax = (math.log10(yMax) + 1.)*multiplier - 1.
+    try:
+        yMax = (math.log10(yMax) + 1.)*multiplier - 1.
+    except ValueError as e:
+        yMax = 1.
     yMax = 10**yMax
   else:
     yMax = yMax*multiplier
