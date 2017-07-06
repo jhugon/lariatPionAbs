@@ -11,21 +11,42 @@
 #include "TCanvas.h"
 #include "TAxis.h"
 #include "TH1.h"
+#include "TFile.h"
+#include "TTree.h"
 using namespace RooFit;
 
 void tofRooFit()
 {
+   // Construct observable -- notice they match the tree variable names
+   RooRealVar mass2("mass2","Reco Mass Squared [MeV^{2}]",-5e4,3e6);
+   RooRealVar mass("mass","Reco Mass [MeV]",0, 1500);
+   RooRealVar reco_tof("reco_tof","Reco TOF [ns]",0,100);
+   RooRealVar reco_momo("reco_momo","Reco Momentum [MeV/c]",0,2000);
+
+   // Read in dataset
+   // ---------------
+
+   TFile* infile = new TFile("momentumTest.root");
+   TTree* intree = (TTree*) infile->Get("lowlevel/Mass Tree");
+   //infile->cd("lowlevel");
+   //infile->ls();
+   //intree->Print();
+
+   // This is our data in RooFit format
+   RooDataSet* data = new RooDataSet("data","data",RooArgSet(mass2,mass,reco_tof,reco_momo),Import(*intree));
+   // This is how you cut on that data (notice that the result is a pointer
+   RooDataSet* dataMassGt500 = (RooDataSet*) data->reduce("mass>500.");
+   RooDataSet* dataMassGt800 = (RooDataSet*) data->reduce("mass>800.");
+   RooDataSet* dataMassGt800Momo650to750 = (RooDataSet*) dataMassGt800->reduce("reco_momo > 650. && reco_momo < 750.");
+
    // S e t u p   c o m p o n e n t   p d f s 
    // ---------------------------------------
-
-   // Construct observable
-   RooRealVar mass2("mass2","Mass Squared [MeV^{2}]",-5e4,3e6);
 
    // Construct nuisance parameters
    RooRealVar true_mass("true_mass","True Mass [MeV]",938.27);
    RooRealVar d("d","Distance [m]",6.683);
-   RooRealVar true_p("true_p","True Momentum [MeV]",300);
-   RooRealVar sigma_p("sigma_p","Momentum Smearing Sigma [MeV]",30.);
+   RooRealVar true_p("true_p","True Momentum [MeV]",700);
+   RooRealVar sigma_p("sigma_p","Momentum Smearing Sigma [MeV]",50,0.,200.);
    RooRealVar sigma_dt("sigma_dt","#Delta t Smearing Sigma [ns]",0.5);
 
    // Construct dependent parameters
@@ -83,23 +104,45 @@ void tofRooFit()
    // ----------------------------------------------------------------------
 
    // Sample 1000 events in x from gxlx
-   RooDataSet* toy_data = gauss.generate(RooArgList(mass2),5000);
+//   RooDataSet* toy_data = gauss.generate(RooArgList(mass2),5000);
 
-//   // Fit gxlx to data
-//   //mass2_model.fitTo(*data);
-//
-//   // Plot data, landau pdf, landau (X) gauss pdf
-   RooPlot* frame = mass2.frame(Title(""));
-   toy_data->plotOn(frame);
-   gauss.plotOn(frame);
-//
-//   // Draw frame on canvas
+   modelPtr->fitTo(*data);
+
+   // Plot data, landau pdf, landau (X) gauss pdf
+   RooPlot* frame2 = mass2.frame(Title(""));
+//   toy_data->plotOn(frame);
+   dataMassGt800Momo650to750->plotOn(frame2);
+   gauss.plotOn(frame2);
+
+   // Draw frame on canvas
    TCanvas* c = new TCanvas("c");
    //gPad->SetLeftMargin(0.15); frame->GetYaxis()->SetTitleOffset(1.4);
+   frame2->Draw();
+   c->SaveAs("FitTOF2.png");
+   c->SaveAs("FitTOF2.pdf");
+
+   // Plot data, landau pdf, landau (X) gauss pdf
+   RooPlot* frame = mass.frame(Title(""));
+//   toy_data->plotOn(frame);
+   data->plotOn(frame);
+
+   // Draw frame on canvas
    frame->Draw();
    c->SaveAs("FitTOF.png");
    c->SaveAs("FitTOF.pdf");
 
+
+   RooPlot* frame_momo = reco_momo.frame(Title(""));
+   data->plotOn(frame_momo);
+   frame_momo->Draw();
+   c->SaveAs("FitTOF_momentum.png");
+   c->SaveAs("FitTOF_momentum.pdf");
+
+   RooPlot* frame_tof = reco_tof.frame(Title(""));
+   data->plotOn(frame_tof);
+   frame_tof->Draw();
+   c->SaveAs("FitTOF_tof.png");
+   c->SaveAs("FitTOF_tof.pdf");
 }
 
 
