@@ -8,11 +8,11 @@ def fitMass2(c,do_toy_data=False,plot_components=True,binned=True):
 
     workspace = root.RooWorkspace("w")
     mass = root.RooRealVar("mass","Mass [MeV]",0,2000.)
-    mass2 = root.RooRealVar("mass2","Mass Squared [MeV^{2}]",-2e5,2e6)
+    mass2 = root.RooRealVar("mass2","Mass Squared [MeV^{2}]",-2e5,3e6)
     true_p = root.RooRealVar("reco_momo","True Momentum [MeV]",500,0,1500.)
     observables = root.RooArgSet(mass2)
-    mass.setBins(100)
-    mass2.setBins(200)
+    mass.setBins(50)
+    mass2.setBins(50)
     true_p.setBins(50) # speeds up data-avaraging projection
 
     data = None
@@ -30,7 +30,7 @@ def fitMass2(c,do_toy_data=False,plot_components=True,binned=True):
     sigma_p = root.RooRealVar("sigma_p","",50.)
     sigma_dt = root.RooRealVar("sigma_dt","",0.5)
     shift_dt2 = root.RooRealVar("shift_dt2","Shift of #Delta t Squared [ns^{2}]",74,-100,200)
-    coef1_p = root.RooRealVar("coef1_p","1st Polynomial Coefficient for Momentum",1.086,1.,1.50)
+    coef1_p = root.RooRealVar("coef1_p","1st Polynomial Coefficient for Momentum",1.120,1.,1.50)
 
     # Derived parameters
     d2 = root.RooFormulaVar("d2","Distance^{2} [m^{2}]","pow(@0,2)",root.RooArgList(d))
@@ -65,7 +65,7 @@ def fitMass2(c,do_toy_data=False,plot_components=True,binned=True):
       ("pion","Pion",139.57,0.03*Ndata),
       ("kaon","Kaon",493.677,0.007*Ndata),
       ("proton","Proton",938.27,0.8*Ndata),
-      ("Deuteron","Deuteron",1875.6,0.002*Ndata),
+      #("Deuteron","Deuteron",1875.6,0.002*Ndata),
     ]
 
     gaussians = []
@@ -167,7 +167,7 @@ def fitMass2(c,do_toy_data=False,plot_components=True,binned=True):
         toy_data = model_mass_momentum.generate(root.RooArgSet(mass,true_p),5000.)
         toy_data2 = model_mass2_momentum.generate(root.RooArgSet(mass2,true_p),5000.)
     else:
-        model2.fitTo(data,
+        model_mass2_momentum.fitTo(data,
                     root.RooFit.ConditionalObservables(root.RooArgSet(true_p)),
                     root.RooFit.NumCPU(4))
 
