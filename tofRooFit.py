@@ -4,24 +4,42 @@ from ROOT import gStyle as gStyle
 root.gROOT.SetBatch(True)
 from helpers import *
 
-def fitMass2(c,do_toy_data=False,plot_components=True,binned=True):
+def fitMass2(c,do_toy_data=False,plot_components=False,binned=True):
 
     workspace = root.RooWorkspace("w")
     mass = root.RooRealVar("mass","Mass [MeV]",0,2000.)
     mass2 = root.RooRealVar("mass2","Mass Squared [MeV^{2}]",-2e5,3e6)
     true_p = root.RooRealVar("reco_momo","True Momentum [MeV]",500,0,1500.)
+    reco_tof = root.RooRealVar("reco_tof","",0,100.)
     observables = root.RooArgSet(mass2)
-    mass.setBins(50)
-    mass2.setBins(50)
-    true_p.setBins(50) # speeds up data-avaraging projection
+    mass.setBins(20)
+    mass2.setBins(20)
+    true_p.setBins(30) # speeds up data-avaraging projection
 
     data = None
     Ndata = 1.
     if not do_toy_data:
         infile = root.TFile("momentumTest.root")
         intree = infile.Get("lowlevel/Mass Tree");
-        data = root.RooDataSet("data","data",root.RooArgSet(mass2,mass,true_p),root.RooFit.Import(intree))
+        intree.Draw("reco_tof:reco_momo >> tofVmomo(150,0,1500,90,0,90)","","colz")
+        c.SaveAs("TOF_tofVmomo.pdf")
+        c.SaveAs("TOF_tofVmomo.png")
+        intree.Draw("mass:reco_momo >> massVmomo(150,0,1500,150,0,1500)","reco_tof < 75.","colz")
+        c.SaveAs("TOF_massVmomo.pdf")
+        c.SaveAs("TOF_massVmomo.png")
+        intree.Draw("mass2:reco_momo >> mass2Vmomo(150,0,1500,200,-2e3,3e6)","","colz")
+        c.SaveAs("TOF_mass2Vmomo.pdf")
+        c.SaveAs("TOF_mass2Vmomo.png")
+        intree.Draw("mass:reco_tof >> massVtof(100,0,100,150,0,1500)","reco_momo > 200","colz")
+        c.SaveAs("TOF_massVtof.pdf")
+        c.SaveAs("TOF_massVtof.png")
+        
+        data = root.RooDataSet("data","data",root.RooArgSet(mass2,mass,true_p,reco_tof),root.RooFit.Import(intree))
+        data = data.reduce("reco_momo >200 && reco_tof < 75.")
+
         #data = data.reduce("reco_momo >600 && reco_momo < 605")
+        #data = data.reduce("reco_momo >400 && reco_momo < 450")
+        #data = data.reduce("reco_momo >700 && reco_momo < 605")
         Ndata = data.sumEntries()
         if binned:
             data = data.binnedClone()
@@ -60,8 +78,8 @@ def fitMass2(c,do_toy_data=False,plot_components=True,binned=True):
     true_p_distribution = root.RooAddPdf("true_p_distribution","True Momentum Distribution",root.RooArgList(true_p_gaus1,true_p_gaus2,true_p_gaus3),root.RooArgList(true_p_norm1,true_p_norm2,true_p_norm3))
 
     particleConfigs = [
-      ("electron","Electron",0.511,0.01*Ndata),
-      ("muon","Muon",105.658,0.03*Ndata),
+      #("electron","Electron",0.511,0.01*Ndata),
+      #("muon","Muon",105.658,0.03*Ndata),
       ("pion","Pion",139.57,0.03*Ndata),
       ("kaon","Kaon",493.677,0.007*Ndata),
       ("proton","Proton",938.27,0.8*Ndata),
@@ -248,16 +266,16 @@ def fitMass2(c,do_toy_data=False,plot_components=True,binned=True):
 #        leg = drawNormalLegend(gaus_graphs,gaus_titles,option="l",position=(0.55,0.7,0.85,0.89))
 #    c.SaveAs("TOFFit.png")
 #    c.SaveAs("TOFFit.pdf")
-#
-#    frame_p = true_p.frame()
-#    if do_toy_data:
-#        toy_data.plotOn(frame_p)
-#    else:
-#        data.plotOn(frame_p)
-#    true_p_distribution.plotOn(frame_p)
-#    frame_p.Draw()
-#    c.SaveAs("TOFFit_p.png")
-#    c.SaveAs("TOFFit_p.pdf")
+
+    frame_p = true_p.frame()
+    if do_toy_data:
+        toy_data.plotOn(frame_p)
+    else:
+        data.plotOn(frame_p)
+    true_p_distribution.plotOn(frame_p)
+    frame_p.Draw()
+    c.SaveAs("TOFFit_p.png")
+    c.SaveAs("TOFFit_p.pdf")
 
 if __name__ == "__main__":
 
