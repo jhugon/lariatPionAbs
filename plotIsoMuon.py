@@ -15,8 +15,10 @@ if __name__ == "__main__":
   cuts += "*(iBestMatch >= 0)" # primary Track found
   #cuts += "*(acos(sin(primTrkStartTheta)*sin(primTrkStartPhi))*180./pi < 5. || acos(sin(primTrkStartTheta)*sin(primTrkStartPhi))*180./pi > 175.)" # theta vertical
   #cuts += "*((!isMC) || (trueStartMom>3000. && trueStartMom < 8000.))"
-  cuts += "*(primTrkResRanges[0] > 1.)"
-  cuts += "*(Iteration$ < 10)"
+  #cuts += "*(primTrkResRanges[0] > 1.)"
+  #cuts += "*(Iteration$ < 10)"
+  cuts += "*(primTrkXs > 10. && primTrkXs < 38. && primTrkYs > -10. && primTrkYs < 10. && primTrkZs > 10. && primTrkZs < 80.)"
+  cuts += "*(sqrt(pow(primTrkXs - trueStartX,2)+pow(primTrkYs - trueStartY,2)+pow(primTrkZs - trueStartZ,2)) < 3.)"
 
   weightStr = "1"+cuts
   nData = 30860.0
@@ -954,6 +956,36 @@ if __name__ == "__main__":
       'binning': [60,-180,180,100,0,5],
       'var': "primTrkdEdxs:atan2(sin(trueStartTheta)*sin(trueStartPhi),cos(trueStartTheta))*180/pi",
       'cuts': weightStr,
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "primTrkdEdxsVtrueStartPhiZY_zoom_onlyCentral",
+      'xtitle': "True Start #phi_{zy}",
+      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+      'binning': [60,-180,180,100,0,5],
+      'var': "primTrkdEdxs:atan2(sin(trueStartTheta)*sin(trueStartPhi),cos(trueStartTheta))*180/pi",
+      'cuts': "(iBestMatch >= 0)"+"*(primTrkXs > 10. && primTrkXs < 38. && primTrkYs > -10. && primTrkYs < 10. && primTrkZs > 10. && primTrkZs < 80.)",
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "primTrkdEdxsVtrueStartPhiZY_zoom_onlyNearVertex",
+      'xtitle': "True Start #phi_{zy}",
+      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+      'binning': [60,-180,180,100,0,5],
+      'var': "primTrkdEdxs:atan2(sin(trueStartTheta)*sin(trueStartPhi),cos(trueStartTheta))*180/pi",
+      'cuts': "(iBestMatch >= 0)"+"*(sqrt(pow(primTrkXs - trueStartX,2)+pow(primTrkYs - trueStartY,2)+pow(primTrkZs - trueStartZ,2))<3.)",
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "primTrkdEdxsVtrueStartPhiZY_zoom_noCuts",
+      'xtitle': "True Start #phi_{zy}",
+      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+      'binning': [60,-180,180,100,0,5],
+      'var': "primTrkdEdxs:atan2(sin(trueStartTheta)*sin(trueStartPhi),cos(trueStartTheta))*180/pi",
+      'cuts': "(iBestMatch >= 0)",
       #'normalize': True,
       'logz': False,
     },

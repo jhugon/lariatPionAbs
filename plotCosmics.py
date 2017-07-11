@@ -17,6 +17,8 @@ if __name__ == "__main__":
   #cuts += "*((!isMC) || (trueStartMom>3000. && trueStartMom < 8000.))"
 
   cuts += "*enterExitYm*enterExitYp"
+  #cuts += "*(primTrkXs > 10. && primTrkXs < 38. &&  primTrkYs > 15. && primTrkZs > 10. && primTrkZs > 80.)"
+  cuts += "*(primTrkYs > 15.)"
 
   weightStr = "1"+cuts
   nData = 30860.0
@@ -298,6 +300,16 @@ if __name__ == "__main__":
       'logy': logy,
     },
     {
+      'name': "primTrkStartCosTheta",
+      'xtitle': "Primary TPC Track cos(#theta)",
+      'ytitle': "Events / bin",
+      'binning': [100,0,1],
+      'var': "cos(primTrkStartTheta)",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
       'name': "primTrkStartPhi",
       'xtitle': "Primary TPC Track #phi [deg]",
       'ytitle': "Events / bin",
@@ -318,8 +330,18 @@ if __name__ == "__main__":
       'logy': logy,
     },
     {
+      'name': "primTrkStartCosThetaY",
+      'xtitle': "Primary TPC Track cos(#theta_{y})",
+      'ytitle': "Events / bin",
+      'binning': [100,0,1],
+      'var': "sin(primTrkStartTheta)*sin(primTrkStartPhi)",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
       'name': "primTrkStartPhiZX",
-      'xtitle': "Primary TPC Track #theta_{zx} [deg]",
+      'xtitle': "Primary TPC Track #phi_{zx} [deg]",
       'ytitle': "Events / bin",
       'binning': [180,-180,180],
       'var': "atan2(sin(primTrkStartTheta)*cos(primTrkStartPhi),cos(primTrkStartTheta))*180./pi",
@@ -338,8 +360,18 @@ if __name__ == "__main__":
       'logy': logy,
     },
     {
+      'name': "primTrkStartCosThetaX",
+      'xtitle': "Primary TPC Track cos(#theta_{x})",
+      'ytitle': "Events / bin",
+      'binning': [100,0,1],
+      'var': "sin(primTrkStartTheta)*cos(primTrkStartPhi)",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
       'name': "primTrkStartPhiZY",
-      'xtitle': "Primary TPC Track #theta_{zy} [deg]",
+      'xtitle': "Primary TPC Track #phi_{zy} [deg]",
       'ytitle': "Events / bin",
       'binning': [180,-180,180],
       'var': "atan2(sin(primTrkStartTheta)*sin(primTrkStartPhi),cos(primTrkStartTheta))*180./pi",
@@ -777,16 +809,16 @@ if __name__ == "__main__":
       #'normalize': True,
       #'logz': True,
     },
-    {
-      'name': "primTrkStartThetaVPhi",
-      'xtitle': "Primary TPC Track #phi [deg]",
-      'ytitle': "Primary TPC Track #theta [deg]",
-      'binning': [90,-180,180,90,0,180],
-      'var': "primTrkStartTheta*180/pi:primTrkStartPhi*180/pi",
-      'cuts': weightStr,
-      #'normalize': True,
-      #'logz': True,
-    },
+#    {
+#      'name': "primTrkStartThetaVPhi",
+#      'xtitle': "Primary TPC Track #phi [deg]",
+#      'ytitle': "Primary TPC Track #theta [deg]",
+#      'binning': [90,-180,180,90,0,180],
+#      'var': "primTrkStartTheta*180/pi:primTrkStartPhi*180/pi",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      #'logz': True,
+#    },
     {
       'name': "primTrkStartThetaYVprimTrkStartPhiZX",
       'xtitle': "Primary TPC Track #phi_{zx} [deg]",
@@ -797,16 +829,16 @@ if __name__ == "__main__":
       #'normalize': True,
       'logz': False,
     },
-    {
-      'name': "primTrkStartThetaXVprimTrkStartPhiZY",
-      'xtitle': "Primary TPC Track #phi_{zy} [deg]",
-      'ytitle': "Primary TPC Track #theta_{x} [deg]",
-      'binning': [90,-180,180,90,0,180],
-      'var': "acos(sin(primTrkStartTheta)*cos(primTrkStartPhi))*180/pi:atan2(sin(primTrkStartTheta)*sin(primTrkStartPhi),cos(primTrkStartTheta))*180/pi",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logz': False,
-    },
+#    {
+#      'name': "primTrkStartThetaXVprimTrkStartPhiZY",
+#      'xtitle': "Primary TPC Track #phi_{zy} [deg]",
+#      'ytitle': "Primary TPC Track #theta_{x} [deg]",
+#      'binning': [90,-180,180,90,0,180],
+#      'var': "acos(sin(primTrkStartTheta)*cos(primTrkStartPhi))*180/pi:atan2(sin(primTrkStartTheta)*sin(primTrkStartPhi),cos(primTrkStartTheta))*180/pi",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logz': False,
+#    },
 #    {
 #      'name': "primTrkdEdxsVx",
 #      'xtitle': "Hit x [cm]",
@@ -997,19 +1029,109 @@ if __name__ == "__main__":
 #      #'normalize': True,
 #      'logz': False,
 #    },
+#    {
+#      'name': "primTrkdEdxsVprimTrkStartCosTheta",
+#      'xtitle': "Primary TPC Track cos(#theta)",
+#      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'binning': [50,0,1,10000,0,50],
+#      'var': "primTrkdEdxs:cos(primTrkStartTheta)",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logz': True,
+#    },
+#    {
+#      'name': "primTrkdEdxsVprimTrkStartPhi",
+#      'xtitle': "Primary TPC Track #phi",
+#      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'binning': [30,-180,180,10000,0,50],
+#      'var': "primTrkdEdxs:primTrkStartPhi*180/pi",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logz': True,
+#    },
+#    {
+#      'name': "primTrkdEdxsVprimTrkStartCosThetaX",
+#      'xtitle': "Primary TPC Track cos(#theta_{x})",
+#      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'binning': [50,0,1,10000,0,50],
+#      'var': "primTrkdEdxs:sin(primTrkStartTheta)*cos(primTrkStartPhi)",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logz': False,
+#    },
+#    {
+#      'name': "primTrkdEdxsVprimTrkStartCosThetaX_zoom",
+#      'xtitle': "Primary TPC Track cos(#theta_{x})",
+#      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'binning': [50,0,1,100,0,5],
+#      'var': "primTrkdEdxs:sin(primTrkStartTheta)*cos(primTrkStartPhi)",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logz': False,
+#    },
+#    {
+#      'name': "primTrkdEdxsVprimTrkStartPhiZY",
+#      'xtitle': "Primary TPC Track #phi_{zy}",
+#      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'binning': [60,-180,180,10000,0,50],
+#      'var': "primTrkdEdxs:atan2(sin(primTrkStartTheta)*sin(primTrkStartPhi),cos(primTrkStartTheta))*180/pi",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logz': False,
+#    },
+#    {
+#      'name': "primTrkdEdxsVprimTrkStartPhiZY_zoom",
+#      'xtitle': "Primary TPC Track #phi_{zy}",
+#      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'binning': [60,-180,180,100,0,5],
+#      'var': "primTrkdEdxs:atan2(sin(primTrkStartTheta)*sin(primTrkStartPhi),cos(primTrkStartTheta))*180/pi",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logz': False,
+#    },
+#    {
+#      'name': "primTrkdEdxsVprimTrkStartPhiZY_zoom_logy",
+#      'xtitle': "Primary TPC Track #phi_{zy}",
+#      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'binning': [60,-180,180,100,0,5],
+#      'var': "primTrkdEdxs:atan2(sin(primTrkStartTheta)*sin(primTrkStartPhi),cos(primTrkStartTheta))*180/pi",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logz': True,
+#    },
+#    {
+#      'name': "primTrkdEdxsVprimTrkStartCosThetaY",
+#      'xtitle': "Primary TPC Track cos(#theta_{y})",
+#      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'binning': [50,0,1,10000,0,50],
+#      'var': "primTrkdEdxs:sin(primTrkStartTheta)*sin(primTrkStartPhi)",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logz': True,
+#    },
+    {
+      'name': "primTrkdEdxsVprimTrkStartPhiZX",
+      'xtitle': "Primary TPC Track #phi_{zx}",
+      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+      'binning': [30,-180,180,10000,0,50],
+      'var': "primTrkdEdxs:atan2(sin(primTrkStartTheta)*cos(primTrkStartPhi),cos(primTrkStartTheta))*180/pi",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': True,
+    },
   ]
 
-#  hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
-#  outfile = root.TFile("cosmics_hists.root","recreate")
-#  outfile.cd()
-#  for var in hists:
-#    for ds in hists[var]:
-#        newname = var+"_"+ds
-#        hist = hists[var][ds]
-#        hist.SetName(newname)
-#        hist.Print()
-#        hist.Write()
-#  outfile.Close()
+  hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
+  outfile = root.TFile("cosmics_hists.root","recreate")
+  outfile.cd()
+  for var in hists:
+    for ds in hists[var]:
+        newname = var+"_"+ds
+        hist = hists[var][ds]
+        hist.SetName(newname)
+        hist.Print()
+        hist.Write()
+  outfile.Close()
 
 ######################################################################################
 ######################################################################################
