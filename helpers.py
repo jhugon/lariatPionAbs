@@ -2299,6 +2299,9 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
     if isinstance(hist,root.TH1):
         histMax = getHistMax(hist)
         yMax = max(yMax,histMax)
+        if logy:
+            histMin = hist.GetMinimum(0.) # should get minimum bin greater than 0.
+            yMin = min(yMin,histMin)
         histX = hist
         if hist.InheritsFrom("TEfficiency"):
             histX = hist.GetTotalHistogram()
@@ -2316,21 +2319,38 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
             yMin = min(yMin,float(y))
   if yMax == -1e15:
     yMax = 1.
-  if yMin == 1e15:
-    yMin = 0.
-  else:
-    yMin -= (yMax-yMin)*0.1
   if logy:
-    yMin = 10**(-1)
+    if yMin == 1e15:
+      yMin = 0.
     try:
-        yMax = (math.log10(yMax) + 1.)*multiplier - 1.
+        yMin = math.log10(yMin)
+    except ValueError as e:
+        yMin = -1.
+    else:
+        try:
+            yMin -= abs(math.log10(yMax) - yMin)*0.25
+        except ValueError as e:
+            pass
+    yMin = min(yMin,-1.)
+    try:
+        yMax = math.log10(yMax)
     except ValueError as e:
         yMax = 1.
+    else:
+        yMax += abs(yMax-yMin)*(multiplier-1.)
+    if abs(yMax-yMin) < 1.:
+        yMax += 0.75
+        yMin -= 0.25
+    yMin = 10**yMin
     yMax = 10**yMax
   else:
     yMax = yMax*multiplier
     if yMax == 0.:
       yMax = 1.
+    if yMin == 1e15:
+      yMin = 0.
+    else:
+      yMin -= (yMax-yMin)*0.1
   if len(xlim)==2:
     xMin = xlim[0]
     xMax = xlim[1]
