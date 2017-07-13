@@ -20,17 +20,20 @@ if __name__ == "__main__":
   #cuts += "*(primTrkXs > 10. && primTrkXs < 38. &&  primTrkYs > 15. && primTrkZs > 10. && primTrkZs > 80.)"
   cuts += "*(primTrkYs > 15.)"
 
-  weightStr = "1"+cuts
+  #momentumDistributionStr = "(pow(trueStartMom/1000.,-2.7)*pow(10,(-0.6*(log10(trueStartMom/1000.)-1.6)**2+2.8))*0.5*(tanh((trueStartMom/1000.-1.)*5.) + 1.)+18.365383433483444*0.5*(tanh((1-trueStartMom/1000.)*5.) + 1.))"
+  #weightStr = "1"
+  weightStr = "cosmicMomWeight"#NoTurnOn"
+  weightStr += cuts
   nData = 30860.0
   logy = True
 
   c = root.TCanvas()
-  NMAX=1000000000
-  #NMAX=100
+  NMAX=100000000
+  NMAX=100000
   fileConfigs = [
     #{
     #  #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/CosmicAna_Pos_RunII.root",
-    #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_data_cosmics_Pos_RunII_v01/anahist.root",
+    #  'fn': "lariat_data_cosmics_Pos_RunII_v01.root",
     #  'name': "RunIIPos",
     #  'title': "Run II Positive Polarity",
     #  'caption': "Run II Positive Polarity",
@@ -38,7 +41,7 @@ if __name__ == "__main__":
     #  'isData': True,
     #},
     #{
-    #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_data_cosmics_Neg_RunII_v01/anahist.root",
+    #  'fn': "lariat_data_cosmics_Neg_RunII_v01.root",
     #  'name': "RunIINeg",
     #  'title': "Run II Negative Polarity",
     #  'caption': "Run II Negative Polarity",
@@ -46,8 +49,9 @@ if __name__ == "__main__":
     #  'isData': True,
     #},
     {
-      'fn': ["/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_data_cosmics_Pos_RunII_v01/anahist.root",
-            "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_data_cosmics_Neg_RunII_v01/anahist.root"],
+      'fn': ["lariat_data_cosmics_Pos_RunII_v01.root",
+            "lariat_data_cosmics_Neg_RunII_v01.root"],
+      'addFriend': ["friend","friendTree_lariat_data_cosmics_RunII_v01.root"],
       'name': "RunII",
       'title': "Run II",
       'caption': "Run II",
@@ -55,8 +59,8 @@ if __name__ == "__main__":
       'isData': True,
     },
     {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_v3/anahist.root",
-      #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/CosmicAnalyzer.root",
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_v3.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_v3.root"],
       'name': "CosmicMC",
       'title': "Cosmic MC",
       'caption': "Cosmic MC",
@@ -64,7 +68,8 @@ if __name__ == "__main__":
       #'scaleFactor': 1367./99535.
     },
     {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v3/anahist.root",
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v3.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v3.root"],
       'name': "CosmicMC_presmear20perc",
       'title': "Cosmic MC Pre-smear 20% ",
       'caption': "Cosmic MC Pre-smear 20%",
@@ -72,7 +77,8 @@ if __name__ == "__main__":
       'scaleFactor': 1367./99692.
     },
     {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v3/anahist.root",
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v3.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v3.root"],
       'name': "CosmicMC_presmear30perc",
       'title': "Cosmic MC Pre-smear 30% ",
       'caption': "Cosmic MC Pre-smear 30%",
@@ -80,7 +86,8 @@ if __name__ == "__main__":
       'scaleFactor': 1367./19365.
     },
     {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_presmear35perc_v3/anahist.root",
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear35perc_v3.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear35perc_v3.root"],
       'name': "CosmicMC_presmear35perc",
       'title': "Cosmic MC Pre-smear 35% ",
       'caption': "Cosmic MC Pre-smear 35%",
@@ -88,7 +95,8 @@ if __name__ == "__main__":
       'scaleFactor': 1367./19379.
     },
     {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_presmear40perc_v3/anahist.root",
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear40perc_v3.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear40perc_v3.root"],
       'name': "CosmicMC_presmear40perc",
       'title': "Cosmic MC Pre-smear 40% ",
       'caption': "Cosmic MC Pre-smear 40%",
@@ -96,7 +104,8 @@ if __name__ == "__main__":
       'scaleFactor': 1367./110166.
     },
     {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear10perc_v3/anahist.root",
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear10perc_v3.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear10perc_v3.root"],
       'name': "CosmicMC_postsmear10perc",
       'title': "Cosmic MC Post-smear 10% ",
       'caption': "Cosmic MC Post-smear 10%",
@@ -104,39 +113,43 @@ if __name__ == "__main__":
       'scaleFactor': 1367./109553.
     },
     {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear20perc_v3/anahist.root",
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear20perc_v3.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear20perc_v3.root"],
       'name': "CosmicMC_postsmear20perc",
       'title': "Cosmic MC Post-smear 20% ",
       'caption': "Cosmic MC Post-smear 20%",
       'isData': False,
       'scaleFactor': 1367./112612.
     },
-   {
-     'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v3/anahist.root",
-     'name': "CosmicMC_postsmear40perc",
-     'title': "Cosmic MC Post-smear 40% ",
-     'caption': "Cosmic MC Post-smear 40%",
-     'isData': False,
-     'scaleFactor': 1367./110166.
-   },
-   {
-     'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v3/anahist.root",
-     'name': "CosmicMC_postsmear60perc",
-     'title': "Cosmic MC Post-smear 60% ",
-     'caption': "Cosmic MC Post-smear 60%",
-     'isData': False,
-     'scaleFactor': 1367./25596.
-   },
-   {
-     'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v3/anahist.root",
-     'name': "CosmicMC_postsmear80perc",
-     'title': "Cosmic MC Post-smear 80% ",
-     'caption': "Cosmic MC Post-smear 80%",
-     'isData': False,
-     'scaleFactor': 1367./25042.
-   },
+    {
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v3.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v3.root"],
+      'name': "CosmicMC_postsmear40perc",
+      'title': "Cosmic MC Post-smear 40% ",
+      'caption': "Cosmic MC Post-smear 40%",
+      'isData': False,
+      'scaleFactor': 1367./110166.
+    },
+    {
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v3.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v3.root"],
+      'name': "CosmicMC_postsmear60perc",
+      'title': "Cosmic MC Post-smear 60% ",
+      'caption': "Cosmic MC Post-smear 60%",
+      'isData': False,
+      'scaleFactor': 1367./25596.
+    },
+    {
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v3.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v3.root"],
+      'name': "CosmicMC_postsmear80perc",
+      'title': "Cosmic MC Post-smear 80% ",
+      'caption': "Cosmic MC Post-smear 80%",
+      'isData': False,
+      'scaleFactor': 1367./25042.
+    },
     #{
-    #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postsmear120perc_v3/anahist.root",
+    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear120perc_v3.root",
     #  'name': "CosmicMC_postsmear120perc",
     #  'title': "Cosmic MC Post-smear 120% ",
     #  'caption': "Cosmic MC Post-smear 120%",
@@ -144,7 +157,7 @@ if __name__ == "__main__":
     #  'scaleFactor': 1367./21010.
     #},
     #{
-    #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_cosmics_vert_postnoise10perc_v3/anahist.root",
+    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_postnoise10perc_v3.root",
     #  'name': "CosmicMC_2xNoise",
     #  'title': "Cosmic MC 2x Noise",
     #  'caption': "Cosmic MC 2x Noise",
@@ -158,6 +171,31 @@ if __name__ == "__main__":
         fileConfigs[i]['color'] = COLORLIST[i-1]
 
   histConfigs = [
+    {
+      'name': "trueStartMom",
+      'xtitle': "True Muon Initial Momentum [MeV]",
+      'ytitle': "Events / MeV",
+      #'binning': getLogBins(20,100,10000),
+      'binning': [20,0,10000],
+      'var': "trueStartMom",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+      #'logx': True,
+      #'normToBinWidth': True,
+    },
+    {
+      'name': "trueStartMomLin",
+      'xtitle': "True Muon Initial Momentum [MeV]",
+      'ytitle': "Events / MeV",
+      #'binning': getLogBins(20,100,10000),
+      'binning': [20,0,10000],
+      'var': "trueStartMom",
+      'cuts': weightStr,
+      'normalize': True,
+      #'logx': True,
+      #'normToBinWidth': True,
+    },
 #    {
 #      'name': "trackXFront",
 #      'xtitle': "X of TPC Track Projection to TPC Front [cm]",
@@ -268,137 +306,137 @@ if __name__ == "__main__":
 #      #'normalize': True,
 #      'logy': logy,
 #    },
-    #{
-    #  'name': "trackCaloKin",
-    #  'xtitle': "TPC Calo Estimate of KE [MeV]",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [50,0,2500],
-    #  'var': "trackCaloKin",
-    #  'cuts': weightStr,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
-    {
-      'name': "primTrkLength",
-      'xtitle': "Primary TPC Track Length [cm]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,100],
-      'var': "primTrkLength",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-      'printIntegral': True,
-    },
-    {
-      'name': "primTrkStartTheta",
-      'xtitle': "Primary TPC Track #theta [deg]",
-      'ytitle': "Events / bin",
-      'binning': [180,0,180],
-      'var': "primTrkStartTheta*180/pi",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkStartCosTheta",
-      'xtitle': "Primary TPC Track cos(#theta)",
-      'ytitle': "Events / bin",
-      'binning': [100,0,1],
-      'var': "cos(primTrkStartTheta)",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkStartPhi",
-      'xtitle': "Primary TPC Track #phi [deg]",
-      'ytitle': "Events / bin",
-      'binning': [180,-180,180],
-      'var': "primTrkStartPhi*180/pi",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkStartThetaY",
-      'xtitle': "Primary TPC Track #theta_{y} [deg]",
-      'ytitle': "Events / bin",
-      'binning': [180,0,180],
-      'var': "acos(sin(primTrkStartTheta)*sin(primTrkStartPhi))*180./pi",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkStartCosThetaY",
-      'xtitle': "Primary TPC Track cos(#theta_{y})",
-      'ytitle': "Events / bin",
-      'binning': [100,0,1],
-      'var': "sin(primTrkStartTheta)*sin(primTrkStartPhi)",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkStartPhiZX",
-      'xtitle': "Primary TPC Track #phi_{zx} [deg]",
-      'ytitle': "Events / bin",
-      'binning': [180,-180,180],
-      'var': "atan2(sin(primTrkStartTheta)*cos(primTrkStartPhi),cos(primTrkStartTheta))*180./pi",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkStartThetaX",
-      'xtitle': "Primary TPC Track #theta_{x} [deg]",
-      'ytitle': "Events / bin",
-      'binning': [180,0,180],
-      'var': "acos(sin(primTrkStartTheta)*cos(primTrkStartPhi))*180./pi",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkStartCosThetaX",
-      'xtitle': "Primary TPC Track cos(#theta_{x})",
-      'ytitle': "Events / bin",
-      'binning': [100,0,1],
-      'var': "sin(primTrkStartTheta)*cos(primTrkStartPhi)",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkStartPhiZY",
-      'xtitle': "Primary TPC Track #phi_{zy} [deg]",
-      'ytitle': "Events / bin",
-      'binning': [180,-180,180],
-      'var': "atan2(sin(primTrkStartTheta)*sin(primTrkStartPhi),cos(primTrkStartTheta))*180./pi",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkdEdxs",
-      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,50],
-      'var': "primTrkdEdxs",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
-    {
-      'name': "primTrkdEdxs_zoom",
-      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,10],
-      'var': "primTrkdEdxs",
-      'cuts': weightStr,
-      'normalize': not logy,
-      'logy': logy,
-    },
+#    {
+#      'name': "trackCaloKin",
+#      'xtitle': "TPC Calo Estimate of KE [MeV]",
+#      'ytitle': "Tracks / bin",
+#      'binning': [50,0,2500],
+#      'var': "trackCaloKin",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#    },
+#    {
+#      'name': "primTrkLength",
+#      'xtitle': "Primary TPC Track Length [cm]",
+#      'ytitle': "Events / bin",
+#      'binning': [100,0,100],
+#      'var': "primTrkLength",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#      'printIntegral': True,
+#    },
+#    {
+#      'name': "primTrkStartTheta",
+#      'xtitle': "Primary TPC Track #theta [deg]",
+#      'ytitle': "Events / bin",
+#      'binning': [180,0,180],
+#      'var': "primTrkStartTheta*180/pi",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#    },
+#    {
+#      'name': "primTrkStartCosTheta",
+#      'xtitle': "Primary TPC Track cos(#theta)",
+#      'ytitle': "Events / bin",
+#      'binning': [100,0,1],
+#      'var': "cos(primTrkStartTheta)",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#    },
+#    {
+#      'name': "primTrkStartPhi",
+#      'xtitle': "Primary TPC Track #phi [deg]",
+#      'ytitle': "Events / bin",
+#      'binning': [180,-180,180],
+#      'var': "primTrkStartPhi*180/pi",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#    },
+#    {
+#      'name': "primTrkStartThetaY",
+#      'xtitle': "Primary TPC Track #theta_{y} [deg]",
+#      'ytitle': "Events / bin",
+#      'binning': [180,0,180],
+#      'var': "acos(sin(primTrkStartTheta)*sin(primTrkStartPhi))*180./pi",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#    },
+#    {
+#      'name': "primTrkStartCosThetaY",
+#      'xtitle': "Primary TPC Track cos(#theta_{y})",
+#      'ytitle': "Events / bin",
+#      'binning': [100,0,1],
+#      'var': "sin(primTrkStartTheta)*sin(primTrkStartPhi)",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#    },
+#    {
+#      'name': "primTrkStartPhiZX",
+#      'xtitle': "Primary TPC Track #phi_{zx} [deg]",
+#      'ytitle': "Events / bin",
+#      'binning': [180,-180,180],
+#      'var': "atan2(sin(primTrkStartTheta)*cos(primTrkStartPhi),cos(primTrkStartTheta))*180./pi",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#    },
+#    {
+#      'name': "primTrkStartThetaX",
+#      'xtitle': "Primary TPC Track #theta_{x} [deg]",
+#      'ytitle': "Events / bin",
+#      'binning': [180,0,180],
+#      'var': "acos(sin(primTrkStartTheta)*cos(primTrkStartPhi))*180./pi",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#    },
+#    {
+#      'name': "primTrkStartCosThetaX",
+#      'xtitle': "Primary TPC Track cos(#theta_{x})",
+#      'ytitle': "Events / bin",
+#      'binning': [100,0,1],
+#      'var': "sin(primTrkStartTheta)*cos(primTrkStartPhi)",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#    },
+#    {
+#      'name': "primTrkStartPhiZY",
+#      'xtitle': "Primary TPC Track #phi_{zy} [deg]",
+#      'ytitle': "Events / bin",
+#      'binning': [180,-180,180],
+#      'var': "atan2(sin(primTrkStartTheta)*sin(primTrkStartPhi),cos(primTrkStartTheta))*180./pi",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#    },
+#    {
+#      'name': "primTrkdEdxs",
+#      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'ytitle': "Events / bin",
+#      'binning': [100,0,50],
+#      'var': "primTrkdEdxs",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      'logy': logy,
+#    },
+#    {
+#      'name': "primTrkdEdxs_zoom",
+#      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'ytitle': "Events / bin",
+#      'binning': [100,0,10],
+#      'var': "primTrkdEdxs",
+#      'cuts': weightStr,
+#      'normalize': not logy,
+#      'logy': logy,
+#    },
     {
       'name': "primTrkdEdxs_zoom2",
       'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
@@ -579,16 +617,16 @@ if __name__ == "__main__":
     #  #'normalize': True,
     #  'logy': logy,
     #},
-    {
-      'name': "primTrkResRanges",
-      'xtitle': "Primary TPC Track Residual Range [cm]",
-      'ytitle': "Events / bin",
-      'binning': [200,0,100],
-      'var': "primTrkResRanges",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
+    #{
+    #  'name': "primTrkResRanges",
+    #  'xtitle': "Primary TPC Track Residual Range [cm]",
+    #  'ytitle': "Events / bin",
+    #  'binning': [200,0,100],
+    #  'var': "primTrkResRanges",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
     {
       'name': "primTrkPitches",
       'xtitle': "Primary TPC Track Pitch [cm]",
@@ -1121,17 +1159,17 @@ if __name__ == "__main__":
     },
   ]
 
-  hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
-  outfile = root.TFile("cosmics_hists.root","recreate")
-  outfile.cd()
-  for var in hists:
-    for ds in hists[var]:
-        newname = var+"_"+ds
-        hist = hists[var][ds]
-        hist.SetName(newname)
-        hist.Print()
-        hist.Write()
-  outfile.Close()
+#  hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
+#  outfile = root.TFile("cosmics_hists.root","recreate")
+#  outfile.cd()
+#  for var in hists:
+#    for ds in hists[var]:
+#        newname = var+"_"+ds
+#        hist = hists[var][ds]
+#        hist.SetName(newname)
+#        hist.Print()
+#        hist.Write()
+#  outfile.Close()
 
 ######################################################################################
 ######################################################################################
@@ -1323,7 +1361,7 @@ if __name__ == "__main__":
       'ytitle': "Events / MeV",
       'binning': getLogBins(20,100,10000),
       'var': "trueStartMom",
-      'cuts': "",
+      'cuts': "cosmicMomWeight",
       #'normalize': True,
       'logy': logy,
       'logx': True,
@@ -1335,7 +1373,7 @@ if __name__ == "__main__":
       'ytitle': "Events / MeV",
       'binning': getLogBins(20,100,10000),
       'var': "trueStartMom",
-      'cuts': "enterExitYp",
+      'cuts': "cosmicMomWeight"+"*enterExitYp",
       #'normalize': True,
       'logy': logy,
       'logx': True,
@@ -1347,7 +1385,7 @@ if __name__ == "__main__":
       'ytitle': "Events / MeV",
       'binning': getLogBins(20,100,10000),
       'var': "trueStartMom",
-      'cuts': "enterExitYm",
+      'cuts': "cosmicMomWeight"+"*enterExitYm",
       #'normalize': True,
       'logy': logy,
       'logx': True,
@@ -1359,7 +1397,7 @@ if __name__ == "__main__":
       'ytitle': "Events / MeV",
       'binning': getLogBins(20,100,10000),
       'var': "trueStartMom",
-      'cuts': "enterExitYm*enterExitYp",
+      'cuts': "cosmicMomWeight"+"*enterExitYm*enterExitYp",
       #'normalize': True,
       'logy': logy,
       'logx': True,
@@ -1371,7 +1409,7 @@ if __name__ == "__main__":
       'ytitle': "Events / MeV",
       'binning': getLogBins(20,100,10000),
       'var': "trueStartMom",
-      'cuts': "enterExitXm",
+      'cuts': "cosmicMomWeight"+"*enterExitXm",
       #'normalize': True,
       'logy': logy,
       'logx': True,
@@ -1383,7 +1421,7 @@ if __name__ == "__main__":
       'ytitle': "Events / MeV",
       'binning': getLogBins(20,100,10000),
       'var': "trueStartMom",
-      'cuts': "enterExitXp",
+      'cuts': "cosmicMomWeight"+"*enterExitXp",
       #'normalize': True,
       'logy': logy,
       'logx': True,
@@ -1392,7 +1430,7 @@ if __name__ == "__main__":
   ]
   for i in range(len(histConfigs)):
     histConfigs[i]["color"] = COLORLIST[i]
-#  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trueStartMom")
+  plotManyHistsOnePlot(fileConfigs[1:],histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trueStartMom")
 
   histConfigs = [
     {

@@ -169,6 +169,8 @@ class DataMCStack:
         raise Exception("")
     if 'addFriend' in fileConfig:
       fileConfig['tree'].AddFriend(*(fileConfig['addFriend']))
+    fileConfig['tree'].SetCacheSize(10000000);
+    fileConfig['tree'].AddBranchToCache("*");
   
   def loadHist(self,histConfig,fileConfig,binning,var,cuts,nMax,isData):
      hist = None
@@ -257,6 +259,8 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         raise Exception("")
     if 'addFriend' in fileConfig:
       fileConfig['tree'].AddFriend(*(fileConfig['addFriend']))
+    fileConfig['tree'].SetCacheSize(10000000);
+    fileConfig['tree'].AddBranchToCache("*");
 
   for histConfig in histConfigs:
     #print(" hist: {}, {}".format(histConfig["var"],histConfig["cuts"]))
@@ -436,6 +440,8 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         raise Exception("")
     if 'addFriend' in fileConfig:
       fileConfig['tree'].AddFriend(*(fileConfig['addFriend']))
+    fileConfig['tree'].SetCacheSize(10000000);
+    fileConfig['tree'].AddBranchToCache("*");
     tree = fileConfig['tree']
     xtitle = ""
     ytitle = "Events/bin"
@@ -676,6 +682,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         raise Exception("")
     if 'addFriend' in fileConfig:
       fileConfig['tree'].AddFriend(*(fileConfig['addFriend']))
+    fileConfig['tree'].SetCacheSize(10000000);
+    fileConfig['tree'].AddBranchToCache("*");
     tree = fileConfig['tree']
     for histConfig in histConfigs:
       # setup
