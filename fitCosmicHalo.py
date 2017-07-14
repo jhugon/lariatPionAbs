@@ -34,9 +34,9 @@ def plotSlices(c,hist,savename,xlimits,xtitle,ytitle,xvarname,rebinX=1,rebinY=1,
     xlow = hist.GetXaxis().GetBinLowEdge(iBin)
     xhigh = hist.GetXaxis().GetBinUpEdge(iBin)
     if xunits:
-      labels.append("{0} {3} < {1} < {2} {3}".format(xlow,xvarname,xhigh,xunits))
+      labels.append("{0:.4g} {3} < {1} < {2:.4g} {3}".format(xlow,xvarname,xhigh,xunits))
     else:
-      labels.append("{0} < {1} < {2}".format(xlow,xvarname,xhigh))
+      labels.append("{0:.4g} < {1} < {2:.4g}".format(xlow,xvarname,xhigh))
   if c.GetLogy() == 1:
     ybound = ymax * 10**((log10(ymax)+1)*0.5)
     axisHist = Hist2D(1,xlimits[0],xlimits[1],1,0.1,ybound)
@@ -156,6 +156,90 @@ def fitLandaus(c,hist):
 def fitSlicesLandaus(c,hist):
   histAll = hist.ProjectionY("_pyAll",1,hist.GetNbinsX())
   fitLandaus(c,histAll)
+
+def fitLandauCore(c,hist,postfix,caption,xMin=1.5,xMax=2.3):
+
+  t = root.RooRealVar("t","dE/dx [MeV/cm]",xMin,xMax)
+  observables = root.RooArgSet(t)
+
+  data = root.RooDataHist("data_"+hist.GetName(),"Data Hist",root.RooArgList(t),hist)
+
+  ##############
+  mpvl = root.RooRealVar("mpvl","mpv landau",1.7,0,5)
+  wl = root.RooRealVar("wl","width landau",0.42,0.01,10)
+  ml = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(mpvl,wl))
+  landau = root.RooLandau("lx","lx",t,ml,wl)
+
+  mg = root.RooRealVar("mg","mg",0)
+  sg = root.RooRealVar("sg","sg",0.1,0.01,2.)
+  gauss = root.RooGaussian("gauss","gauss",t,mg,sg)
+
+  t.setBins(10000,"cache")
+  langaus = root.RooFFTConvPdf("langaus","landau (X) gauss",t,landau,gauss)
+  langaus.setBufferFraction(0.4)
+
+  model = langaus
+
+  ##############
+
+  fitResult = model.fitTo(data,root.RooFit.Save())
+
+  frame = t.frame(root.RooFit.Title("landau (x) gauss convolution"))
+  data.plotOn(frame)
+  model.plotOn(frame)
+
+  #root.gPad.SetLeftMargin(0.15)
+  #frame.GetYaxis().SetTitleOffset(1.4)
+  #frame.Draw("same")
+  #axisHist = root.TH2F("axisHist","",1,0,50,1,0,1000)
+  ##axisHist = root.TH2F("axisHist","",1,-1,1,1,1000,1300)
+  #axisHist.Draw()
+  #frame.Draw("same")
+  frame.Draw()
+  frame.SetTitle(caption)
+  c.SaveAs("roofit_{}.png".format(postfix))
+  c.SaveAs("roofit_{}.pdf".format(postfix))
+
+  return (mpvl.getVal(),wl.getVal(),sg.getVal()), (mpvl.getError(),wl.getError(),sg.getError())
+
+def fitSlicesLandauCore(c,hist,fileprefix):
+  nJump = 1
+  xaxis = hist.GetXaxis()
+  xTitle = xaxis.GetTitle()
+  yaxis = hist.GetYaxis()
+  yTitle = yaxis.GetTitle()
+  mpvlGraph = root.TGraphErrors()
+  wlGraph = root.TGraphErrors()
+  sgGraph = root.TGraphErrors()
+  for i in range(hist.GetNbinsX()//nJump):
+      firstBin = i*nJump+1
+      lastBin = (i+1)*(nJump)
+      lastBin = min(lastBin,hist.GetNbinsX())
+      histAll = hist.ProjectionY("_pyAll",firstBin,lastBin)
+      postfix = "_"+fileprefix+"bins{}".format(i)
+      xMin = xaxis.GetBinLowEdge(firstBin)
+      xMax = xaxis.GetBinUpEdge(lastBin)
+      caption = "{} from {} to {}".format(xTitle,xMin,xMax)
+      xMiddle = 0.5*(xMax+xMin)
+      xError = 0.5*(xMax-xMin)
+      (mpvl,wl,sg),(mpvlErr,wlErr,sgErr) = fitLandauCore(c,histAll,postfix,caption)
+      if mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5:
+            continue
+      mpvlGraph.SetPoint(i,xMiddle,mpvl)
+      wlGraph.SetPoint(i,xMiddle,wl)
+      sgGraph.SetPoint(i,xMiddle,sg)
+      mpvlGraph.SetPointError(i,xError,mpvlErr)
+      wlGraph.SetPointError(i,xError,wlErr)
+      sgGraph.SetPointError(i,xError,sgErr)
+  graphs = [mpvlGraph,wlGraph,sgGraph]
+  for i, graph in enumerate(graphs):
+    graph.SetLineColor(COLORLIST[i])
+    graph.SetMarkerColor(COLORLIST[i])
+  axis = drawGraphs(c,graphs,xTitle,yTitle)
+  leg = drawNormalLegend(graphs,["Landau MPV", "Landau Width", "Gaussian #sigma"],option="lep",position=[0.2,0.4,0.8,0.6])
+  c.SaveAs(fileprefix+".png")
+  c.SaveAs(fileprefix+".pdf")
+  return mpvlGraph,wlGraph,sgGraph
 
 if __name__ == "__main__":
 

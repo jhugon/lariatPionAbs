@@ -169,6 +169,8 @@ class DataMCStack:
         raise Exception("")
     if 'addFriend' in fileConfig:
       fileConfig['tree'].AddFriend(*(fileConfig['addFriend']))
+    fileConfig['tree'].SetCacheSize(10000000);
+    fileConfig['tree'].AddBranchToCache("*");
   
   def loadHist(self,histConfig,fileConfig,binning,var,cuts,nMax,isData):
      hist = None
@@ -258,6 +260,8 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         raise Exception("")
     if 'addFriend' in fileConfig:
       fileConfig['tree'].AddFriend(*(fileConfig['addFriend']))
+    fileConfig['tree'].SetCacheSize(10000000);
+    fileConfig['tree'].AddBranchToCache("*");
 
   for histConfig in histConfigs:
     #print(" hist: {}, {}".format(histConfig["var"],histConfig["cuts"]))
@@ -443,6 +447,8 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
         raise Exception("")
     if 'addFriend' in fileConfig:
       fileConfig['tree'].AddFriend(*(fileConfig['addFriend']))
+    fileConfig['tree'].SetCacheSize(10000000);
+    fileConfig['tree'].AddBranchToCache("*");
     tree = fileConfig['tree']
     xtitle = ""
     ytitle = "Events/bin"
@@ -539,7 +545,7 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
       hist = None
       if is2D:
         if len(binning) == 2:
-          hist = Hist(binning[0],binning[1])
+          hist = Hist2D(binning[0],binning[1])
         else:
           hist = Hist2D(*binning)
       else:
@@ -683,6 +689,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         raise Exception("")
     if 'addFriend' in fileConfig:
       fileConfig['tree'].AddFriend(*(fileConfig['addFriend']))
+    fileConfig['tree'].SetCacheSize(10000000);
+    fileConfig['tree'].AddBranchToCache("*");
     tree = fileConfig['tree']
     for histConfig in histConfigs:
       # setup
@@ -759,7 +767,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       hist = None
       if is2D:
         if len(binning) == 2:
-          hist = Hist(binning[0],binning[1])
+          hist = Hist2D(binning[0],binning[1])
         else:
           hist = Hist2D(*binning)
       else:
@@ -2326,6 +2334,9 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
     if isinstance(hist,root.TH1):
         histMax = getHistMax(hist)
         yMax = max(yMax,histMax)
+        if logy:
+            histMin = hist.GetMinimum(0.) # should get minimum bin greater than 0.
+            yMin = min(yMin,histMin)
         histX = hist
         if hist.InheritsFrom("TEfficiency"):
             histX = hist.GetTotalHistogram()
@@ -2343,18 +2354,38 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
             yMin = min(yMin,float(y))
   if yMax == -1e15:
     yMax = 1.
-  if yMin == 1e15:
-    yMin = 0.
-  else:
-    yMin -= (yMax-yMin)*0.1
   if logy:
-    yMin = 10**(-1)
-    yMax = (math.log10(yMax) + 1.)*multiplier - 1.
+    if yMin == 1e15:
+      yMin = 0.
+    try:
+        yMin = math.log10(yMin)
+    except ValueError as e:
+        yMin = -1.
+    else:
+        try:
+            yMin -= abs(math.log10(yMax) - yMin)*0.25
+        except ValueError as e:
+            pass
+    yMin = min(yMin,-1.)
+    try:
+        yMax = math.log10(yMax)
+    except ValueError as e:
+        yMax = 1.
+    else:
+        yMax += abs(yMax-yMin)*(multiplier-1.)
+    if abs(yMax-yMin) < 1.:
+        yMax += 0.75
+        yMin -= 0.25
+    yMin = 10**yMin
     yMax = 10**yMax
   else:
     yMax = yMax*multiplier
     if yMax == 0.:
       yMax = 1.
+    if yMin == 1e15:
+      yMin = 0.
+    else:
+      yMin -= (yMax-yMin)*0.1
   if len(xlim)==2:
     xMin = xlim[0]
     xMax = xlim[1]
@@ -2364,12 +2395,16 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
   axisHist = root.TH2F(uuid.uuid1().hex,"",1,xMin,xMax,1,yMin,yMax)
   return axisHist
 
+def getLinBins(nBins,xMin,xMax):
+  delta = (xMax-xMin)/float(nBins)
+  return [xMin + x*delta for x in range(nBins+1)]
+
 def getLogBins(nBins,xMin,xMax):
   xMinLog = math.log10(xMin)
   delta = (math.log10(xMax)-xMinLog)/nBins
   return [10**(xMinLog + x*delta) for x in range(nBins+1)]
 
-def drawNormalLegend(hists,labels,option="l",wide=False):
+def drawNormalLegend(hists,labels,option="l",wide=False,position=None):
   assert(len(hists)==len(labels))
   options = None
   if type(option) is list and len(option) == len(labels):
@@ -2379,7 +2414,9 @@ def drawNormalLegend(hists,labels,option="l",wide=False):
   else:
     raise Exception("option must be a str or a list of str with length == lenght of labels")
   leg = None
-  if wide:
+  if position:
+    leg = root.TLegend(*position)
+  elif wide:
     leg = root.TLegend(0.2,0.7,0.91,0.89)
   else:
     leg = root.TLegend(0.55,0.7,0.91,0.89)
@@ -2502,6 +2539,41 @@ def drawHline(axisHist,y):
   result.SetLineColor(root.kGray+1)
   result.Draw("lsame")
   return result
+
+def drawGraphs(canvas,graphs,xTitle,yTitle):
+  xMin = 1e15
+  xMax = -1e15
+  yMin = 1e15
+  yMax = -1e15
+  xArr = array.array("d", [0.])
+  yArr = array.array("d", [0.])
+  for graph in graphs:
+    for iPoint in range(graph.GetN()):
+        graph.GetPoint(iPoint,xArr,yArr)
+        x = xArr[0]
+        y = yArr[0]
+        xMin = min(x,xMin)
+        xMax = max(x,xMax)
+        yMin = min(y,yMin)
+        yMax = max(y,yMax)
+        xMax = max(x+graph.GetErrorXhigh(iPoint),xMax)
+        xMin = min(x-graph.GetErrorXlow(iPoint),xMin)
+        yMax = max(y+graph.GetErrorYhigh(iPoint),yMax)
+        yMin = min(y-graph.GetErrorYlow(iPoint),yMin)
+  xRange = xMax-xMin
+  yRange = yMax-yMin
+  xMin -= xRange*0.1
+  xMax += xRange*0.1
+  yMin -= yRange*0.1
+  yMax += yRange*0.1
+  yMin = min(0,yMin)
+
+  axisHist = Hist2D(1,xMin,xMax,1,yMin,yMax)
+  setHistTitles(axisHist,xTitle,yTitle)
+  axisHist.Draw()
+  for graph in graphs:
+    graph.Draw("PEZ")
+  return axisHist
 
 COLORLIST=[
       root.kBlue-7,
