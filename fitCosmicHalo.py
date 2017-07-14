@@ -157,9 +157,9 @@ def fitSlicesLandaus(c,hist):
   histAll = hist.ProjectionY("_pyAll",1,hist.GetNbinsX())
   fitLandaus(c,histAll)
 
-def fitLandauCore(c,hist,postfix,caption):
+def fitLandauCore(c,hist,postfix,caption,xMin=1.5,xMax=2.3):
 
-  t = root.RooRealVar("t","dE/dx [MeV/cm]",1.5,2.3)
+  t = root.RooRealVar("t","dE/dx [MeV/cm]",xMin,xMax)
   observables = root.RooArgSet(t)
 
   data = root.RooDataHist("data_"+hist.GetName(),"Data Hist",root.RooArgList(t),hist)
