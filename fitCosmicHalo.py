@@ -5,6 +5,9 @@ root.gROOT.SetBatch(True)
 from helpers import *
 
 def plotSlices(c,hist,savename,xlimits,xtitle,ytitle,xvarname,rebinX=1,rebinY=1,xunits=None,normalize=False):
+  print(hist)
+  if not hist:
+    return
   hist = hist.Clone(uuid.uuid1().hex)
 
   hist.RebinX(rebinX)
@@ -157,8 +160,10 @@ def fitSlicesLandaus(c,hist):
   histAll = hist.ProjectionY("_pyAll",1,hist.GetNbinsX())
   fitLandaus(c,histAll)
 
-def fitLandauCore(c,hist,postfix,caption,xMin=1.5,xMax=2.3):
+def fitLandauCore(c,hist,postfix,caption,fitMin=1.5,fitMax=2.3):
 
+  xMin = hist.GetXaxis().GetBinLowEdge(1)
+  xMax = hist.GetXaxis().GetBinUpEdge(hist.GetNbinsX())
   t = root.RooRealVar("t","dE/dx [MeV/cm]",xMin,xMax)
   observables = root.RooArgSet(t)
 
@@ -182,11 +187,11 @@ def fitLandauCore(c,hist,postfix,caption,xMin=1.5,xMax=2.3):
 
   ##############
 
-  fitResult = model.fitTo(data,root.RooFit.Save())
+  fitResult = model.fitTo(data,root.RooFit.Save(),root.RooFit.Range(fitMin,fitMax))
 
   frame = t.frame(root.RooFit.Title("landau (x) gauss convolution"))
   data.plotOn(frame)
-  model.plotOn(frame)
+  model.plotOn(frame,root.RooFit.Range(fitMin,fitMax))
 
   #root.gPad.SetLeftMargin(0.15)
   #frame.GetYaxis().SetTitleOffset(1.4)
@@ -244,49 +249,42 @@ def fitSlicesLandauCore(c,hist,fileprefix):
 if __name__ == "__main__":
 
   c = root.TCanvas("c")
-  fHalo = root.TFile("halo_hists.root")
-  #fHalo.ls()
   fCosmics = root.TFile("cosmics_hists.root")
-  #fCosmics.ls()
+  fCosmics.ls()
+  for key in fCosmics.GetListOfKeys():
+    name = key.GetName()
+    if "primTrkdEdxs_zoom3" in name:
+        hist = key.ReadObj()
+        hist.Rebin(2)
+        xMin,xMax = getHistFracMaxVals(hist,0.5)
+        fitLandauCore(c,hist,name,name,xMin,xMax)
 
   for logy,xmax,outext,ytitle in [(False,4,"","Normalized--Hits"),(True,50,"_logy","Hits/bin")]:
     c.SetLogy(logy)
-#    plotSlices(c,fHalo.Get("primTrkdEdxsVx_RunIIPos"),"SlicesXRunIIPos_Halo"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"x",rebinX=5,xunits="cm",normalize=not logy)
-#    plotSlices(c,fHalo.Get("primTrkdEdxsVx_HaloMC"),"SlicesXHaloMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"x",rebinX=5,xunits="cm",normalize=not logy)
+
+    plotSlices(c,fCosmics.Get("primTrkdEdxVwire_RunII"),"SlicesWireRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"wire",rebinX=1,xunits="",normalize=not logy)
+
 #    plotSlices(c,fCosmics.Get("primTrkdEdxsVx_RunIIPos"),"SlicesXRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"x",rebinX=5,xunits="cm",normalize=not logy)
 #    plotSlices(c,fCosmics.Get("primTrkdEdxsVx_CosmicMC"),"SlicesXCosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"x",rebinX=5,xunits="cm",normalize=not logy)
 
-    plotSlices(c,fHalo.Get("primTrkdEdxsVy_RunIIPos"),"SlicesYRunIIPos_Halo"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"y",rebinX=10,xunits="cm",normalize=not logy)
-    plotSlices(c,fHalo.Get("primTrkdEdxsVy_HaloMC"),"SlicesYHaloMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"y",rebinX=10,xunits="cm",normalize=not logy)
-    plotSlices(c,fCosmics.Get("primTrkdEdxsVy_RunIIPos"),"SlicesYRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"y",rebinX=10,xunits="cm",normalize=not logy)
-    plotSlices(c,fCosmics.Get("primTrkdEdxsVy_CosmicMC"),"SlicesYCosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"y",rebinX=10,xunits="cm",normalize=not logy)
+    #plotSlices(c,fCosmics.Get("primTrkdEdxsVy_RunIIPos"),"SlicesYRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"y",rebinX=10,xunits="cm",normalize=not logy)
+    #plotSlices(c,fCosmics.Get("primTrkdEdxsVy_CosmicMC"),"SlicesYCosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"y",rebinX=10,xunits="cm",normalize=not logy)
 
-    plotSlices(c,fHalo.Get("primTrkdEdxsVz_RunIIPos"),"SlicesZRunIIPos_Halo"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=10,xunits="cm",normalize=not logy)
-    plotSlices(c,fHalo.Get("primTrkdEdxsVz_HaloMC"),"SlicesZHaloMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=10,xunits="cm",normalize=not logy)
-    plotSlices(c,fCosmics.Get("primTrkdEdxsVz_RunIIPos"),"SlicesZRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=10,xunits="cm",normalize=not logy)
-    plotSlices(c,fCosmics.Get("primTrkdEdxsVz_CosmicMC"),"SlicesZ_CosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=10,xunits="cm",normalize=not logy)
+    #plotSlices(c,fCosmics.Get("primTrkdEdxsVz_RunIIPos"),"SlicesZRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=10,xunits="cm",normalize=not logy)
+    #plotSlices(c,fCosmics.Get("primTrkdEdxsVz_CosmicMC"),"SlicesZ_CosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=10,xunits="cm",normalize=not logy)
 
-    plotSlices(c,fHalo.Get("primTrkdEdxsVyFromCenter_RunIIPos"),"SlicesYFromCenterRunIIPos_Halo"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|y|",rebinX=8,xunits="cm",normalize=not logy)
-    plotSlices(c,fHalo.Get("primTrkdEdxsVyFromCenter_HaloMC"),"SlicesYFromCenterHaloMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|y|",rebinX=8,xunits="cm",normalize=not logy)
-    plotSlices(c,fCosmics.Get("primTrkdEdxsVyFromCenter_RunIIPos"),"SlicesYFromCenterRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|y|",rebinX=8,xunits="cm",normalize=not logy)
-    plotSlices(c,fCosmics.Get("primTrkdEdxsVyFromCenter_CosmicMC"),"SlicesYFromCenterCosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|y|",rebinX=8,xunits="cm",normalize=not logy)
+    #plotSlices(c,fCosmics.Get("primTrkdEdxsVyFromCenter_RunIIPos"),"SlicesYFromCenterRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|y|",rebinX=8,xunits="cm",normalize=not logy)
+    #plotSlices(c,fCosmics.Get("primTrkdEdxsVyFromCenter_CosmicMC"),"SlicesYFromCenterCosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|y|",rebinX=8,xunits="cm",normalize=not logy)
 
-    plotSlices(c,fHalo.Get("primTrkdEdxsVzFromCenter_RunIIPos"),"SlicesZFromCenterRunIIPos_Halo"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|z-45cm|",rebinX=8,xunits="cm",normalize=not logy)
-    plotSlices(c,fHalo.Get("primTrkdEdxsVzFromCenter_HaloMC"),"SlicesZFromCenterHaloMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|z-45cm|",rebinX=8,xunits="cm",normalize=not logy)
-    plotSlices(c,fCosmics.Get("primTrkdEdxsVzFromCenter_RunIIPos"),"SlicesZFromCenterRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=4,xunits="cm",normalize=not logy)
-    plotSlices(c,fCosmics.Get("primTrkdEdxsVzFromCenter_CosmicMC"),"SlicesZFromCenter_CosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|z-45cm|",rebinX=8,xunits="cm",normalize=not logy)
+    #plotSlices(c,fCosmics.Get("primTrkdEdxsVzFromCenter_RunIIPos"),"SlicesZFromCenterRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=4,xunits="cm",normalize=not logy)
+    #plotSlices(c,fCosmics.Get("primTrkdEdxsVzFromCenter_CosmicMC"),"SlicesZFromCenter_CosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|z-45cm|",rebinX=8,xunits="cm",normalize=not logy)
 #
-#    plotSlices(c,fHalo.Get("primTrkdEdxsVrun_RunIIPos"),"SlicesRunRunIIPos_Halo"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"Run",rebinX=2,normalize=not logy)
 #    plotSlices(c,fCosmics.Get("primTrkdEdxsVrun_RunIIPos"),"SlicesRunRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"Run",rebinX=2,normalize=not logy)
 
   ##############################################
 
 #  c.SetLogy(False)
 #  graphConfigs = [
-#    (fHalo.Get("primTrkdEdxsVrun_RunIIPos"),"Slices_modefwhm_run_halo","Run Number","Mode & FWHM of dE/dx [MeV/cm]"),
-#    (fHalo.Get("primTrkdEdxsVx_RunIIPos"),"Slices_modefwhm_x_halo","Hit x [cm]","Mode & FWHM of dE/dx [MeV/cm]"),
-#    (fHalo.Get("primTrkdEdxsVy_RunIIPos"),"Slices_modefwhm_y_halo","Hit y [cm]","Mode & FWHM of dE/dx [MeV/cm]"),
-#    (fHalo.Get("primTrkdEdxsVz_RunIIPos"),"Slices_modefwhm_z_halo","Hit z [cm]","Mode & FWHM of dE/dx [MeV/cm]"),
 #    (fCosmics.Get("primTrkdEdxsVrun_RunIIPos"),"Slices_modefwhm_run_cosmics","Run Number","Mode & FWHM of dE/dx [MeV/cm]"),
 #    (fCosmics.Get("primTrkdEdxsVx_RunIIPos"),"Slices_modefwhm_x_cosmics","Hit x [cm]","Mode & FWHM of dE/dx [MeV/cm]"),
 #    (fCosmics.Get("primTrkdEdxsVy_RunIIPos"),"Slices_modefwhm_y_cosmics","Hit y [cm]","Mode & FWHM of dE/dx [MeV/cm]"),

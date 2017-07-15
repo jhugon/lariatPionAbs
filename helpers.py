@@ -246,6 +246,7 @@ def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
     drawvlines: list of x locations to draw vertical lines
     printIntegral: if True, print integral after all scaling
     showMedian: if True, put median in legend
+    showMode: if True, put mode in legend
   """
   #print("plotManyFilesOnePlot")
   
@@ -1011,6 +1012,35 @@ def getHistMode(hist):
     return hist.GetXaxis().GetBinCenter(iMax)
   else:
     return None
+
+def getHistFracMaxVals(hist,frac,mode=None):
+    """
+    Finds the values on either side of the mode
+    where the data has dropped below frac of the
+    max value
+    """
+    nBins = hist.GetXaxis().GetNbins()
+    if mode is None:
+        mode = getHistMode(hist)
+    iMode = hist.GetXaxis().FindBin(mode)
+    nFracMax = hist.GetBinContent(iMode)*frac
+    minVal = None
+    maxVal = None
+    for i in range(iMode,0,-1):
+      if hist.GetBinContent(i) <= nFracMax:
+        minVal = hist.GetXaxis().GetBinUpEdge(i)
+        break
+    for i in range(iMode,nBins+1):
+      if hist.GetBinContent(i) <= nFracMax:
+        maxVal = hist.GetXaxis().GetBinLowEdge(i)
+        break
+    return minVal,maxVal
+
+def getHistFWHM(hist,mode=None):
+    minVal, maxVal = getHistFracMaxVals(hist,0.5,mode=mode)
+    if (minVal is None) or (maxVal is None):
+        return None
+    return maxVal-minVal
 
 def divideYValByXVal(hist):
     nBinsX = hist.GetXaxis().GetNbins()
