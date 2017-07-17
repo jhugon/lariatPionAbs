@@ -17,9 +17,9 @@ if __name__ == "__main__":
   #cuts += "*((!isMC) || (trueStartMom>3000. && trueStartMom < 8000.))"
 
   cuts += "*enterExitYm*enterExitYp"
-  #cuts += "*(primTrkXs > 10. && primTrkXs < 38. &&  primTrkYs > 15. && primTrkZs > 10. && primTrkZs > 80.)"
   cuts += "*(primTrkYs > 15.)"
   cuts += "*(primTrkPitches > 0.75 && primTrkPitches < 1.)"
+  cuts += "*(primTrkXs > 10. && primTrkXs < 38. &&  primTrkYs > -18. && primTrkYs < 18. && primTrkZs > 5. && primTrkZs < 85.)"
 
   #weightStr = "1"
   weightStr = "cosmicMomWeight"#NoTurnOn"
@@ -58,24 +58,24 @@ if __name__ == "__main__":
       'color': root.kBlack,
       'isData': True,
     },
-    #{
-    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_v3.root",
-    #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_v3.root"],
-    #  'name': "CosmicMC",
-    #  'title': "Cosmic MC",
-    #  'caption': "Cosmic MC",
-    #  'isData': False,
-    #  'scaleFactor': nData/4961.22
-    #},
-    #{
-    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v3.root",
-    #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v3.root"],
-    #  'name': "CosmicMC_presmear20perc",
-    #  'title': "Cosmic MC Pre-smear 20% ",
-    #  'caption': "Cosmic MC Pre-smear 20%",
-    #  'isData': False,
-    #  'scaleFactor': nData/2500.4
-    #},
+    {
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_v3.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_v3.root"],
+      'name': "CosmicMC",
+      'title': "Cosmic MC",
+      'caption': "Cosmic MC",
+      'isData': False,
+      #'scaleFactor': nData/4961.22
+    },
+    {
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v3.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v3.root"],
+      'name': "CosmicMC_presmear20perc",
+      'title': "Cosmic MC Pre-smear 20% ",
+      'caption': "Cosmic MC Pre-smear 20%",
+      'isData': False,
+      #'scaleFactor': nData/2500.4
+    },
     {
       #'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v3.root",
       #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v3.root"],
@@ -127,39 +127,39 @@ if __name__ == "__main__":
     #  'isData': False,
     #  #'scaleFactor': nData/1527.6
     #},
-    {
-      #'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v3.root",
-      #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v3.root"],
-      'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v4.root",
-      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v4.root"],
-      'name': "CosmicMC_postsmear40perc",
-      'title': "Cosmic MC Post-smear 40% ",
-      'caption': "Cosmic MC Post-smear 40%",
-      'isData': False,
-      #'scaleFactor': nData/17697.5883269
-    },
-    {
-      #'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v3.root",
-      #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v3.root"],
-      'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v4.root",
-      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v4.root"],
-      'name': "CosmicMC_postsmear60perc",
-      'title': "Cosmic MC Post-smear 60% ",
-      'caption': "Cosmic MC Post-smear 60%",
-      'isData': False,
-      #'scaleFactor': nData/17128.818256
-    },
-    {
-      #'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v3.root",
-      #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v3.root"],
-      'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v4.root",
-      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v4.root"],
-      'name': "CosmicMC_postsmear80perc",
-      'title': "Cosmic MC Post-smear 80% ",
-      'caption': "Cosmic MC Post-smear 80%",
-      'isData': False,
-      #'scaleFactor': nData/18530.886425
-    },
+    #{
+    #  #'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v3.root",
+    #  #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v3.root"],
+    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v4.root",
+    #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear40perc_v4.root"],
+    #  'name': "CosmicMC_postsmear40perc",
+    #  'title': "Cosmic MC Post-smear 40% ",
+    #  'caption': "Cosmic MC Post-smear 40%",
+    #  'isData': False,
+    #  #'scaleFactor': nData/17697.5883269
+    #},
+    #{
+    #  #'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v3.root",
+    #  #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v3.root"],
+    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v4.root",
+    #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear60perc_v4.root"],
+    #  'name': "CosmicMC_postsmear60perc",
+    #  'title': "Cosmic MC Post-smear 60% ",
+    #  'caption': "Cosmic MC Post-smear 60%",
+    #  'isData': False,
+    #  #'scaleFactor': nData/17128.818256
+    #},
+    #{
+    #  #'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v3.root",
+    #  #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v3.root"],
+    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v4.root",
+    #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear80perc_v4.root"],
+    #  'name': "CosmicMC_postsmear80perc",
+    #  'title': "Cosmic MC Post-smear 80% ",
+    #  'caption': "Cosmic MC Post-smear 80%",
+    #  'isData': False,
+    #  #'scaleFactor': nData/18530.886425
+    #},
     #{
     #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear120perc_v3.root",
     #  'name': "CosmicMC_postsmear120perc",
@@ -467,7 +467,7 @@ if __name__ == "__main__":
       'binning': [50,0,5],
       'var': "primTrkdEdxs",
       'cuts': weightStr,
-      #'normalize': logy,
+      'normalize': logy,
       'logy': not logy,
       'printIntegral': True,
     },
@@ -641,16 +641,16 @@ if __name__ == "__main__":
     #  #'normalize': True,
     #  'logy': logy,
     #},
-    {
-      'name': "primTrkPitches",
-      'xtitle': "Primary TPC Track Pitch [cm]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,10],
-      'var': "primTrkPitches",
-      'cuts': weightStr,
-      #'normalize': True,
-      'logy': logy,
-    },
+    #{
+    #  'name': "primTrkPitches",
+    #  'xtitle': "Primary TPC Track Pitch [cm]",
+    #  'ytitle': "Events / bin",
+    #  'binning': [100,0,10],
+    #  'var': "primTrkPitches",
+    #  'cuts': weightStr,
+    #  #'normalize': True,
+    #  'logy': logy,
+    #},
     #{
     #  'name': "primTrkEndKin",
     #  'xtitle': "Primary TPC Track End Kinetic Energy [MeV]",
@@ -739,13 +739,13 @@ if __name__ == "__main__":
     #},
   ]
 
-#  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
-#  fileConfigMCs = copy.deepcopy(fileConfigs)
-#  fileConfigData = None
-#  for i in reversed(range(len(fileConfigMCs))):
-#    if 'isData' in fileConfigMCs[i] and fileConfigMCs[i]['isData']:
-#      fileConfigData = fileConfigMCs.pop(i)
-#  DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX)
+  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
+  #fileConfigMCs = copy.deepcopy(fileConfigs)
+  #fileConfigData = None
+  #for i in reversed(range(len(fileConfigMCs))):
+  #  if 'isData' in fileConfigMCs[i] and fileConfigMCs[i]['isData']:
+  #    fileConfigData = fileConfigMCs.pop(i)
+  #DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX)
 
 ########################################################
 ########################################################
@@ -1179,16 +1179,16 @@ if __name__ == "__main__":
 #      #'normalize': True,
 #      'logz': True,
 #    },
-    {
-      'name': "primTrkdEdxsVprimTrkPitches",
-      'xtitle': "Hit Pitch [cm]",
-      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'binning': [30,0,6,10000,0,50],
-      'var': "primTrkdEdxs:primTrkPitches",
-      'cuts': weightStr,
-      #'normalize': True,
-      #'logz': True,
-    },
+#    {
+#      'name': "primTrkdEdxsVprimTrkPitches",
+#      'xtitle': "Hit Pitch [cm]",
+#      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'binning': [30,0,6,10000,0,50],
+#      'var': "primTrkdEdxs:primTrkPitches",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      #'logz': True,
+#    },
   ]
 
   hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")

@@ -160,6 +160,44 @@ def fitSlicesLandaus(c,hist):
   histAll = hist.ProjectionY("_pyAll",1,hist.GetNbinsX())
   fitLandaus(c,histAll)
 
+def fitGaussCore(c,hist,postfix,caption,fitMin=1.5,fitMax=2.3):
+
+  xMin = hist.GetXaxis().GetBinLowEdge(1)
+  xMax = hist.GetXaxis().GetBinUpEdge(hist.GetNbinsX())
+  t = root.RooRealVar("t","dE/dx [MeV/cm]",xMin,xMax)
+  observables = root.RooArgSet(t)
+
+  data = root.RooDataHist("data_"+hist.GetName(),"Data Hist",root.RooArgList(t),hist)
+
+  ##############
+  mg = root.RooRealVar("mg","mg",1.7,0.,5.)
+  sg = root.RooRealVar("sg","sg",0.1,0.01,2.)
+  gauss = root.RooGaussian("gauss","gauss",t,mg,sg)
+
+  model = gauss
+
+  ##############
+
+  fitResult = model.fitTo(data,root.RooFit.Save(),root.RooFit.Range(fitMin,fitMax))
+
+  frame = t.frame(root.RooFit.Title(""))
+  data.plotOn(frame)
+  model.plotOn(frame,root.RooFit.Range(fitMin,fitMax))
+
+  #root.gPad.SetLeftMargin(0.15)
+  #frame.GetYaxis().SetTitleOffset(1.4)
+  #frame.Draw("same")
+  #axisHist = root.TH2F("axisHist","",1,0,50,1,0,1000)
+  ##axisHist = root.TH2F("axisHist","",1,-1,1,1,1000,1300)
+  #axisHist.Draw()
+  #frame.Draw("same")
+  frame.Draw()
+  frame.SetTitle(caption)
+  c.SaveAs("roofit_gauss_{}.png".format(postfix))
+  c.SaveAs("roofit_gauss_{}.pdf".format(postfix))
+
+  return (mg.getVal(),sg.getVal()), (mg.getError(),sg.getError())
+
 def fitLandauCore(c,hist,postfix,caption,fitMin=1.5,fitMax=2.3):
 
   xMin = hist.GetXaxis().GetBinLowEdge(1)
@@ -171,7 +209,8 @@ def fitLandauCore(c,hist,postfix,caption,fitMin=1.5,fitMax=2.3):
 
   ##############
   mpvl = root.RooRealVar("mpvl","mpv landau",1.7,0,5)
-  wl = root.RooRealVar("wl","width landau",0.42,0.01,10)
+  #wl = root.RooRealVar("wl","width landau",0.42,0.01,10)
+  wl = root.RooRealVar("wl","width landau",0.147)
   ml = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(mpvl,wl))
   landau = root.RooLandau("lx","lx",t,ml,wl)
 
@@ -202,8 +241,8 @@ def fitLandauCore(c,hist,postfix,caption,fitMin=1.5,fitMax=2.3):
   #frame.Draw("same")
   frame.Draw()
   frame.SetTitle(caption)
-  c.SaveAs("roofit_{}.png".format(postfix))
-  c.SaveAs("roofit_{}.pdf".format(postfix))
+  c.SaveAs("roofit_landau_{}.png".format(postfix))
+  c.SaveAs("roofit_landau_{}.pdf".format(postfix))
 
   return (mpvl.getVal(),wl.getVal(),sg.getVal()), (mpvl.getError(),wl.getError(),sg.getError())
 
@@ -249,15 +288,28 @@ def fitSlicesLandauCore(c,hist,fileprefix):
 if __name__ == "__main__":
 
   c = root.TCanvas("c")
-  fCosmics = root.TFile("cosmics_hists.root")
+  #fCosmics = root.TFile("cosmics_hists.root")
+  fCosmics = root.TFile("Y10to18/cosmics_hists.root")
   fCosmics.ls()
+  nameLists = []
+  paramLists = []
+  errorLists = []
   for key in fCosmics.GetListOfKeys():
     name = key.GetName()
     if "primTrkdEdxs_zoom3" in name:
         hist = key.ReadObj()
         hist.Rebin(2)
-        xMin,xMax = getHistFracMaxVals(hist,0.5)
-        fitLandauCore(c,hist,name,name,xMin,xMax)
+        params, errs = fitLandauCore(c,hist,name,name,1.4,2.4)
+        #xMin,xMax = getHistFracMaxVals(hist,0.3)
+        #params, errs = fitGaussCore(c,hist,name,name,xMin,xMax)
+        nameLists.append(name)
+        paramLists.append(params)
+        errorLists.append(errs)
+  for name, params, errors in zip(nameLists,paramLists,errorLists):
+    printStr = "{:55} ".format(name)
+    for i in range(len(params)):
+        printStr += "{:6.3f} +/- {:8.3g} ".format(params[i],errors[i])
+    print(printStr)
 
   for logy,xmax,outext,ytitle in [(False,4,"","Normalized--Hits"),(True,50,"_logy","Hits/bin")]:
     c.SetLogy(logy)
