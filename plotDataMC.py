@@ -246,7 +246,7 @@ if __name__ == "__main__":
 #      'xtitle': "WC track #theta_{yz} [deg]",
 #      'ytitle': "Events / bin",
 #      'binning': [100,-5,5],
-#      'var': "(asin(sin(thetaWC)*sin(phiWC)))*180/pi",
+#      'var': "(asin(tan(thetaWC)*sin(phiWC)))*180/pi",
 #      'cuts': weightStr,
 #      #'normalize': True,
 #      'logy': logy,
