@@ -20,6 +20,8 @@ if __name__ == "__main__":
   cuts += "*(primTrkXs > 10. && primTrkXs < 38. && primTrkYs > -10. && primTrkYs < 10. && primTrkZs > 10. && primTrkZs < 80.)"
   cuts += "*(sqrt(pow(primTrkXs - trueStartX,2)+pow(primTrkYs - trueStartY,2)+pow(primTrkZs - trueStartZ,2)) < 3.)"
 
+  #cuts += "*(trueStartTheta*180/pi < 90.)"
+
   weightStr = "1"+cuts
   nData = 30860.0
   logy = True
@@ -29,7 +31,8 @@ if __name__ == "__main__":
   #NMAX=100
   fileConfigs = [
     {
-      'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_flat_isoInTPC_mup_test_v1/anahist.root",
+      #'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_PiAbsAndChEx_flat_isoInTPC_mup_test_v1/anahist.root",
+      'fn': "lariat_PiAbsAndChEx_flat_isoInTPC_mup_test_v1_cosmicAna.root",
       'name': "UniformIsoMuon",
       'title': "#mu^{+} MC",
       'caption': "Uniform,Isotropic #mu^{+} MC",
@@ -818,17 +821,17 @@ if __name__ == "__main__":
 #      #'normalize': True,
 #      'logz': True,
 #    },
-#    {
-#      'name': "primTrkdEdxsVprimTrkPitches",
-#      'xtitle': "Hit Pitch [cm]",
-#      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
-#      #'binning': [30,0,6,10000,0,50],
-#      'binning': [[0.4,0.6,1.,2.,5,20],getLinBins(10000,0,50)],
-#      'var': "primTrkdEdxs:primTrkPitches",
-#      'cuts': weightStr,
-#      #'normalize': True,
-#      'logz': True,
-#    },
+    {
+      'name': "primTrkdEdxsVprimTrkPitches",
+      'xtitle': "Hit Pitch [cm]",
+      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+      #'binning': [30,0,6,10000,0,50],
+      'binning': [[0.4,0.6,1.,2.,5,20],getLinBins(10000,0,50)],
+      'var': "primTrkdEdxs:primTrkPitches",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': True,
+    },
 #    {
 #      'name': "primTrkdEdxsV1OprimTrkPitches",
 #      'xtitle': "(Hit Pitch)^{-1} [cm^{-1}]",
@@ -1271,19 +1274,129 @@ if __name__ == "__main__":
       #'normalize': True,
       'logy': False,
     },
+    {
+      'name': "primTrkStartPhiVtrueStartPhi",
+      'xtitle': "True Start #phi_{xy} [deg]",
+      'ytitle': "TPC Track Start #phi_{xy} [deg]",
+      'binning': [180,-180,180,180,-180,180],
+      'var': "primTrkStartPhi*180/pi:trueStartPhi*180/pi",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "primTrkStartThetaVtrueStartTheta",
+      'xtitle': "True Start #theta_{z} [deg]",
+      'ytitle': "TPC Track Start #theta_{z} [deg]",
+      'binning': [180,0,180,180,0,180],
+      'var': "primTrkStartTheta*180/pi:trueStartTheta*180/pi",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "primTrkStartPhiZYVtrueStartPhiZY",
+      'xtitle': "True Start #phi_{zy} [deg]",
+      'ytitle': "TPC Track Start #phi_{zy} [deg]",
+      'binning': [180,-180,180,180,-180,180],
+      'var': "atan2(sin(primTrkStartTheta)*sin(primTrkStartPhi),cos(primTrkStartTheta))*180/pi:atan2(sin(trueStartTheta)*sin(trueStartPhi),cos(trueStartTheta))*180/pi",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "primTrkStartThetaXVtrueStartThetaX",
+      'xtitle': "True Start #theta_{x} [deg]",
+      'ytitle': "TPC Track Start #theta_{x} [deg]",
+      'binning': [180,0,180,180,0,180],
+      'var': "acos(sin(primTrkStartTheta)*cos(primTrkStartPhi))*180/pi:acos(sin(trueStartTheta)*cos(trueStartPhi))*180/pi",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "primTrkStartTanPhiZYVtrueStartTanPhiZY",
+      'xtitle': "True Start |tan(#phi_{zy})|",
+      'ytitle': "TPC Track Start |tan(#phi_{zy})|",
+      'binning': [100,0,20,100,0,20],
+      'var': "fabs(tan(primTrkStartTheta)*sin(primTrkStartPhi)):fabs(tan(trueStartTheta)*sin(trueStartPhi))",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "primTrkStartCosPhiZYVtrueStartCosPhiZY",
+      'xtitle': "True Start |cos(#phi_{zy})|",
+      'ytitle': "TPC Track Start |cos(#phi_{zy})|",
+      'binning': [100,0,1,100,0,1],
+      'var': "fabs(cos(atan2(sin(primTrkStartTheta)*sin(primTrkStartPhi),cos(primTrkStartTheta)))):fabs(cos(atan2(sin(trueStartTheta)*sin(trueStartPhi),cos(trueStartTheta))))",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "primTrkStartSinPhiZYVtrueStartSinPhiZY",
+      'xtitle': "True Start |sin(#phi_{zy})|",
+      'ytitle': "TPC Track Start |sin(#phi_{zy})|",
+      'binning': [100,0,1,100,0,1],
+      'var': "fabs(sin(atan2(sin(primTrkStartTheta)*sin(primTrkStartPhi),cos(primTrkStartTheta)))):fabs(sin(atan2(sin(trueStartTheta)*sin(trueStartPhi),cos(trueStartTheta))))",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "primTrkStartCosThetaXVtrueStartCosThetaX",
+      'xtitle': "True Start |cos(#theta_{x})|",
+      'ytitle': "TPC Track Start |cos(#theta_{x})|",
+      'binning': [100,0,1,100,0,1],
+      'var': "sin(primTrkStartTheta)*cos(primTrkStartPhi):sin(trueStartTheta)*cos(trueStartPhi)",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "deltaRecoTruePhiZYVtrueStartPhiZY",
+      'xtitle': "True Start #phi_{zy} [deg]",
+      'ytitle': "Reco - True #Delta #phi_{zy} [deg]",
+      'binning': [60,-180,180,90,-180,180],
+      'var': "(atan2(sin(primTrkStartTheta)*sin(primTrkStartPhi),cos(primTrkStartTheta))-atan2(sin(trueStartTheta)*sin(trueStartPhi),cos(trueStartTheta)))*180/pi:atan2(sin(trueStartTheta)*sin(trueStartPhi),cos(trueStartTheta))*180/pi",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "deltaRecoTrueThetaXVtrueStartCosThetaX",
+      'xtitle': "True Start |cos(#theta_{x})|",
+      'ytitle': "Reco - True #Delta #theta_{x} [deg]",
+      'binning': [50,0,1,90,-180,180],
+      'var': "(acos(sin(primTrkStartTheta)*cos(primTrkStartPhi))-acos(sin(trueStartTheta)*cos(trueStartPhi)))*180/pi:fabs(sin(trueStartTheta)*cos(trueStartPhi))",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': False,
+    },
+    {
+      'name': "deltaRecoTrueThetaXVtrueStartPhiZY",
+      'xtitle': "True Start #phi_{zy} [deg]",
+      'ytitle': "Reco - True #Delta #theta_{x} [deg]",
+      'binning': [60,0,180,90,-180,180],
+      'var': "(acos(sin(primTrkStartTheta)*cos(primTrkStartPhi))-acos(sin(trueStartTheta)*cos(trueStartPhi)))*180/pi:atan2(sin(trueStartTheta)*sin(trueStartPhi),cos(trueStartTheta))*180/pi",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': False,
+    },
   ]
 
   hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="UnifIso_")
-#  outfile = root.TFile("unifiso_hists.root","recreate")
-#  outfile.cd()
-#  for var in hists:
-#    for ds in hists[var]:
-#        newname = var+"_"+ds
-#        hist = hists[var][ds]
-#        hist.SetName(newname)
-#        hist.Print()
-#        hist.Write()
-#  outfile.Close()
+  outfile = root.TFile("unifiso_hists.root","recreate")
+  outfile.cd()
+  for var in hists:
+    for ds in hists[var]:
+        newname = var+"_"+ds
+        hist = hists[var][ds]
+        hist.SetName(newname)
+        hist.Print()
+        hist.Write()
+  outfile.Close()
 
 ######################################################################################
 ######################################################################################

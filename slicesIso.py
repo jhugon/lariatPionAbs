@@ -31,23 +31,23 @@ if __name__ == "__main__":
   ##############################################
 
   c.SetLogy(False)
-  #graphConfigs = [
-  #  (f.Get("primTrkdEdxsVtrueStartPhiZY_UniformIsoMuon"),"Slices_trueStartPhiZY_fit","#phi_{zy}","Fit of dE/dx [MeV/cm]"),
-  #]
+  graphConfigs = [
+    (f.Get("primTrkdEdxsVtrueStartPhiZY_UniformIsoMuon"),"Slices_trueStartPhiZY_fit","#phi_{zy}","Fit of dE/dx [MeV/cm]"),
+  ]
 
-  #for hist, savename, xtitle, ytitle, in graphConfigs:
-  #  graphMode,graphFWHM = makeGraphsModeAndFWHM(hist)
-  #  axisHist = makeStdAxisHist([graphMode,graphFWHM],ylim=[0,4])
-  #  axisHist.Draw()
-  #  graphMode.Draw("P")
-  #  graphFWHM.Draw("P")
-  #  graphFWHM.SetMarkerColor(COLORLIST[0])
-  #  graphFWHM.SetLineColor(COLORLIST[0])
-  #  setHistTitles(axisHist,xtitle,ytitle)
-  #  c.SaveAs(savename+".png")
-  #  c.SaveAs(savename+".pdf")
+  for hist, savename, xtitle, ytitle, in graphConfigs:
+    graphMode,graphFWHM = makeGraphsModeAndFWHM(hist)
+    axisHist = makeStdAxisHist([graphMode,graphFWHM],ylim=[0,4])
+    axisHist.Draw()
+    graphMode.Draw("P")
+    graphFWHM.Draw("P")
+    graphFWHM.SetMarkerColor(COLORLIST[0])
+    graphFWHM.SetLineColor(COLORLIST[0])
+    setHistTitles(axisHist,xtitle,ytitle)
+    c.SaveAs(savename+".png")
+    c.SaveAs(savename+".pdf")
 
-  #fitSlicesLandauCore(c,f.Get("primTrkdEdxsVtrueStartPhiZY_UniformIsoMuon").Rebin2D(5,10,"newPhiZy"),"Fits_trueStartPhiXY_UniformIsoMuon_")
+  fitSlicesLandauCore(c,f.Get("primTrkdEdxsVtrueStartPhiZY_UniformIsoMuon").Rebin2D(5,10,"newPhiZy"),"Fits_trueStartPhiXY_UniformIsoMuon_")
 
-  #c.SetLogx(True)
-  #fitSlicesLandauCore(c,f.Get("primTrkdEdxsVprimTrkPitches_UniformIsoMuon").Rebin2D(1,10,"newPitches"),"Fits_primTrkPitches_UniformIsoMuon_")
+  c.SetLogx(True)
+  fitSlicesLandauCore(c,f.Get("primTrkdEdxsVprimTrkPitches_UniformIsoMuon").Rebin2D(1,10,"newPitches"),"Fits_primTrkPitches_UniformIsoMuon_")
