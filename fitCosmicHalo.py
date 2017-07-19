@@ -160,7 +160,7 @@ def fitSlicesLandaus(c,hist):
   histAll = hist.ProjectionY("_pyAll",1,hist.GetNbinsX())
   fitLandaus(c,histAll)
 
-def fitGaussCore(c,hist,postfix,caption,fitMin=1.5,fitMax=2.3):
+def fitGaussCore(c,hist,postfix,caption,fitMin=1.4,fitMax=2.4):
 
   xMin = hist.GetXaxis().GetBinLowEdge(1)
   xMax = hist.GetXaxis().GetBinUpEdge(hist.GetNbinsX())
@@ -198,10 +198,11 @@ def fitGaussCore(c,hist,postfix,caption,fitMin=1.5,fitMax=2.3):
 
   return (mg.getVal(),sg.getVal()), (mg.getError(),sg.getError())
 
-def fitLandauCore(c,hist,postfix,caption,fitMin=1.5,fitMax=2.3):
+def fitLandauCore(c,hist,postfix,caption,fitMin=1.5,fitMax=2.3,fixedLandauWidth=None):
 
   xMin = hist.GetXaxis().GetBinLowEdge(1)
   xMax = hist.GetXaxis().GetBinUpEdge(hist.GetNbinsX())
+  xMax = min(xMax,5.)
   t = root.RooRealVar("t","dE/dx [MeV/cm]",xMin,xMax)
   observables = root.RooArgSet(t)
 
@@ -209,8 +210,11 @@ def fitLandauCore(c,hist,postfix,caption,fitMin=1.5,fitMax=2.3):
 
   ##############
   mpvl = root.RooRealVar("mpvl","mpv landau",1.7,0,5)
-  #wl = root.RooRealVar("wl","width landau",0.42,0.01,10)
-  wl = root.RooRealVar("wl","width landau",0.147)
+  wl = None
+  if fixedLandauWidth is None:
+    wl = root.RooRealVar("wl","width landau",0.42,0.01,10)
+  else:
+    wl = root.RooRealVar("wl","width landau",fixedLandauWidth)
   ml = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(mpvl,wl))
   landau = root.RooLandau("lx","lx",t,ml,wl)
 
@@ -228,6 +232,8 @@ def fitLandauCore(c,hist,postfix,caption,fitMin=1.5,fitMax=2.3):
 
   fitResult = model.fitTo(data,root.RooFit.Save(),root.RooFit.Range(fitMin,fitMax))
 
+  fwhm = calcFWHM(model,t,1.,4.,0.01)
+
   frame = t.frame(root.RooFit.Title("landau (x) gauss convolution"))
   data.plotOn(frame)
   model.plotOn(frame,root.RooFit.Range(fitMin,fitMax))
@@ -244,7 +250,7 @@ def fitLandauCore(c,hist,postfix,caption,fitMin=1.5,fitMax=2.3):
   c.SaveAs("roofit_landau_{}.png".format(postfix))
   c.SaveAs("roofit_landau_{}.pdf".format(postfix))
 
-  return (mpvl.getVal(),wl.getVal(),sg.getVal()), (mpvl.getError(),wl.getError(),sg.getError())
+  return (mpvl.getVal(),wl.getVal(),sg.getVal()), (mpvl.getError(),wl.getError(),sg.getError()), fwhm
 
 def fitSlicesLandauCore(c,hist,fileprefix):
   nJump = 1
@@ -255,6 +261,7 @@ def fitSlicesLandauCore(c,hist,fileprefix):
   mpvlGraph = root.TGraphErrors()
   wlGraph = root.TGraphErrors()
   sgGraph = root.TGraphErrors()
+  fwhmGraph = root.TGraphErrors()
   for i in range(hist.GetNbinsX()//nJump):
       firstBin = i*nJump+1
       lastBin = (i+1)*(nJump)
@@ -266,50 +273,122 @@ def fitSlicesLandauCore(c,hist,fileprefix):
       caption = "{} from {} to {}".format(xTitle,xMin,xMax)
       xMiddle = 0.5*(xMax+xMin)
       xError = 0.5*(xMax-xMin)
-      (mpvl,wl,sg),(mpvlErr,wlErr,sgErr) = fitLandauCore(c,histAll,postfix,caption)
+      (mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histAll,postfix,caption)
+      #(mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histAll,postfix,caption,fixedLandauWidth=0.1)
+      #(mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histAll,postfix,caption,fixedLandauWidth=0.147)
       if mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5:
             continue
       mpvlGraph.SetPoint(i,xMiddle,mpvl)
       wlGraph.SetPoint(i,xMiddle,wl)
       sgGraph.SetPoint(i,xMiddle,sg)
+      fwhmGraph.SetPoint(i,xMiddle,fwhm)
       mpvlGraph.SetPointError(i,xError,mpvlErr)
       wlGraph.SetPointError(i,xError,wlErr)
       sgGraph.SetPointError(i,xError,sgErr)
-  graphs = [mpvlGraph,wlGraph,sgGraph]
+  graphs = [mpvlGraph,wlGraph,sgGraph,fwhmGraph]
+  labels = ["Landau MPV", "Landau Width", "Gaussian #sigma","FWHM"]
+  #graphs = [mpvlGraph,sgGraph]
+  #labels = ["Landau MPV", "Gaussian #sigma"]
   for i, graph in enumerate(graphs):
     graph.SetLineColor(COLORLIST[i])
     graph.SetMarkerColor(COLORLIST[i])
   axis = drawGraphs(c,graphs,xTitle,yTitle)
-  leg = drawNormalLegend(graphs,["Landau MPV", "Landau Width", "Gaussian #sigma"],option="lep",position=[0.2,0.4,0.8,0.6])
+  leg = drawNormalLegend(graphs,labels,option="lep",position=[0.2,0.50,0.6,0.70])
   c.SaveAs(fileprefix+".png")
   c.SaveAs(fileprefix+".pdf")
   return mpvlGraph,wlGraph,sgGraph
 
 if __name__ == "__main__":
 
+  import numpy
+  from matplotlib import pyplot as mpl
+
   c = root.TCanvas("c")
-  #fCosmics = root.TFile("cosmics_hists.root")
-  fCosmics = root.TFile("Y10to18/cosmics_hists.root")
+  fCosmics = root.TFile("cosmics_hists.root")
+  #fCosmics = root.TFile("Y10to18/cosmics_hists.root")
   fCosmics.ls()
   nameLists = []
   paramLists = []
   errorLists = []
+  paramGausLists = []
+  errorGausLists = []
+  fwhmLists = []
   for key in fCosmics.GetListOfKeys():
     name = key.GetName()
     if "primTrkdEdxs_zoom3" in name:
         hist = key.ReadObj()
         hist.Rebin(2)
-        params, errs = fitLandauCore(c,hist,name,name,1.4,2.4)
-        #xMin,xMax = getHistFracMaxVals(hist,0.3)
-        #params, errs = fitGaussCore(c,hist,name,name,xMin,xMax)
+        params, errs, fwhm = fitLandauCore(c,hist,name,name)
+        #params, errs, fwhm = fitLandauCore(c,hist,name,name,1.,4.)
+        #params, errs, fwhm = fitLandauCore(c,hist,name,name,1.4,2.)
         nameLists.append(name)
         paramLists.append(params)
         errorLists.append(errs)
-  for name, params, errors in zip(nameLists,paramLists,errorLists):
+        fwhmLists.append(fwhm)
+        #xMin,xMax = getHistFracMaxVals(hist,0.25)
+        #params, errs = fitGaussCore(c,hist,name,name,xMin,xMax)
+        #paramGausLists.append(params)
+        #errorGausLists.append(errs)
+  dataParamsErrs = None
+  dataFWHM = None
+  mcSmearingVals = []
+  mcParams = []
+  mcErrs = []
+  fwhmVals = []
+  for name, params, errors, fwhm in zip(nameLists,paramLists,errorLists,fwhmLists):
     printStr = "{:55} ".format(name)
     for i in range(len(params)):
         printStr += "{:6.3f} +/- {:8.3g} ".format(params[i],errors[i])
+    printStr += "FWHM: {:6.3f} ".format(fwhm)
     print(printStr)
+    if "RunII" in name:
+        dataParamsErrs = (params,errors)
+        dataFWHM = fwhm
+    else:
+        match = re.match(r".*_presmear(\d+)perc$",name)
+        if match:
+            mcParams.append(params)
+            mcErrs.append(errors)
+            fwhmVals.append(fwhm)
+            mcSmearingVals.append(float(match.group(1)))
+        else:
+            mcParams.append(params)
+            mcErrs.append(errors)
+            fwhmVals.append(fwhm)
+            mcSmearingVals.append(0.)
+  mcParams = numpy.array(mcParams)
+  mcErrs = numpy.array(mcErrs)
+  fig, ax = mpl.subplots(figsize=(7,7))
+  ax.axhspan(dataParamsErrs[0][2]-dataParamsErrs[1][2],dataParamsErrs[0][2]+dataParamsErrs[1][2],facecolor='k',edgecolor='k',alpha=0.3)
+  ax.axhline(dataParamsErrs[0][2],c='k')
+  ax.errorbar(mcSmearingVals,mcParams[:,2],yerr=mcErrs[:,2],fmt=".b")
+  ax.set_xlim(-10,50)
+  ax.set_xlabel("MC Smearing [%]")
+  ax.set_ylabel("Gaussian $\sigma$ Parameter [MeV/cm]")
+  ax.annotate("Run II Data",(45,dataParamsErrs[0][2]+0.5*dataParamsErrs[1][2]),ha='right',va='center')
+  fig.savefig("Cosmic_Gaus_Widths.png")
+  fig.savefig("Cosmic_Gaus_Widths.pdf")
+
+  fig, ax = mpl.subplots(figsize=(7,7))
+  ax.axhspan(dataParamsErrs[0][0]-dataParamsErrs[1][0],dataParamsErrs[0][0]+dataParamsErrs[1][0],facecolor='k',edgecolor='k',alpha=0.3)
+  ax.axhline(dataParamsErrs[0][0],c='k')
+  ax.errorbar(mcSmearingVals,mcParams[:,0],yerr=mcErrs[:,0],fmt=".b")
+  ax.set_xlim(-10,50)
+  ax.set_xlabel("MC Smearing [%]")
+  ax.set_ylabel("Landau MPV Parameter [MeV/cm]")
+  ax.annotate("Run II Data",(45,dataParamsErrs[0][0]+0.5*dataParamsErrs[1][0]),ha='right',va='center')
+  fig.savefig("Cosmic_Gaus_MPV.png")
+  fig.savefig("Cosmic_Gaus_MPV.pdf")
+
+  fig, ax = mpl.subplots(figsize=(7,7))
+  ax.axhline(dataFWHM,c='k',lw=2)
+  ax.errorbar(mcSmearingVals,fwhmVals,fmt="ob")
+  ax.set_xlim(-10,50)
+  ax.set_xlabel("MC Smearing [%]")
+  ax.set_ylabel("Full Width Half Max of Fit PDF [MeV/cm]")
+  ax.annotate("Run II Data",(45,dataFWHM),ha='right',va='bottom')
+  fig.savefig("Cosmic_FWHM.png")
+  fig.savefig("Cosmic_FWHM.pdf")
 
   for logy,xmax,outext,ytitle in [(False,4,"","Normalized--Hits"),(True,50,"_logy","Hits/bin")]:
     c.SetLogy(logy)

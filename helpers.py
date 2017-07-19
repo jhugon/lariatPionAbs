@@ -877,16 +877,19 @@ def getOrdinalStr(inInt):
   return result
 
 # calculate FWHM
-def calcFWHM(pdf,obs,min,max,step):
+def calcFWFracMax(pdf,obs,lowVal,highVal,step,frac):
 
   var = pdf.getObservables(root.RooArgSet(obs)).first();
 
   ymaxVal = float(0)
   xmaxVal = float(0)
 
+  nSteps = int(math.ceil((highVal-lowVal)/step))
+
   # find the maximum value
-  for x in drange(min,max,step):
-   
+  for iStep in range(nSteps):
+    x = lowVal + iStep*step
+
     var.setVal(x)
     pdfVal = pdf.getVal(root.RooArgSet(var)) 
 
@@ -901,7 +904,8 @@ def calcFWHM(pdf,obs,min,max,step):
 
   # find lower boundary with y=max/2
   xLow = float(0)
-  for x in drange(min,max,step):
+  for iStep in range(nSteps):
+    x = lowVal + iStep*step
    
     var.setVal(x)
     pdfVal = pdf.getVal(root.RooArgSet(var)) 
@@ -915,7 +919,8 @@ def calcFWHM(pdf,obs,min,max,step):
 
   # find higher boundary with y=max/2
   xHigh = float(0)
-  for x in revdrange(max,min,step):
+  for iStep in reversed(range(nSteps)):
+    x = lowVal + iStep*step
    
     var.setVal(x)
     pdfVal = pdf.getVal(root.RooArgSet(var)) 
@@ -924,8 +929,12 @@ def calcFWHM(pdf,obs,min,max,step):
        xHigh = x
 
   #print "xHigh=%s" % xHigh
+  #print("FWHM low, high",xLow,xHigh)
   
   return (xHigh-xLow)
+
+def calcFWHM(pdf,obs,lowVal,highVal,step):
+    return calcFWFracMax(pdf,obs,lowVal,highVal,step,0.5)
 
 def doubleGauss(x,par):
   meanG1  = par[0]

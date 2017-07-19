@@ -17,7 +17,7 @@ if __name__ == "__main__":
   #cuts += "*((!isMC) || (trueStartMom>3000. && trueStartMom < 8000.))"
 
   cuts += "*enterExitYm*enterExitYp"
-  cuts += "*(primTrkYs > 15.)"
+  #cuts += "*(primTrkYs > 15.)"
   cuts += "*(primTrkPitches > 0.75 && primTrkPitches < 1.)"
   cuts += "*(primTrkXs > 10. && primTrkXs < 38. &&  primTrkYs > -18. && primTrkYs < 18. && primTrkZs > 5. && primTrkZs < 85.)"
 
@@ -58,57 +58,66 @@ if __name__ == "__main__":
       'color': root.kBlack,
       'isData': True,
     },
+    #{
+    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_v4.root",
+    #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_v4.root"],
+    #  'name': "CosmicMC",
+    #  'title': "Cosmic MC",
+    #  'caption': "Cosmic MC",
+    #  'isData': False,
+    #  #'scaleFactor': nData/4961.22
+    #},
+    #{
+    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear10perc_v4.root",
+    #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear10perc_v4.root"],
+    #  'name': "CosmicMC_presmear10perc",
+    #  'title': "Cosmic MC Pre-smear 10% ",
+    #  'caption': "Cosmic MC Pre-smear 10%",
+    #  'isData': False,
+    #  #'scaleFactor': nData/2500.4
+    #},
     {
-      'fn': "lariat_PiAbsAndChEx_cosmics_vert_v3.root",
-      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_v3.root"],
-      'name': "CosmicMC",
-      'title': "Cosmic MC",
-      'caption': "Cosmic MC",
-      'isData': False,
-      #'scaleFactor': nData/4961.22
-    },
-    {
-      'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v3.root",
-      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v3.root"],
+      'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v4.root",
+      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear20perc_v4.root"],
       'name': "CosmicMC_presmear20perc",
       'title': "Cosmic MC Pre-smear 20% ",
       'caption': "Cosmic MC Pre-smear 20%",
       'isData': False,
       #'scaleFactor': nData/2500.4
     },
-    {
-      #'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v3.root",
-      #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v3.root"],
-      'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v4.root",
-      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v4.root"],
-      'name': "CosmicMC_presmear30perc",
-      'title': "Cosmic MC Pre-smear 30% ",
-      'caption': "Cosmic MC Pre-smear 30%",
-      'isData': False,
-      #'scaleFactor': nData/17501.
-    },
-    {
-      #'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear35perc_v3.root",
-      #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear35perc_v3.root"],
-      'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear35perc_v4.root",
-      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear35perc_v4.root"],
-      'name': "CosmicMC_presmear35perc",
-      'title': "Cosmic MC Pre-smear 35% ",
-      'caption': "Cosmic MC Pre-smear 35%",
-      'isData': False,
-      #'scaleFactor': nData/16051.0393241
-    },
-    {
-      #'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear40perc_v3.root",
-      #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear40perc_v3.root"],
-      'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear40perc_v4.root",
-      'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear40perc_v4.root"],
-      'name': "CosmicMC_presmear40perc",
-      'title': "Cosmic MC Pre-smear 40% ",
-      'caption': "Cosmic MC Pre-smear 40%",
-      'isData': False,
-      #'scaleFactor': nData/15846.8544841
-    },
+    #{
+    #  #'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v3.root",
+    #  #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v3.root"],
+    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v4.root",
+    #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear30perc_v4.root"],
+    #  'name': "CosmicMC_presmear30perc",
+    #  'title': "Cosmic MC Pre-smear 30% ",
+    #  'caption': "Cosmic MC Pre-smear 30%",
+    #  'isData': False,
+    #  #'scaleFactor': nData/17501.
+    #},
+    #{
+    #  #'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear35perc_v3.root",
+    #  #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear35perc_v3.root"],
+    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear35perc_v4.root",
+    #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear35perc_v4.root"],
+    #  'name': "CosmicMC_presmear35perc",
+    #  'title': "Cosmic MC Pre-smear 35% ",
+    #  'caption': "Cosmic MC Pre-smear 35%",
+    #  'isData': False,
+    #  #'scaleFactor': nData/16051.0393241
+    #},
+    #{
+    #  #'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear40perc_v3.root",
+    #  #'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear40perc_v3.root"],
+    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear40perc_v4.root",
+    #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear40perc_v4.root"],
+    #  'name': "CosmicMC_presmear40perc",
+    #  'title': "Cosmic MC Pre-smear 40% ",
+    #  'caption': "Cosmic MC Pre-smear 40%",
+    #  'isData': False,
+    #  #'scaleFactor': nData/15846.8544841
+    #},
     #{
     #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_postsmear10perc_v3.root",
     #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_postsmear10perc_v3.root"],
@@ -1191,17 +1200,17 @@ if __name__ == "__main__":
 #    },
   ]
 
-  hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
-  outfile = root.TFile("cosmics_hists.root","recreate")
-  outfile.cd()
-  for var in hists:
-    for ds in hists[var]:
-        newname = var+"_"+ds
-        hist = hists[var][ds]
-        hist.SetName(newname)
-        hist.Print()
-        hist.Write()
-  outfile.Close()
+#  hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
+#  outfile = root.TFile("cosmics_hists.root","recreate")
+#  outfile.cd()
+#  for var in hists:
+#    for ds in hists[var]:
+#        newname = var+"_"+ds
+#        hist = hists[var][ds]
+#        hist.SetName(newname)
+#        hist.Print()
+#        hist.Write()
+#  outfile.Close()
 
 ######################################################################################
 ######################################################################################
