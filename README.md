@@ -18,8 +18,8 @@ mkdir -p /lariat/app/users/$USER/lariatsoft_v06_15_00_pionAbs
 cd /lariat/app/users/$USER/lariatsoft_v06_15_00_pionAbs
 ```
 
-Then create a new lariatsoft area (more instructions here:
-`https://redmine.fnal.gov/redmine/projects/lardbt/wiki/Setting_up_the_Offline_Software_CVMFS`)
+Then create a new lariatsoft area 
+([more instructions here](https://redmine.fnal.gov/redmine/projects/lardbt/wiki/Setting_up_the_Offline_Software_CVMFS))
 
 ```
 source /cvmfs/lariat.opensciencegrid.org/setup_lariat.sh
@@ -30,7 +30,6 @@ setup larsoft $version -q $qual
 mrb newDev
 source localProducts*/setup
 cd srcs
-mrb g -t $version lariatsoft
 ```
   
 Now we need to get the necessary larsoft packages. Make sure you are in the
@@ -38,7 +37,7 @@ srcs dir of your area and run:
 
 ```
 git clone http://cdcvs.fnal.gov/projects/lariatsoft
-git clone http://cdcvs.fnal.gov/projects/lariatutil
+git clone http://cdcvs.fnal.gov/projects/lardbt-lariatutil lariatutil
 git clone http://cdcvs.fnal.gov/projects/larana
 git clone http://cdcvs.fnal.gov/projects/larreco
 git clone http://cdcvs.fnal.gov/projects/lardataobj
@@ -63,6 +62,7 @@ cd larbatch
 git checkout c30e15939360
 git checkout $version ups/product_deps
 cd ..
+mrb uc # updates the build dependencies to require these packages
 ```
 
 Now we need to compile everything
