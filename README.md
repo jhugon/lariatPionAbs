@@ -60,9 +60,9 @@ git checkout feature/jhugon_caloTruth
 cd ..
 cd larbatch
 git checkout c30e15939360
-git checkout $version ups/product_deps
+git checkout LARSOFT_SUITE_$version ups/product_deps
 cd ..
-mrb uc # updates the build dependencies to require these packages
+mrb uc # updates the build dependencies to use the packages you just got
 ```
 
 Now we need to compile everything
