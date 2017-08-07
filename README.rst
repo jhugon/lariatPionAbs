@@ -8,6 +8,87 @@ The .C parts of the code are meant to create tree friends for the main anaTrees
 with higher-level variables. the .py parts of the code use tree.Draw() to
 create histograms and paint them to image files
 
+Setting up LariatSoft Code on Fermilab lariatgpvm
+-------------------------------------------------
+
+Create a directory where you want your work to be e.g.
+
+  ::
+
+  mkdir -p /lariat/app/users/$USER/lariatsoft_v06_15_00_pionAbs
+  cd /lariat/app/users/$USER/lariatsoft_v06_15_00_pionAbs
+
+Then create a new lariatsoft area (more instructions here:
+https://redmine.fnal.gov/redmine/projects/lardbt/wiki/Setting_up_the_Offline_Software_CVMFS)
+
+  ::
+
+  source /cvmfs/lariat.opensciencegrid.org/setup_lariat.sh
+  setup ninja v1_6_0b
+  version=v06_15_00
+  qual=e10:debug
+  setup larsoft $version -q $qual
+  mrb newDev
+  source localProducts*/setup
+  cd srcs
+  mrb g -t $version lariatsoft
+  
+Now we need to get the necessary larsoft packages. Make sure you are in the
+srcs dir of your area and run:
+
+  ::
+
+  git clone http://cdcvs.fnal.gov/projects/lariatsoft
+  git clone http://cdcvs.fnal.gov/projects/lariatutil
+  git clone http://cdcvs.fnal.gov/projects/larana
+  git clone http://cdcvs.fnal.gov/projects/larreco
+  git clone http://cdcvs.fnal.gov/projects/lardataobj
+  git clone http://cdcvs.fnal.gov/projects/larbatch
+  cd lariatsoft
+  git checkout feature/jhugon_PionAbsAndChEx
+  cd ..
+  cd lariatutil
+  git checkout feature/jhugon_CVMFSWorks
+  git checkout $version ups/product_deps
+  cd ..
+  cd larana
+  git checkout feature/jhugon_likelihoodPID_forlarsoftv06_15_00
+  cd ..
+  cd larreco
+  git checkout feature/jhugon_caloTruth
+  cd ..
+  cd lardataobj
+  git checkout feature/jhugon_caloTruth
+  cd ..
+  cd larbatch
+  git checkout c30e15939360
+  git checkout $version ups/product_deps
+  cd ..
+
+Now we need to compile everything
+
+  ::
+
+  mrbsetenv
+  nice mrb i --generator ninja -j8
+
+Finally, create a script setup.sh with this in in e.g.
+/lariat/app/users/$USER/lariatsoft_v06_15_00_pionAbs:
+
+  ::
+
+  source /cvmfs/lariat.opensciencegrid.org/setup_lariat.sh
+  setup ninja v1_6_0b
+  version=v06_15_00
+  qual=e10:debug
+  setup larsoft $version -q $qual
+  source localProducts*/setup
+  mrbsetenv
+  setup lariatsoft $version -q $qual
+  setup lariatsoft $version -q $qual
+
+Running source setup.sh will setup your environment on a new login.
+
 Tree Info
 ---------
 
