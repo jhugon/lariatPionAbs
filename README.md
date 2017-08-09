@@ -89,6 +89,92 @@ setup lariatsoft $version -q $qual
 
 Running source setup.sh will setup your environment on a new login.
 
+Setting up LariatSoft Code on p04
+---------------------------------
+
+Create a directory where you want your work to be and cd in it.
+
+Then create a new lariatsoft area 
+
+```
+source /hepsoft/LAr/setup
+setup mrb
+setup git
+setup gitflow
+setup ninja v1_6_0b
+export MRB_PROJECT=larsoft
+export PROJECT=lariat
+version=v06_15_00
+qual=e10:debug
+setup larsoft $version -q $qual
+mrb newDev
+source localProducts*/setup
+cd srcs
+```
+  
+Now we need to get the necessary larsoft packages. Make sure you are in the
+srcs dir of your area and run:
+
+```
+git clone http://cdcvs.fnal.gov/projects/lariatsoft
+git clone http://cdcvs.fnal.gov/projects/lardbt-lariatutil lariatutil
+git clone http://cdcvs.fnal.gov/projects/larana
+git clone http://cdcvs.fnal.gov/projects/larreco
+git clone http://cdcvs.fnal.gov/projects/lardataobj
+git clone http://cdcvs.fnal.gov/projects/larbatch
+cd lariatsoft
+git checkout feature/jhugon_PionAbsAndChEx
+cd ..
+cd lariatutil
+git checkout feature/jhugon_CVMFSWorks
+git checkout $version ups/product_deps
+cd ..
+cd larana
+git checkout feature/jhugon_likelihoodPID_forlarsoftv06_15_00
+cd ..
+cd larreco
+git checkout feature/jhugon_caloTruth
+cd ..
+cd lardataobj
+git checkout feature/jhugon_caloTruth
+cd ..
+cd larbatch
+git checkout c30e15939360
+git checkout LARSOFT_SUITE_$version ups/product_deps
+cd ..
+mrb uc # updates the build dependencies to use the packages you just got
+```
+
+Now we need to compile everything
+
+```
+mrbsetenv
+nice mrb i --generator ninja -j8
+```
+
+Finally, create a script setup.sh with this in it the top level directory of
+your project:
+
+```
+source /hepsoft/LAr/setup
+setup mrb
+setup git
+setup gitflow
+setup ninja v1_6_0b
+export MRB_PROJECT=larsoft
+export PROJECT=lariat
+version=v06_15_00
+qual=e10:debug
+setup larsoft $version -q $qual
+source localProducts*/setup
+mrbsetenv
+setup lariatsoft $version -q $qual
+setup lariatsoft $version -q $qual
+```
+
+Running source setup.sh will setup your environment on a new login.
+
+
 Tree Info
 ---------
 
