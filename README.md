@@ -174,6 +174,33 @@ setup lariatsoft $version -q $qual
 
 Running source setup.sh will setup your environment on a new login.
 
+Updating lariatsoft to latest git version
+-----------------------------------------
+
+These are the steps to update your code to the version of
+feature/jhugon_PionAbsAndChEx that is on the git server.
+
+First, you should have your larsoft environment setup, because it loads a newer
+version of git. Then, go into your lariatsoft directory.
+
+I recommend you commit whatever you have been working on. You can use `git
+status` and `git diff` to see what changes you have made from the last commit
+you made (or got from the server). You can use `git add <filename>` to track
+new files with git. When you are happy with the changes you've made, run `git
+commit -a` to commit all changes.
+
+Run `git fetch` to have your local git repository load information about the
+git server repository. This doesn't change any files.
+
+Finally, run `git merge origin/feature/jhugon_PionAbsAndChEx`. This merges any
+changes on the server (by convention called "origin") version of
+feature/jhugon_PionAbsAndChEx into your local working copy. If it is a trivial
+merge, just adding new commits on top of what you have, then the command will
+talk about a "fast-forward". Otherwise, git tries to merge things
+automatically. If there are problems with the automatic merging, then you will
+get an error about "conflicts". `git status` will tell you which files have
+conflicts and you can try to fix them manually. You can run `git merge --abort`
+to give up on the merge process if you have problems.
 
 Tree Info
 ---------
