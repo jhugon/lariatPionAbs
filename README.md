@@ -14,8 +14,8 @@ Setting up LariatSoft Code on Fermilab lariatgpvm
 Create a directory where you want your work to be e.g.
 
 ```
-mkdir -p /lariat/app/users/$USER/lariatsoft_v06_34_00_pionAbs
-cd /lariat/app/users/$USER/lariatsoft_v06_34_00_pionAbs
+mkdir -p /lariat/app/users/$USER/lariatsoft_v06_34_01_pionAbs
+cd /lariat/app/users/$USER/lariatsoft_v06_34_01_pionAbs
 ```
 
 Then create a new lariatsoft area 
@@ -24,7 +24,7 @@ Then create a new lariatsoft area
 ```
 source /cvmfs/lariat.opensciencegrid.org/setup_lariat.sh
 setup ninja v1_7_2
-version=v06_34_00
+version=v06_34_01
 qual=e14:debug
 setup larsoft $version -q $qual
 mrb newDev
@@ -63,12 +63,12 @@ nice mrb i --generator ninja -j8
 ```
 
 Finally, create a script setup.sh with this in in e.g.
-`/lariat/app/users/$USER/lariatsoft_v06_34_00_pionAbs`:
+`/lariat/app/users/$USER/lariatsoft_v06_34_01_pionAbs`:
 
 ```
 source /cvmfs/lariat.opensciencegrid.org/setup_lariat.sh
 setup ninja v1_7_2
-version=v06_34_00
+version=v06_34_01
 qual=e14:debug
 setup larsoft $version -q $qual
 source localProducts*/setup
@@ -94,7 +94,7 @@ setup gitflow
 setup ninja v1_7_2
 export MRB_PROJECT=larsoft
 export PROJECT=lariat
-version=v06_34_00
+version=v06_34_01
 qual=e14:debug
 setup larsoft $version -q $qual
 mrb newDev
@@ -143,7 +143,7 @@ setup gitflow
 setup ninja v1_7_2
 export MRB_PROJECT=larsoft
 export PROJECT=lariat
-version=v06_34_00
+version=v06_34_01
 qual=e14:debug
 setup larsoft $version -q $qual
 source localProducts*/setup
