@@ -55,6 +55,15 @@ cd ..
 mrb uc # updates the build dependencies to use the packages you just got
 ```
 
+**IF YOU ARE A DEVELPER OF LARIATSOFT AND LARSOFT**, then you can clone these instead:
+
+```
+git clone ssh://p-lariatsoft@cdcvs.fnal.gov/cvs/projects/lariatsoft
+git clone ssh://p-larana@cdcvs.fnal.gov/cvs/projects/larana
+git clone ssh://p-larreco@cdcvs.fnal.gov/cvs/projects/larreco
+git clone ssh://p-lardataobj@cdcvs.fnal.gov/cvs/projects/lardataobj
+```
+
 Now we need to compile everything
 
 ```
