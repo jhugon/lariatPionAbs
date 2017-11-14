@@ -119,6 +119,8 @@ git clone http://cdcvs.fnal.gov/projects/lariatsoft
 git clone http://cdcvs.fnal.gov/projects/larana
 git clone http://cdcvs.fnal.gov/projects/larreco
 git clone http://cdcvs.fnal.gov/projects/lardataobj
+git clone http://cdcvs.fnal.gov/projects/lariat-online-lariatfragments lariatfragments
+git clone http://cdcvs.fnal.gov/projects/lardbt-lariatutil lariatutil
 cd lariatsoft
 git checkout feature/jhugon_PionAbsAndChEx
 cd ..
@@ -130,6 +132,12 @@ git checkout feature/jhugon_caloTruth
 cd ..
 cd lardataobj
 git checkout feature/jhugon_caloTruth
+cd ..
+cd lariatfragments
+git checkout v06_32_00
+cd ..
+cd lariatutil
+git checkout v06_34_01
 cd ..
 mrb uc # updates the build dependencies to use the packages you just got
 ```
