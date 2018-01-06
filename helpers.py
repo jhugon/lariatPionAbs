@@ -2109,34 +2109,55 @@ class PlotOfSlices:
       xBin += 1
     leg.Draw("same")
 
-def getIntegralHist(hist,setErrors=True):
+def getIntegralHist(hist,setErrors=True,reverse=False):
   result = hist.Clone(hist.GetName()+"_Integral")
   if hist.InheritsFrom("TH2"):
     nBinsX = result.GetNbinsX()
     nBinsY = result.GetNbinsY()
-    for iX in range(nBinsX+2):
-      for iY in range(nBinsY+2):
+    iXRange = range(nBinsX+2)
+    if reverse:
+        iXRange.reverse()
+    iYRange = range(nBinsY+2)
+    if reverse:
+        iYRange.reverse()
+    for iX in iXRange:
+      for iY in iYRange:
         sumw = 0.0
         sumw2 = 0.0
-        for jX in range(iX,nBinsX+2):
-          for jY in range(iY,nBinsY+2):
-            sumw += result.GetBinContent(jX,jY)
-            sumw2 += (result.GetBinError(jX,jY))**2
+        if reverse:
+          for jX in range(0,iX+1):
+            for jY in range(0,iY+1):
+              sumw += result.GetBinContent(jX,jY)
+              sumw2 += (result.GetBinError(jX,jY))**2
+        else:
+          for jX in range(iX,nBinsX+2):
+            for jY in range(iY,nBinsY+2):
+              sumw += result.GetBinContent(jX,jY)
+              sumw2 += (result.GetBinError(jX,jY))**2
         result.SetBinContent(iX,iY,sumw)
         if setErrors:
             result.SetBinError(iX,iY,sumw2**0.5)
   else:
     nBins = result.GetNbinsX()
-    for i in range(nBins+1):
+    iRange = range(nBins+1)
+    if reverse:
+        iRange.reverse()
+    for i in iRange:
       sumw = 0.0
       sumw2 = 0.0
-      for j in range(i,nBins+2):
-        sumw += result.GetBinContent(j)
-        sumw2 += (result.GetBinError(j))**2
+      if reverse:
+        for j in range(0,i+1): # include underflow 0 and current bin i
+          sumw += result.GetBinContent(j)
+          sumw2 += (result.GetBinError(j))**2
+      else:
+        for j in range(i,nBins+2): # include current bin i and overflow nBins + 1
+          sumw += result.GetBinContent(j)
+          sumw2 += (result.GetBinError(j))**2
       result.SetBinContent(i,sumw)
       if setErrors:
           result.SetBinError(i,sumw2**0.5)
   return result
+
 
 def hist2to1(hist):
   assert(hist.InheritsFrom("TH1"))
@@ -2370,7 +2391,7 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
   xMin = 1e15
   xMax = -1e15
   for hist in histList:
-    if isinstance(hist,root.TH1):
+    if isinstance(hist,root.TH1) or isinstance(hist,root.TEfficiency):
         histMax = getHistMax(hist)
         yMax = max(yMax,histMax)
         if logy:
@@ -2391,6 +2412,7 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
             yMax = max(yMax,float(y))
             xMin = min(xMin,float(x))
             yMin = min(yMin,float(y))
+  #print xMin, xMax, yMin, yMax
   if yMax == -1e15:
     yMax = 1.
   if logy:
