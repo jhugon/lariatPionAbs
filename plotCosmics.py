@@ -31,7 +31,7 @@ if __name__ == "__main__":
   fileConfigs = [
     #{
     #  #'fn': "/lariat/app/users/jhugon/lariatsoft_v06_15_00/srcs/lariatsoft/JobConfigurations/CosmicAna_Pos_RunII.root",
-    #  'fn': "lariat_data_cosmics_Pos_RunII_v01.root",
+    #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_data_cosmics_Pos_RunII_v01/anahist.root",
     #  'name': "RunIIPos",
     #  'title': "Run II Positive Polarity",
     #  'caption': "Run II Positive Polarity",
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     #  'isData': True,
     #},
     #{
-    #  'fn': "lariat_data_cosmics_Neg_RunII_v01.root",
+    #  'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/cosmicAna/lariat_data_cosmics_Neg_RunII_v01/anahist.root",
     #  'name': "RunIINeg",
     #  'title': "Run II Negative Polarity",
     #  'caption': "Run II Negative Polarity",
@@ -59,24 +59,6 @@ if __name__ == "__main__":
       'color': root.kBlack,
       'isData': True,
     },
-    #{
-    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_v4.root",
-    #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_v4.root"],
-    #  'name': "CosmicMC",
-    #  'title': "Cosmic MC",
-    #  'caption': "Cosmic MC",
-    #  'isData': False,
-    #  #'scaleFactor': nData/4961.22
-    #},
-    #{
-    #  'fn': "lariat_PiAbsAndChEx_cosmics_vert_presmear10perc_v4.root",
-    #  'addFriend': ["friend","friendTree_lariat_PiAbsAndChEx_cosmics_vert_presmear10perc_v4.root"],
-    #  'name': "CosmicMC_presmear10perc",
-    #  'title': "Cosmic MC Pre-smear 10% ",
-    #  'caption': "Cosmic MC Pre-smear 10%",
-    #  'isData': False,
-    #  #'scaleFactor': nData/2500.4
-    #},
     {
       #'fn': "/home/jhugon/cvmfs_lariat_v06_34_01/srcs/lariatsoft/JobConfigurations/textTestCosmicAna.root",
       'fn': "/scratch/jhugon/lariat/MC/Cosmics_v01/cosmicAna2.root",
@@ -157,31 +139,6 @@ if __name__ == "__main__":
         fileConfigs[i]['color'] = COLORLIST[i-1]
 
   histConfigs = [
-#    {
-#      'name': "trueStartMom",
-#      'xtitle': "True Muon Initial Momentum [MeV]",
-#      'ytitle': "Events / MeV",
-#      #'binning': getLogBins(20,100,10000),
-#      'binning': [20,0,10000],
-#      'var': "trueStartMom",
-#      'cuts': weightStr,
-#      #'normalize': True,
-#      'logy': logy,
-#      #'logx': True,
-#      #'normToBinWidth': True,
-#    },
-#    {
-#      'name': "trueStartMomLin",
-#      'xtitle': "True Muon Initial Momentum [MeV]",
-#      'ytitle': "Events / MeV",
-#      #'binning': getLogBins(20,100,10000),
-#      'binning': [20,0,10000],
-#      'var': "trueStartMom",
-#      'cuts': weightStr,
-#      'normalize': True,
-#      #'logx': True,
-#      #'normToBinWidth': True,
-#    },
 #    {
 #      'name': "trackXFront",
 #      'xtitle': "X of TPC Track Projection to TPC Front [cm]",
@@ -443,7 +400,6 @@ if __name__ == "__main__":
       'cuts': weightStr,
       'normalize': logy,
       'logy': not logy,
-      'printIntegral': True,
     },
 #    {
 #      'name': "primTrkTruedEdxs",
@@ -605,26 +561,26 @@ if __name__ == "__main__":
     #  #'normalize': True,
     #  'logy': logy,
     #},
-    #{
-    #  'name': "primTrkResRanges",
-    #  'xtitle': "Primary TPC Track Residual Range [cm]",
-    #  'ytitle': "Events / bin",
-    #  'binning': [200,0,100],
-    #  'var': "primTrkResRanges",
-    #  'cuts': weightStr,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
-    #{
-    #  'name': "primTrkPitches",
-    #  'xtitle': "Primary TPC Track Pitch [cm]",
-    #  'ytitle': "Events / bin",
-    #  'binning': [100,0,10],
-    #  'var': "primTrkPitches",
-    #  'cuts': weightStr,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
+    {
+      'name': "primTrkResRanges",
+      'xtitle': "Primary TPC Track Residual Range [cm]",
+      'ytitle': "Events / bin",
+      'binning': [200,0,100],
+      'var': "primTrkResRanges",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "primTrkPitches",
+      'xtitle': "Primary TPC Track Pitch [cm]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,10],
+      'var': "primTrkPitches",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
     #{
     #  'name': "primTrkEndKin",
     #  'xtitle': "Primary TPC Track End Kinetic Energy [MeV]",
@@ -736,12 +692,12 @@ if __name__ == "__main__":
   ]
 
   plotManyFilesOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
-  #fileConfigMCs = copy.deepcopy(fileConfigs)
-  #fileConfigData = None
-  #for i in reversed(range(len(fileConfigMCs))):
-  #  if 'isData' in fileConfigMCs[i] and fileConfigMCs[i]['isData']:
-  #    fileConfigData = fileConfigMCs.pop(i)
-  #DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX)
+#  fileConfigMCs = copy.deepcopy(fileConfigs)
+#  fileConfigData = None
+#  for i in reversed(range(len(fileConfigMCs))):
+#    if 'isData' in fileConfigMCs[i] and fileConfigMCs[i]['isData']:
+#      fileConfigData = fileConfigMCs.pop(i)
+#  DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX)
 
 ########################################################
 ########################################################
@@ -825,16 +781,16 @@ if __name__ == "__main__":
       'var': "primTrkdEdxs",
       'cuts': weightStr,
     },
-#    {
-#      'name': "primTrkdEdxVRange",
-#      'xtitle': "Primary Track Hit Residual Range [cm]",
-#      'ytitle': "Primary Track Hit dE/dx [MeV/cm]",
-#      'binning': [100,0,100,100,0,50],
-#      'var': "primTrkdEdxs:primTrkResRanges",
-#      'cuts': weightStr,
-#      #'normalize': True,
-#      #'logz': True,
-#    },
+    {
+      'name': "primTrkdEdxVRange",
+      'xtitle': "Primary Track Hit Residual Range [cm]",
+      'ytitle': "Primary Track Hit dE/dx [MeV/cm]",
+      'binning': [100,0,100,100,0,50],
+      'var': "primTrkdEdxs:primTrkResRanges",
+      'cuts': weightStr,
+      #'normalize': True,
+      #'logz': True,
+    },
 #    {
 #      'name': "primTrkdEdxVRangeFidCut",
 #      'xtitle': "Primary Track Hit Residual Range [cm]",
@@ -1175,39 +1131,29 @@ if __name__ == "__main__":
 #      #'normalize': True,
 #      'logz': True,
 #    },
-#    {
-#      'name': "primTrkdEdxsVprimTrkStartPhiZX",
-#      'xtitle': "Primary TPC Track #phi_{zx}",
-#      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
-#      'binning': [30,-180,180,10000,0,50],
-#      'var': "primTrkdEdxs:atan2(sin(primTrkStartTheta)*cos(primTrkStartPhi),cos(primTrkStartTheta))*180/pi",
-#      'cuts': weightStr,
-#      #'normalize': True,
-#      'logz': True,
-#    },
-#    {
-#      'name': "primTrkdEdxsVprimTrkPitches",
-#      'xtitle': "Hit Pitch [cm]",
-#      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
-#      'binning': [30,0,6,10000,0,50],
-#      'var': "primTrkdEdxs:primTrkPitches",
-#      'cuts': weightStr,
-#      #'normalize': True,
-#      #'logz': True,
-#    },
+    {
+      'name': "primTrkdEdxsVprimTrkStartPhiZX",
+      'xtitle': "Primary TPC Track #phi_{zx}",
+      'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
+      'binning': [30,-180,180,10000,0,50],
+      'var': "primTrkdEdxs:atan2(sin(primTrkStartTheta)*cos(primTrkStartPhi),cos(primTrkStartTheta))*180/pi",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': True,
+    },
   ]
 
-#  hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
-#  outfile = root.TFile("cosmics_hists.root","recreate")
-#  outfile.cd()
-#  for var in hists:
-#    for ds in hists[var]:
-#        newname = var+"_"+ds
-#        hist = hists[var][ds]
-#        hist.SetName(newname)
-#        hist.Print()
-#        hist.Write()
-#  outfile.Close()
+  hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_")
+  outfile = root.TFile("cosmics_hists.root","recreate")
+  outfile.cd()
+  for var in hists:
+    for ds in hists[var]:
+        newname = var+"_"+ds
+        hist = hists[var][ds]
+        hist.SetName(newname)
+        hist.Print()
+        hist.Write()
+  outfile.Close()
 
 ######################################################################################
 ######################################################################################
@@ -1399,7 +1345,7 @@ if __name__ == "__main__":
       'ytitle': "Events / MeV",
       'binning': getLogBins(20,100,10000),
       'var': "trueStartMom",
-      'cuts': "cosmicMomWeight",
+      'cuts': "",
       #'normalize': True,
       'logy': logy,
       'logx': True,
@@ -1411,7 +1357,7 @@ if __name__ == "__main__":
       'ytitle': "Events / MeV",
       'binning': getLogBins(20,100,10000),
       'var': "trueStartMom",
-      'cuts': "cosmicMomWeight"+"*enterExitYp",
+      'cuts': "enterExitYp",
       #'normalize': True,
       'logy': logy,
       'logx': True,
@@ -1423,7 +1369,7 @@ if __name__ == "__main__":
       'ytitle': "Events / MeV",
       'binning': getLogBins(20,100,10000),
       'var': "trueStartMom",
-      'cuts': "cosmicMomWeight"+"*enterExitYm",
+      'cuts': "enterExitYm",
       #'normalize': True,
       'logy': logy,
       'logx': True,
@@ -1435,7 +1381,7 @@ if __name__ == "__main__":
       'ytitle': "Events / MeV",
       'binning': getLogBins(20,100,10000),
       'var': "trueStartMom",
-      'cuts': "cosmicMomWeight"+"*enterExitYm*enterExitYp",
+      'cuts': "enterExitYm*enterExitYp",
       #'normalize': True,
       'logy': logy,
       'logx': True,
@@ -1447,7 +1393,7 @@ if __name__ == "__main__":
       'ytitle': "Events / MeV",
       'binning': getLogBins(20,100,10000),
       'var': "trueStartMom",
-      'cuts': "cosmicMomWeight"+"*enterExitXm",
+      'cuts': "enterExitXm",
       #'normalize': True,
       'logy': logy,
       'logx': True,
@@ -1459,7 +1405,7 @@ if __name__ == "__main__":
       'ytitle': "Events / MeV",
       'binning': getLogBins(20,100,10000),
       'var': "trueStartMom",
-      'cuts': "cosmicMomWeight"+"*enterExitXp",
+      'cuts': "enterExitXp",
       #'normalize': True,
       'logy': logy,
       'logx': True,
@@ -1468,7 +1414,7 @@ if __name__ == "__main__":
   ]
   for i in range(len(histConfigs)):
     histConfigs[i]["color"] = COLORLIST[i]
-  #plotManyHistsOnePlot(fileConfigs[1:],histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trueStartMom")
+#  plotManyHistsOnePlot(fileConfigs,histConfigs,c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trueStartMom")
 
   histConfigs = [
     {
