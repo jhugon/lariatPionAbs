@@ -2317,7 +2317,7 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
   xMin = 1e15
   xMax = -1e15
   for hist in histList:
-    if isinstance(hist,root.TH1):
+    if isinstance(hist,root.TH1) or isinstance(hist,root.TEfficiency):
         histMax = getHistMax(hist)
         yMax = max(yMax,histMax)
         if logy:
@@ -2338,6 +2338,7 @@ def makeStdAxisHist(histList,logy=False,freeTopSpace=0.5,xlim=[],ylim=[]):
             yMax = max(yMax,float(y))
             xMin = min(xMin,float(x))
             yMin = min(yMin,float(y))
+  #print xMin, xMax, yMin, yMax
   if yMax == -1e15:
     yMax = 1.
   if logy:
