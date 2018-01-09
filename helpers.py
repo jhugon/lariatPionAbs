@@ -640,6 +640,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         captionright2, captionright3, preliminaryString:
         all are passed to drawStandardCaptions. histConfig arguments override these
     cuts: additional cuts per file concat to histConfig cuts, default ""
+    writeImage: if False, don't make an image for this file
   histConfig options:
     name: name of histogram, used for savename REQUIRED
     color: sets line/marker color of histogram
@@ -675,6 +676,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     profileStdDev: if True, profile errors are std deviation instead of std error on mean
     profileXtoo: if True, draw profileX of 2D hist, on top of 2D hist
     funcs: List of TF1's to draw on top of the histogram
+    writeImage: if False, don't make an image for this hist
   """
   
   allHists = {}
@@ -693,6 +695,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     fileConfig['tree'].SetCacheSize(10000000);
     fileConfig['tree'].AddBranchToCache("*");
     tree = fileConfig['tree']
+    writeImageFile = True
+    if "writeImage" in fileConfig: writeImageFile = fileConfig["writeImage"]
     for histConfig in histConfigs:
       # setup
       binning = histConfig['binning']
@@ -764,6 +768,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       funcs = []
       if "funcs" in histConfig and type(histConfig["funcs"]) == list:
         funcs = histConfig["funcs"]
+      writeImageHist = True
+      if "writeImage" in histConfig: writeImageHist = histConfig["writeImage"]
       # now on to the real work
       hist = None
       if is2D:
@@ -839,7 +845,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
           hist.Draw("Esame")
         else:
           hist.Draw("histsame")
-      if writeImages:
+      if writeImages and writeImageFile and writeImageHist:
         for hlineY in hlineYs:
           hlines.append(drawHline(axisHist,hlineY))
         for vlineX in vlineXs:
@@ -2639,12 +2645,13 @@ def drawGraphs(canvas,graphs,xTitle,yTitle):
 COLORLIST=[
       root.kBlue-7,
       root.kRed-4,
-      root.kGreen,
+      root.kGreen+3,
       root.kMagenta-4,
       root.kOrange-3,
-      root.kGray+1,
       root.kAzure+10,
       root.kYellow+1,
+      root.kViolet+2,
+      #root.kGray+1,
 ]*100
 
 if __name__ == "__main__":
