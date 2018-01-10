@@ -296,7 +296,7 @@ def fitSlicesLandauCore(c,hist,fileprefix,nJump=1):
       caption = "{} from {} to {}".format(xTitle,xMin,xMax)
       xMiddle = 0.5*(xMax+xMin)
       xError = 0.5*(xMax-xMin)
-      startFit, endFit = getFracMaxVals(histAll,0.3)
+      startFit, endFit = getFracMaxVals(histAll,0.4)
       (mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histAll,postfix,caption,startFit,endFit,fixedLandauWidth=0.12)
       if mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5:
             continue
@@ -332,9 +332,6 @@ def fitSlicesLandauCore(c,hist,fileprefix,nJump=1):
   return mpvlGraph,wlGraph,sgGraph
 
 if __name__ == "__main__":
-
-  import numpy
-  from matplotlib import pyplot as mpl
 
   c = root.TCanvas("c")
   fCosmics = root.TFile("cosmics_hists.root")
@@ -403,45 +400,52 @@ if __name__ == "__main__":
             mcErrs.append(errors)
             fwhmVals.append(fwhm)
             mcSmearingVals.append(0.)
-  mcParams = numpy.array(mcParams)
-  mcErrs = numpy.array(mcErrs)
-  fig, ax = mpl.subplots(figsize=(7,7))
-  for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
-    ax.axhspan(dataParamsErr[0][2]-dataParamsErr[1][2],dataParamsErr[0][2]+dataParamsErr[1][2],facecolor='k',edgecolor='k',alpha=0.3)
-    ax.axhline(dataParamsErr[0][2],c='k')
-  ax.errorbar(mcSmearingVals,mcParams[:,2],yerr=mcErrs[:,2],fmt=".b")
-  #ax.set_xlim(-10,50)
-  ax.set_xlabel("MC Smearing [%]")
-  ax.set_ylabel("Gaussian $\sigma$ Parameter [MeV/cm]")
-  for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
-    ax.annotate(dataLabel,(45,dataParamsErr[0][2]+0.5*dataParamsErr[1][2]),ha='right',va='center')
-  fig.savefig("Cosmic_Gaus_Widths.png")
-  fig.savefig("Cosmic_Gaus_Widths.pdf")
 
-  fig, ax = mpl.subplots(figsize=(7,7))
-  for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
-    ax.axhspan(dataParamsErr[0][0]-dataParamsErr[1][0],dataParamsErr[0][0]+dataParamsErr[1][0],facecolor='k',edgecolor='k',alpha=0.3)
-    ax.axhline(dataParamsErr[0][0],c='k')
-  ax.errorbar(mcSmearingVals,mcParams[:,0],yerr=mcErrs[:,0],fmt=".b")
-  #ax.set_xlim(-10,50)
-  ax.set_xlabel("MC Smearing [%]")
-  ax.set_ylabel("Landau MPV Parameter [MeV/cm]")
-  for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
-    ax.annotate(dataLabel,(45,dataParamsErr[0][0]+0.5*dataParamsErr[1][0]),ha='right',va='center')
-  fig.savefig("Cosmic_Gaus_MPV.png")
-  fig.savefig("Cosmic_Gaus_MPV.pdf")
+  try:
+    import numpy
+    from matplotlib import pyplot as mpl
 
-  fig, ax = mpl.subplots(figsize=(7,7))
-  for dataLabel, dataFWHM in zip(dataLabels,dataFWHMs):
-    ax.axhline(dataFWHM,c='k',lw=2)
-  ax.errorbar(mcSmearingVals,fwhmVals,fmt="ob")
-  #ax.set_xlim(-10,50)
-  ax.set_xlabel("MC Smearing [%]")
-  ax.set_ylabel("Full Width Half Max of Fit PDF [MeV/cm]")
-  for dataLabel, dataFWHM in zip(dataLabels,dataFWHMs):
-    ax.annotate(dataLabel,(45,dataFWHM),ha='right',va='bottom')
-  fig.savefig("Cosmic_FWHM.png")
-  fig.savefig("Cosmic_FWHM.pdf")
+    mcParams = numpy.array(mcParams)
+    mcErrs = numpy.array(mcErrs)
+    fig, ax = mpl.subplots(figsize=(7,7))
+    for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
+      ax.axhspan(dataParamsErr[0][2]-dataParamsErr[1][2],dataParamsErr[0][2]+dataParamsErr[1][2],facecolor='k',edgecolor='k',alpha=0.3)
+      ax.axhline(dataParamsErr[0][2],c='k')
+    ax.errorbar(mcSmearingVals,mcParams[:,2],yerr=mcErrs[:,2],fmt=".b")
+    #ax.set_xlim(-10,50)
+    ax.set_xlabel("MC Smearing [%]")
+    ax.set_ylabel("Gaussian $\sigma$ Parameter [MeV/cm]")
+    for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
+      ax.annotate(dataLabel,(45,dataParamsErr[0][2]+0.5*dataParamsErr[1][2]),ha='right',va='center')
+    fig.savefig("Cosmic_Gaus_Widths.png")
+    fig.savefig("Cosmic_Gaus_Widths.pdf")
+
+    fig, ax = mpl.subplots(figsize=(7,7))
+    for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
+      ax.axhspan(dataParamsErr[0][0]-dataParamsErr[1][0],dataParamsErr[0][0]+dataParamsErr[1][0],facecolor='k',edgecolor='k',alpha=0.3)
+      ax.axhline(dataParamsErr[0][0],c='k')
+    ax.errorbar(mcSmearingVals,mcParams[:,0],yerr=mcErrs[:,0],fmt=".b")
+    #ax.set_xlim(-10,50)
+    ax.set_xlabel("MC Smearing [%]")
+    ax.set_ylabel("Landau MPV Parameter [MeV/cm]")
+    for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
+      ax.annotate(dataLabel,(45,dataParamsErr[0][0]+0.5*dataParamsErr[1][0]),ha='right',va='center')
+    fig.savefig("Cosmic_Gaus_MPV.png")
+    fig.savefig("Cosmic_Gaus_MPV.pdf")
+
+    fig, ax = mpl.subplots(figsize=(7,7))
+    for dataLabel, dataFWHM in zip(dataLabels,dataFWHMs):
+      ax.axhline(dataFWHM,c='k',lw=2)
+    ax.errorbar(mcSmearingVals,fwhmVals,fmt="ob")
+    #ax.set_xlim(-10,50)
+    ax.set_xlabel("MC Smearing [%]")
+    ax.set_ylabel("Full Width Half Max of Fit PDF [MeV/cm]")
+    for dataLabel, dataFWHM in zip(dataLabels,dataFWHMs):
+      ax.annotate(dataLabel,(45,dataFWHM),ha='right',va='bottom')
+    fig.savefig("Cosmic_FWHM.png")
+    fig.savefig("Cosmic_FWHM.pdf")
+  except ImportError:
+    pass
 
 #  for logy,xmax,outext,ytitle in [(False,4,"","Normalized--Hits"),(True,50,"_logy","Hits/bin")]:
 #    c.SetLogy(logy)
@@ -503,32 +507,41 @@ if __name__ == "__main__":
   #graphsRuns_phiLt0 = fitSlicesLandauCore(c,hist,"Run_phiLt0_1_")
   graphsRuns_phiLt0 = fitSlicesLandauCore(c,hist,"Run_phiLt0_10_",nJump=10)
 
+  graphsRunsList = [graphsRuns,graphsRuns_phiGeq0,graphsRuns_phiLt0]
+
   hist = fCosmics.Get("primTrkdEdxVwire_RunIIPos")
   #graphsWires = fitSlicesLandauCore(c,hist,"Wire_1_")
-  graphsWires = fitSlicesLandauCore(c,hist,"Wire_16_",nJump=16)
+  graphsWires = fitSlicesLandauCore(c,hist,"Wire_16_",nJump=8)
 
   hist = fCosmics.Get("primTrkdEdxVwire_phiGeq0_RunIIPos")
   #graphsWires_phiGeq0 = fitSlicesLandauCore(c,hist,"Wire_phiGeq0_1_")
-  graphsWires_phiGeq0 = fitSlicesLandauCore(c,hist,"Wire_phiGeq0_16_",nJump=16)
+  graphsWires_phiGeq0 = fitSlicesLandauCore(c,hist,"Wire_phiGeq0_16_",nJump=8)
 
   hist = fCosmics.Get("primTrkdEdxVwire_phiLt0_RunIIPos")
   #graphsWires_phiLt0 = fitSlicesLandauCore(c,hist,"Wire_phiLt0_1_")
-  graphsWires_phiLt0 = fitSlicesLandauCore(c,hist,"Wire_phiLt0_16_",nJump=16)
+  graphsWires_phiLt0 = fitSlicesLandauCore(c,hist,"Wire_phiLt0_16_",nJump=8)
+
+  graphsWiresList = [graphsWires,graphsWires_phiGeq0,graphsWires_phiLt0]
+
+  hist = fCosmics.Get("primTrkdEdxsVx_phiLt0_RunIIPos")
+  graphsX_phiLt0 = fitSlicesLandauCore(c,hist,"X_phiLt0_1_")
+  #graphsX_phiLt0 = fitSlicesLandauCore(c,hist,"X_phiLt0_2_",nJump=2)
+
+  hist = fCosmics.Get("primTrkdEdxsVy_phiLt0_RunIIPos")
+  graphsY_phiLt0 = fitSlicesLandauCore(c,hist,"Y_phiLt0_1_")
+  #graphsY_phiLt0 = fitSlicesLandauCore(c,hist,"Y_phiLt0_2_",nJump=2)
+
+  hist = fCosmics.Get("primTrkdEdxsVz_phiLt0_RunIIPos")
+  graphsZ_phiLt0 = fitSlicesLandauCore(c,hist,"Z_phiLt0_1_")
+  #graphsZ_phiLt0 = fitSlicesLandauCore(c,hist,"Z_phiLt0_5_",nJump=5)
 
   c.Clear()
 
-  graphsRunsList = [graphsRuns,graphsRuns_phiGeq0,graphsRuns_phiLt0]
-  for iColor, graphs in enumerate(graphsRunsList):
-    for graph in graphs:
-        graph.SetMarkerColor(COLORLIST[iColor])
-        graph.SetLineColor(COLORLIST[iColor])
-
-  graphsWiresList = [graphsWires,graphsWires_phiGeq0,graphsWires_phiLt0]
-  for iColor, graphs in enumerate(graphsWiresList):
-    for graph in graphs:
-        graph.SetMarkerColor(COLORLIST[iColor])
-        graph.SetLineColor(COLORLIST[iColor])
-
+  for graphsList in [graphsRunsList,graphsWiresList]:
+    for iColor, graphs in enumerate(graphsList):
+      for graph in graphs:
+          graph.SetMarkerColor(COLORLIST[iColor])
+          graph.SetLineColor(COLORLIST[iColor])
   
   axisHist = drawGraphs(c,[x[0] for x in graphsRunsList],"Run Number","Landau MPV [MeV/cm]",yStartZero=False)
   leg = drawNormalLegend([x[0] for x in graphsRunsList],["All","#phi #geq 0","#phi < 0"],option="ep")
@@ -540,12 +553,12 @@ if __name__ == "__main__":
   c.SaveAs("CompareRuns_Sigma.png")
   c.SaveAs("CompareRuns_Sigma.pdf")
 
-  axisHist = drawGraphs(c,[x[0] for x in graphsWiresList],"Run Number","Landau MPV [MeV/cm]",yStartZero=False)
+  axisHist = drawGraphs(c,[x[0] for x in graphsWiresList],"Wire Number","Landau MPV [MeV/cm]",yStartZero=False)
   leg = drawNormalLegend([x[0] for x in graphsWiresList],["All","#phi #geq 0","#phi < 0"],option="ep")
   c.SaveAs("CompareWires_MPV.png")
   c.SaveAs("CompareWires_MPV.pdf")
 
-  axisHist = drawGraphs(c,[x[2] for x in graphsWiresList],"Run Number","Gaussian Sigma [MeV/cm]",yStartZero=False)
+  axisHist = drawGraphs(c,[x[2] for x in graphsWiresList],"Wire Number","Gaussian Sigma [MeV/cm]",yStartZero=False)
   leg = drawNormalLegend([x[2] for x in graphsWiresList],["All","#phi #geq 0","#phi < 0"],option="ep")
   c.SaveAs("CompareWires_Sigma.png")
   c.SaveAs("CompareWires_Sigma.pdf")
