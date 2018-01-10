@@ -273,8 +273,7 @@ def fitLandauCore(c,hist,postfix,caption,fitMin=1.6,fitMax=2.3,fixedLandauWidth=
 
   return (mpvl.getVal(),wl.getVal(),sg.getVal()), (mpvl.getError(),wl.getError(),sg.getError()), fwhm
 
-def fitSlicesLandauCore(c,hist,fileprefix):
-  nJump = 1
+def fitSlicesLandauCore(c,hist,fileprefix,nJump=1):
   xaxis = hist.GetXaxis()
   xTitle = xaxis.GetTitle()
   yaxis = hist.GetYaxis()
@@ -283,29 +282,32 @@ def fitSlicesLandauCore(c,hist,fileprefix):
   wlGraph = root.TGraphErrors()
   sgGraph = root.TGraphErrors()
   fwhmGraph = root.TGraphErrors()
+  iPoint=0
   for i in range(hist.GetNbinsX()//nJump):
       firstBin = i*nJump+1
       lastBin = (i+1)*(nJump)
       lastBin = min(lastBin,hist.GetNbinsX())
       histAll = hist.ProjectionY("_pyAll",firstBin,lastBin)
+      if histAll.GetEntries() == 0:
+        continue
       postfix = "_"+fileprefix+"bins{}".format(i)
       xMin = xaxis.GetBinLowEdge(firstBin)
       xMax = xaxis.GetBinUpEdge(lastBin)
       caption = "{} from {} to {}".format(xTitle,xMin,xMax)
       xMiddle = 0.5*(xMax+xMin)
       xError = 0.5*(xMax-xMin)
-      (mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histAll,postfix,caption)
-      #(mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histAll,postfix,caption,fixedLandauWidth=0.1)
-      #(mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histAll,postfix,caption,fixedLandauWidth=0.147)
+      startFit, endFit = getFracMaxVals(histAll,0.3)
+      (mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histAll,postfix,caption,startFit,endFit,fixedLandauWidth=0.12)
       if mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5:
             continue
-      mpvlGraph.SetPoint(i,xMiddle,mpvl)
-      wlGraph.SetPoint(i,xMiddle,wl)
-      sgGraph.SetPoint(i,xMiddle,sg)
-      fwhmGraph.SetPoint(i,xMiddle,fwhm)
-      mpvlGraph.SetPointError(i,xError,mpvlErr)
-      wlGraph.SetPointError(i,xError,wlErr)
-      sgGraph.SetPointError(i,xError,sgErr)
+      mpvlGraph.SetPoint(iPoint,xMiddle,mpvl)
+      wlGraph.SetPoint(iPoint,xMiddle,wl)
+      sgGraph.SetPoint(iPoint,xMiddle,sg)
+      fwhmGraph.SetPoint(iPoint,xMiddle,fwhm)
+      mpvlGraph.SetPointError(iPoint,xError,mpvlErr)
+      wlGraph.SetPointError(iPoint,xError,wlErr)
+      sgGraph.SetPointError(iPoint,xError,sgErr)
+      iPoint += 1
   graphs = [mpvlGraph,wlGraph,sgGraph,fwhmGraph]
   labels = ["Landau MPV", "Landau Width", "Gaussian #sigma","FWHM"]
   #graphs = [mpvlGraph,sgGraph]
@@ -313,8 +315,18 @@ def fitSlicesLandauCore(c,hist,fileprefix):
   for i, graph in enumerate(graphs):
     graph.SetLineColor(COLORLIST[i])
     graph.SetMarkerColor(COLORLIST[i])
-  axis = drawGraphs(c,graphs,xTitle,yTitle)
-  leg = drawNormalLegend(graphs,labels,option="lep",position=[0.2,0.50,0.6,0.70])
+  pad1 = root.TPad("pad1"+hist.GetName(),"",0.02,0.50,0.98,0.98,0)
+  pad2 = root.TPad("pad2"+hist.GetName(),"",0.02,0.01,0.98,0.49,0)
+  c.cd()
+  c.Clear()
+  pad1.Draw()
+  pad2.Draw()
+  pad1.cd()
+  axis1 = drawGraphs(pad1,[mpvlGraph],xTitle,"Landau MPV [MeV/cm]",yStartZero=False)
+  pad2.cd()
+  axis2 = drawGraphs(pad2,[sgGraph],xTitle,"Gaussian #sigma [MeV/cm]")
+  #leg = drawNormalLegend(graphs,labels,option="lep",position=[0.2,0.50,0.6,0.70])
+  c.cd()
   c.SaveAs(fileprefix+".png")
   c.SaveAs(fileprefix+".pdf")
   return mpvlGraph,wlGraph,sgGraph
@@ -335,7 +347,7 @@ if __name__ == "__main__":
   fwhmLists = []
   for key in fCosmics.GetListOfKeys():
     name = key.GetName()
-    if "primTrkdEdxs_zoom3" in name:
+    if "primTrkdEdxs_zoom3_phiGeq0" in name:
         hist = key.ReadObj()
         hist.Rebin(2)
         startFit, endFit = getFracMaxVals(hist,0.4)
@@ -343,15 +355,19 @@ if __name__ == "__main__":
         params, errs, fwhm = fitLandauCore(c,hist,name,name,startFit,endFit,fixedLandauWidth=0.12)
         #params, errs, fwhm = fitLandauCore(c,hist,name,name,1.,4.)
         #params, errs, fwhm = fitLandauCore(c,hist,name,name,1.4,2.)
-        #params, errs, fwhm = fitGaussCore(c,hist,name,name,startFit,endFit)
         nameLists.append(name)
         paramLists.append(params)
         errorLists.append(errs)
         fwhmLists.append(fwhm)
         #xMin,xMax = getHistFracMaxVals(hist,0.25)
         #params, errs = fitGaussCore(c,hist,name,name,xMin,xMax)
+        #params, errs, fwhm = fitGaussCore(c,hist,name,name,startFit,endFit)
         #paramGausLists.append(params)
         #errorGausLists.append(errs)
+    elif "primTrkdEdxs_zoom3_phiLt0" in name:
+      pass
+    elif "primTrkdEdxs_zoom3" in name:
+      pass
   dataParamsErrs = []
   dataFWHMs = []
   dataLabels = []
@@ -427,12 +443,12 @@ if __name__ == "__main__":
   fig.savefig("Cosmic_FWHM.png")
   fig.savefig("Cosmic_FWHM.pdf")
 
-  for logy,xmax,outext,ytitle in [(False,4,"","Normalized--Hits"),(True,50,"_logy","Hits/bin")]:
-    c.SetLogy(logy)
-
-    plotSlices(c,fCosmics.Get("primTrkdEdxVwire_RunIIP60"),"SlicesWireRunIIP60_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"wire",rebinX=1,xunits="",normalize=not logy)
-    plotSlices(c,fCosmics.Get("primTrkdEdxVwire_RunIIP100"),"SlicesWireRunIIP100_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"wire",rebinX=1,xunits="",normalize=not logy)
-
+#  for logy,xmax,outext,ytitle in [(False,4,"","Normalized--Hits"),(True,50,"_logy","Hits/bin")]:
+#    c.SetLogy(logy)
+#
+#    plotSlices(c,fCosmics.Get("primTrkdEdxVwire_RunIIP60"),"SlicesWireRunIIP60_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"wire",rebinX=1,xunits="",normalize=not logy)
+#    plotSlices(c,fCosmics.Get("primTrkdEdxVwire_RunIIP100"),"SlicesWireRunIIP100_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"wire",rebinX=1,xunits="",normalize=not logy)
+#
 #    plotSlices(c,fCosmics.Get("primTrkdEdxsVx_RunIIPos"),"SlicesXRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"x",rebinX=5,xunits="cm",normalize=not logy)
 #    plotSlices(c,fCosmics.Get("primTrkdEdxsVx_CosmicMC"),"SlicesXCosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"x",rebinX=5,xunits="cm",normalize=not logy)
 
@@ -474,3 +490,12 @@ if __name__ == "__main__":
 
   #fitSlicesLandaus(c,fCosmics.Get("primTrkdEdxsVy_RunIIPos"))
   #fitSlicesLandaus(c,fCosmics.Get("primTrkdEdxsVy_CosmicMC"))
+
+  hist = fCosmics.Get("primTrkdEdxsVrun_RunIIP60")
+  hist.Add(fCosmics.Get("primTrkdEdxsVrun_RunIIP100"))
+  fitSlicesLandauCore(c,hist,"Run_1_")
+  fitSlicesLandauCore(c,hist,"Run_10_",nJump=10)
+
+  hist = fCosmics.Get("primTrkdEdxsVwire_RunIIP60")
+  hist.Add(fCosmics.Get("primTrkdEdxsVwire_RunIIP100"))
+  fitSlicesLandauCore(c,hist,"Wire_1_")
