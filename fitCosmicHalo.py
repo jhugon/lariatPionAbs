@@ -288,7 +288,7 @@ def fitSlicesLandauCore(c,hist,fileprefix,nJump=1):
       lastBin = (i+1)*(nJump)
       lastBin = min(lastBin,hist.GetNbinsX())
       histAll = hist.ProjectionY("_pyAll",firstBin,lastBin)
-      if histAll.GetEntries() == 0:
+      if histAll.GetEntries() < 10:
         continue
       postfix = "_"+fileprefix+"bins{}".format(i)
       xMin = xaxis.GetBinLowEdge(firstBin)
@@ -491,11 +491,61 @@ if __name__ == "__main__":
   #fitSlicesLandaus(c,fCosmics.Get("primTrkdEdxsVy_RunIIPos"))
   #fitSlicesLandaus(c,fCosmics.Get("primTrkdEdxsVy_CosmicMC"))
 
-  hist = fCosmics.Get("primTrkdEdxsVrun_RunIIP60")
-  hist.Add(fCosmics.Get("primTrkdEdxsVrun_RunIIP100"))
-  fitSlicesLandauCore(c,hist,"Run_1_")
-  fitSlicesLandauCore(c,hist,"Run_10_",nJump=10)
+  hist = fCosmics.Get("primTrkdEdxsVrun_RunIIPos")
+  graphsRuns = fitSlicesLandauCore(c,hist,"Run_1_",nJump=20)
+  #fitSlicesLandauCore(c,hist,"Run_10_",nJump=10)
 
-  hist = fCosmics.Get("primTrkdEdxsVwire_RunIIP60")
-  hist.Add(fCosmics.Get("primTrkdEdxsVwire_RunIIP100"))
-  fitSlicesLandauCore(c,hist,"Wire_1_")
+  hist = fCosmics.Get("primTrkdEdxsVrun_phiGeq0_RunIIPos")
+  graphsRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"Run_phiGeq0_1_",nJump=20)
+  #fitSlicesLandauCore(c,hist,"Run_phiGeq0_10_",nJump=10)
+
+  hist = fCosmics.Get("primTrkdEdxsVrun_phiLt0_RunIIPos")
+  graphsRuns_phiLt0 = fitSlicesLandauCore(c,hist,"Run_phiLt0_1_",nJump=20)
+  #fitSlicesLandauCore(c,hist,"Run_phiLt0_10_",nJump=10)
+
+  hist = fCosmics.Get("primTrkdEdxVwire_RunIIPos")
+  graphsWires = fitSlicesLandauCore(c,hist,"Wire_1_",nJump=20)
+  #fitSlicesLandauCore(c,hist,"Wire_16_",nJump=16)
+
+  hist = fCosmics.Get("primTrkdEdxVwire_phiGeq0_RunIIPos")
+  graphsWires_phiGeq0 = fitSlicesLandauCore(c,hist,"Wire_phiGeq0_1_",nJump=20)
+  #fitSlicesLandauCore(c,hist,"Wire_phiGeq0_16_",nJump=16)
+
+  hist = fCosmics.Get("primTrkdEdxVwire_phiLt0_RunIIPos")
+  graphsWires_phiLt0 = fitSlicesLandauCore(c,hist,"Wire_phiLt0_1_",nJump=20)
+  #fitSlicesLandauCore(c,hist,"Wire_phiLt0_16_",nJump=16)
+
+  c.Clear()
+
+  graphsRunsList = [graphsRuns,graphsRuns_phiGeq0,graphsRuns_phiLt0]
+  for iColor, graphs in enumerate(graphsRunsList):
+    for graph in graphs:
+        graph.SetMarkerColor(COLORLIST[iColor])
+        graph.SetLineColor(COLORLIST[iColor])
+
+  graphsWiresList = [graphsWires,graphsWires_phiGeq0,graphsWires_phiLt0]
+  for iColor, graphs in enumerate(graphsWiresList):
+    for graph in graphs:
+        graph.SetMarkerColor(COLORLIST[iColor])
+        graph.SetLineColor(COLORLIST[iColor])
+
+  
+  axisHist = drawGraphs(c,[x[0] for x in graphsRunsList],"Run Number","Landau MPV [MeV/cm]",yStartZero=False)
+  leg = drawNormalLegend([x[0] for x in graphsRunsList],["All","#phi #geq 0","#phi < 0"],option="ep")
+  c.SaveAs("CompareRuns_MPV.png")
+  c.SaveAs("CompareRuns_MPV.pdf")
+
+  axisHist = drawGraphs(c,[x[2] for x in graphsRunsList],"Run Number","Gaussian Sigma [MeV/cm]",yStartZero=False)
+  leg = drawNormalLegend([x[2] for x in graphsRunsList],["All","#phi #geq 0","#phi < 0"],option="ep")
+  c.SaveAs("CompareRuns_Sigma.png")
+  c.SaveAs("CompareRuns_Sigma.pdf")
+
+  axisHist = drawGraphs(c,[x[0] for x in graphsWiresList],"Run Number","Landau MPV [MeV/cm]",yStartZero=False)
+  leg = drawNormalLegend([x[0] for x in graphsWiresList],["All","#phi #geq 0","#phi < 0"],option="ep")
+  c.SaveAs("CompareWires_MPV.png")
+  c.SaveAs("CompareWires_MPV.pdf")
+
+  axisHist = drawGraphs(c,[x[2] for x in graphsWiresList],"Run Number","Gaussian Sigma [MeV/cm]",yStartZero=False)
+  leg = drawNormalLegend([x[2] for x in graphsWiresList],["All","#phi #geq 0","#phi < 0"],option="ep")
+  c.SaveAs("CompareWires_Sigma.png")
+  c.SaveAs("CompareWires_Sigma.pdf")
