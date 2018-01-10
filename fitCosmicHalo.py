@@ -492,28 +492,28 @@ if __name__ == "__main__":
   #fitSlicesLandaus(c,fCosmics.Get("primTrkdEdxsVy_CosmicMC"))
 
   hist = fCosmics.Get("primTrkdEdxsVrun_RunIIPos")
-  graphsRuns = fitSlicesLandauCore(c,hist,"Run_1_",nJump=20)
-  #fitSlicesLandauCore(c,hist,"Run_10_",nJump=10)
+  #graphsRuns = fitSlicesLandauCore(c,hist,"Run_1_")
+  graphsRuns = fitSlicesLandauCore(c,hist,"Run_10_",nJump=10)
 
   hist = fCosmics.Get("primTrkdEdxsVrun_phiGeq0_RunIIPos")
-  graphsRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"Run_phiGeq0_1_",nJump=20)
-  #fitSlicesLandauCore(c,hist,"Run_phiGeq0_10_",nJump=10)
+  #graphsRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"Run_phiGeq0_1_")
+  graphsRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"Run_phiGeq0_10_",nJump=10)
 
   hist = fCosmics.Get("primTrkdEdxsVrun_phiLt0_RunIIPos")
-  graphsRuns_phiLt0 = fitSlicesLandauCore(c,hist,"Run_phiLt0_1_",nJump=20)
-  #fitSlicesLandauCore(c,hist,"Run_phiLt0_10_",nJump=10)
+  #graphsRuns_phiLt0 = fitSlicesLandauCore(c,hist,"Run_phiLt0_1_")
+  graphsRuns_phiLt0 = fitSlicesLandauCore(c,hist,"Run_phiLt0_10_",nJump=10)
 
   hist = fCosmics.Get("primTrkdEdxVwire_RunIIPos")
-  graphsWires = fitSlicesLandauCore(c,hist,"Wire_1_",nJump=20)
-  #fitSlicesLandauCore(c,hist,"Wire_16_",nJump=16)
+  #graphsWires = fitSlicesLandauCore(c,hist,"Wire_1_")
+  graphsWires = fitSlicesLandauCore(c,hist,"Wire_16_",nJump=16)
 
   hist = fCosmics.Get("primTrkdEdxVwire_phiGeq0_RunIIPos")
-  graphsWires_phiGeq0 = fitSlicesLandauCore(c,hist,"Wire_phiGeq0_1_",nJump=20)
-  #fitSlicesLandauCore(c,hist,"Wire_phiGeq0_16_",nJump=16)
+  #graphsWires_phiGeq0 = fitSlicesLandauCore(c,hist,"Wire_phiGeq0_1_")
+  graphsWires_phiGeq0 = fitSlicesLandauCore(c,hist,"Wire_phiGeq0_16_",nJump=16)
 
   hist = fCosmics.Get("primTrkdEdxVwire_phiLt0_RunIIPos")
-  graphsWires_phiLt0 = fitSlicesLandauCore(c,hist,"Wire_phiLt0_1_",nJump=20)
-  #fitSlicesLandauCore(c,hist,"Wire_phiLt0_16_",nJump=16)
+  #graphsWires_phiLt0 = fitSlicesLandauCore(c,hist,"Wire_phiLt0_1_")
+  graphsWires_phiLt0 = fitSlicesLandauCore(c,hist,"Wire_phiLt0_16_",nJump=16)
 
   c.Clear()
 
