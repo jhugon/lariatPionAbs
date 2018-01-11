@@ -21,6 +21,7 @@ if __name__ == "__main__":
   #cuts += "*(primTrkYs > 15.)"
   cuts += "*((!isMC) || (trueHitCosmic1 && trueHitCosmic2) || (trueHitCosmic3 && trueHitCosmic4))"
   cuts += "*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)" # only angles that match MC
+  #cuts += "*(primTrkLength > 10.)" # didn't seem to make a difference
 
   hitExtraCuts = "*(primTrkXs > 3. && primTrkXs < 46. && primTrkYs < 18. && primTrkYs > -18. && primTrkZs > 3. && primTrkZs < 87.)"
 
@@ -624,7 +625,7 @@ if __name__ == "__main__":
     {
       'name': "primTrkResRanges",
       'xtitle': "Primary TPC Track Residual Range [cm]",
-      'ytitle': "Events / bin",
+      'ytitle': "Hits / bin",
       'binning': [200,0,100],
       'var': "primTrkResRanges",
       'cuts': weightStr+hitExtraCuts,
@@ -634,7 +635,7 @@ if __name__ == "__main__":
     {
       'name': "primTrkPitches",
       'xtitle': "Primary TPC Track Pitch [cm]",
-      'ytitle': "Events / bin",
+      'ytitle': "Hits / bin",
       'binning': [100,0,5],
       'var': "primTrkPitches",
       'cuts': weightStr+hitExtraCuts,
@@ -644,7 +645,7 @@ if __name__ == "__main__":
     {
       'name': "primTrkPitches_phiGeq0",
       'xtitle': "Primary TPC Track Pitch [cm]",
-      'ytitle': "Events / bin",
+      'ytitle': "Hits / bin",
       'binning': [100,0,2],
       'var': "primTrkPitches",
       'captionright1': "Track #phi #geq 0",
@@ -655,7 +656,7 @@ if __name__ == "__main__":
     {
       'name': "primTrkPitches_phiLt0",
       'xtitle': "Primary TPC Track Pitch [cm]",
-      'ytitle': "Events / bin",
+      'ytitle': "Hits / bin",
       'binning': [100,0,2],
       'var': "primTrkPitches",
       'captionright1': "Track #phi < 0",
@@ -789,7 +790,7 @@ if __name__ == "__main__":
     {
       'name': "primTrkdEdxs_zoom3",
       'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'ytitle': "Events / bin",
+      'ytitle': "Hits / bin",
       'binning': [100,0,5],
       'var': "primTrkdEdxs",
       'cuts': weightStr+hitExtraCuts,
@@ -798,7 +799,7 @@ if __name__ == "__main__":
     {
       'name': "primTrkdEdxs_zoom3_phiGeq0",
       'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'ytitle': "Events / bin",
+      'ytitle': "Hits / bin",
       'binning': [100,0,5],
       'var': "primTrkdEdxs",
       'cuts': weightStr+hitExtraCuts+"*(primTrkStartPhi >= 0)",
@@ -807,7 +808,7 @@ if __name__ == "__main__":
     {
       'name': "primTrkdEdxs_zoom3_phiLt0",
       'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'ytitle': "Events / bin",
+      'ytitle': "Hits / bin",
       'binning': [100,0,5],
       'var': "primTrkdEdxs",
       'cuts': weightStr+hitExtraCuts+"*(primTrkStartPhi < 0)",
@@ -1092,6 +1093,60 @@ if __name__ == "__main__":
   ########################################################
 
   histConfigs = [
+    {
+      'name': "primTrkdQdxs",
+      'xtitle': "Primary TPC Track dQ/dx [ADC ns / cm]",
+      'ytitle': "Hits / bin",
+      'binning': [100,0,1e4],
+      'var': "primTrkdQdxs",
+      'cuts': weightStr+hitExtraCuts,
+      'writeImage': False,
+    },
+    {
+      'name': "primTrkdQdxs_phiGeq0",
+      'xtitle': "Primary TPC Track dQ/dx [ADC ns / cm]",
+      'ytitle': "Hits / bin",
+      'binning': [100,0,1e4],
+      'var': "primTrkdQdxs",
+      'cuts': weightStr+hitExtraCuts+"*(primTrkStartPhi >= 0)",
+      'writeImage': False,
+    },
+    {
+      'name': "primTrkdQdxs_phiLt0",
+      'xtitle': "Primary TPC Track dQ/dx [ADC ns / cm]",
+      'ytitle': "Hits / bin",
+      'binning': [100,0,1e4],
+      'var': "primTrkdQdxs",
+      'cuts': weightStr+hitExtraCuts+"*(primTrkStartPhi < 0)",
+      'writeImage': False,
+    },
+    {
+      'name': "primTrkdQs",
+      'xtitle': "Primary TPC Track dQ [ADC ns]",
+      'ytitle': "Hits / bin",
+      'binning': [200,0,8e3],
+      'var': "primTrkdQdxs*primTrkPitches",
+      'cuts': weightStr+hitExtraCuts,
+      'writeImage': False,
+    },
+    {
+      'name': "primTrkdQs_phiGeq0",
+      'xtitle': "Primary TPC Track dQ [ADC ns]",
+      'ytitle': "Hits / bin",
+      'binning': [200,0,8e3],
+      'var': "primTrkdQdxs*primTrkPitches",
+      'cuts': weightStr+hitExtraCuts+"*(primTrkStartPhi >= 0)",
+      'writeImage': False,
+    },
+    {
+      'name': "primTrkdQs_phiLt0",
+      'xtitle': "Primary TPC Track dQ [ADC ns]",
+      'ytitle': "Hits / bin",
+      'binning': [200,0,8e3],
+      'var': "primTrkdQdxs*primTrkPitches",
+      'cuts': weightStr+hitExtraCuts+"*(primTrkStartPhi < 0)",
+      'writeImage': False,
+    },
     {
       'name': "primTrkStartPhiVrun",
       'xtitle': "Run Number",
@@ -1636,7 +1691,7 @@ if __name__ == "__main__":
   for i in range(len(histConfigs)):
     histConfigs[i].update(
       {
-      'xtitle': "Primary TPC Track dQ [ADC]",
+      'xtitle': "Primary TPC Track dQ [ADC ns]",
       'ytitle': "Events / bin",
       'binning': [200,0,8e3],
       'var': "primTrkdQdxs*primTrkPitches",
