@@ -635,9 +635,31 @@ if __name__ == "__main__":
       'name': "primTrkPitches",
       'xtitle': "Primary TPC Track Pitch [cm]",
       'ytitle': "Events / bin",
-      'binning': [100,0,10],
+      'binning': [100,0,5],
       'var': "primTrkPitches",
       'cuts': weightStr+hitExtraCuts,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "primTrkPitches_phiGeq0",
+      'xtitle': "Primary TPC Track Pitch [cm]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,2],
+      'var': "primTrkPitches",
+      'captionright1': "Track #phi #geq 0",
+      'cuts': weightStr+hitExtraCuts +" * (primTrkStartPhi >= 0)",
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "primTrkPitches_phiLt0",
+      'xtitle': "Primary TPC Track Pitch [cm]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,2],
+      'var': "primTrkPitches",
+      'captionright1': "Track #phi < 0",
+      'cuts': weightStr+hitExtraCuts +" * (primTrkStartPhi < 0)",
       #'normalize': True,
       'logy': logy,
     },
@@ -1070,6 +1092,16 @@ if __name__ == "__main__":
   ########################################################
 
   histConfigs = [
+    {
+      'name': "primTrkStartPhiVrun",
+      'xtitle': "Run Number",
+      'ytitle': "Primary TPC Track #phi [deg]",
+      'binning': [1400,8200,9600,45,-180,180],
+      'var': "primTrkStartPhi*180/pi:runNumber",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logz': True,
+    },
     {
       'name': "primTrkdEdxsVrun",
       'xtitle': "Run Number",
@@ -1563,11 +1595,11 @@ if __name__ == "__main__":
   histConfigs = [
     {
       'title': "Track #phi #geq 0",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi >= 0)",
+      'cuts': weightStr+hitExtraCuts+" * (primTrkStartPhi >= 0)",
     },
     {
-      'title': "Track #phi <0",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi < 0)",
+      'title': "Track #phi < 0",
+      'cuts': weightStr+hitExtraCuts+" * (primTrkStartPhi < 0)",
     },
   ]
   for i in range(len(histConfigs)):
@@ -1601,45 +1633,100 @@ if __name__ == "__main__":
   plotManyHistsOnePlot([x for x in fileConfigs if not ("smear" in x["name"])],histConfigs,
         c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trackPhi_primTrkdQdxs_zoom")
 
-
-  ######################################################################################
-  ## Compare Cuts -- Phi >= or < 0 && other angle cuts #################################
-  ######################################################################################
-
-  histConfigs = [
-    {
-      'title': "Track #phi #geq 0",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi >= 0)",
-    },
-    {
-      'title': "Track #phi <0",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi < 0)",
-    },
-    {
-      'title': "Track #phi #geq 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
-    },
-    {
-      'title': "Track #phi <0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
-    },
-  ]
-  for i in range(len(histConfigs)):
-    histConfigs[i]["color"] = COLORLIST[i]
-
   for i in range(len(histConfigs)):
     histConfigs[i].update(
       {
-      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
+      'xtitle': "Primary TPC Track dQ [ADC]",
       'ytitle': "Events / bin",
-      'binning': [50,0,5],
-      'var': "primTrkdEdxs",
+      'binning': [200,0,8e3],
+      'var': "primTrkdQdxs*primTrkPitches",
       'normalize': True,
       'logy': False,
       },
     )
   plotManyHistsOnePlot([x for x in fileConfigs if not ("smear" in x["name"])],histConfigs,
-        c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trackPhiCuts_primTrkdEdxs_zoom3")
+        c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trackPhi_primTrkdQs_zoom")
+
+  for i in range(len(histConfigs)):
+    histConfigs[i].update(
+      {
+      'xtitle': "Primary TPC Track Pitch [cm]",
+      'ytitle': "Hits / bin",
+      'binning': [200,0,2],
+      'var': "primTrkPitches",
+      'normalize': False,
+      'logy': True,
+      },
+    )
+  plotManyHistsOnePlot([x for x in fileConfigs if not ("smear" in x["name"])],histConfigs,
+        c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trackPhi_primTrkPitches_logy")
+
+  for i in range(len(histConfigs)):
+    histConfigs[i].update(
+      {
+      'xtitle': "Primary TPC Track Pitch [cm]",
+      'ytitle': "Normalized hits / bin",
+      'binning': [200,0,2],
+      'var': "primTrkPitches",
+      'normalize': True,
+      'logy': False,
+      },
+    )
+  plotManyHistsOnePlot([x for x in fileConfigs if not ("smear" in x["name"])],histConfigs,
+        c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trackPhi_primTrkPitches")
+
+  ######################################################################################
+  ## Compare Cuts -- Phi >= or < 0 && other angle cuts #################################
+  ######################################################################################
+
+#  histConfigs = [
+#    {
+#      'title': "Track #phi #geq 0",
+#      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi >= 0)",
+#    },
+#    {
+#      'title': "Track #phi <0",
+#      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi < 0)",
+#    },
+#    {
+#      'title': "Track #phi #geq 0 & Angle Cuts",
+#      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+#    },
+#    {
+#      'title': "Track #phi <0 & Angle Cuts",
+#      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+#    },
+#  ]
+#  for i in range(len(histConfigs)):
+#    histConfigs[i]["color"] = COLORLIST[i]
+#
+#  for i in range(len(histConfigs)):
+#    histConfigs[i].update(
+#      {
+#      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
+#      'ytitle': "Hits / bin",
+#      'binning': [50,0,5],
+#      'var': "primTrkdEdxs",
+#      'normalize': True,
+#      'logy': False,
+#      },
+#    )
+#  plotManyHistsOnePlot([x for x in fileConfigs if not ("smear" in x["name"])],histConfigs,
+#        c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trackPhiCuts_primTrkdEdxs_zoom3")
+#
+#  for i in range(len(histConfigs)):
+#    histConfigs[i].update(
+#      {
+#      'xtitle': "Primary TPC Track Pitch [cm]",
+#      'ytitle': "Hits / bin",
+#      'binning': [200,0,2],
+#      'var': "primTrkPitches",
+#      'normalize': False,
+#      'logy': True,
+#      },
+#    )
+#  plotManyHistsOnePlot([x for x in fileConfigs if not ("smear" in x["name"])],histConfigs,
+#        c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trackPhiCuts_primTrkPitches")
 
   ######################################################################################
   ## Hit Locations -- Phi >= or < 0 && other angle cuts #################################

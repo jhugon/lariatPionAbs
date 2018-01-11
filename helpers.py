@@ -2607,11 +2607,12 @@ def drawHline(axisHist,y):
   result.Draw("lsame")
   return result
 
-def drawGraphs(canvas,graphs,xTitle,yTitle,yStartZero=True):
+def drawGraphs(canvas,graphs,xTitle,yTitle,yStartZero=True,freeTopSpace=0.):
   xMin = 1e15
   xMax = -1e15
   yMin = 1e15
   yMax = -1e15
+  multiplier = 1./(1.-freeTopSpace)
   xArr = array.array("d", [0.])
   yArr = array.array("d", [0.])
   for graph in graphs:
@@ -2627,14 +2628,15 @@ def drawGraphs(canvas,graphs,xTitle,yTitle,yStartZero=True):
         xMin = min(x-graph.GetErrorXlow(iPoint),xMin)
         yMax = max(y+graph.GetErrorYhigh(iPoint),yMax)
         yMin = min(y-graph.GetErrorYlow(iPoint),yMin)
+  if yStartZero:
+    yMin = min(0.,yMin)
   xRange = xMax-xMin
   yRange = yMax-yMin
   xMin -= xRange*0.1
   xMax += xRange*0.1
   yMin -= yRange*0.1
-  yMax += yRange*0.1
-  if yStartZero:
-    yMin = min(0,yMin)
+  if freeTopSpace > 0.:
+    yMax = yMin + yRange*multiplier
 
   axisHist = Hist2D(1,xMin,xMax,1,yMin,yMax)
   setHistTitles(axisHist,xTitle,yTitle)
