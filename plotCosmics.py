@@ -22,6 +22,7 @@ if __name__ == "__main__":
   cuts += "*((!isMC) || (trueHitCosmic1 && trueHitCosmic2) || (trueHitCosmic3 && trueHitCosmic4))"
   cuts += "*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)" # only angles that match MC
   #cuts += "*(primTrkLength > 10.)" # didn't seem to make a difference
+  cuts += "*(nTracks == 1)"
 
   hitExtraCuts = "*(primTrkXs > 3. && primTrkXs < 46. && primTrkYs < 18. && primTrkYs > -18. && primTrkZs > 3. && primTrkZs < 87.)"
 
@@ -1615,15 +1616,15 @@ if __name__ == "__main__":
   histConfigs = [
     {
       'title': "All",
-      'cuts': "( iBestMatch >= 0)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1)",
     },
     {
       'title': " 40 cm < x < 45 cm",
-      'cuts': "( iBestMatch >= 0) && (primTrkXs > 40 && primTrkXs < 45)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) && (primTrkXs > 40 && primTrkXs < 45)",
     },
     {
       'title': "x > 45 cm",
-      'cuts': "( iBestMatch >= 0) && (primTrkXs > 45)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) && (primTrkXs > 45)",
     },
   ]
   for i in range(len(histConfigs)):
@@ -1795,7 +1796,7 @@ if __name__ == "__main__":
       'binning': [60,-5,55,60,-30,30],
       'var': "primTrkYs:primTrkXs",
       'captionright1': "Track #phi #geq 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
       #'normalize': True,
       #'logz': True,
     },
@@ -1806,7 +1807,7 @@ if __name__ == "__main__":
       'binning': [120,-10,110,60,-30,30],
       'var': "primTrkYs:primTrkZs",
       'captionright1': "Track #phi #geq 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
       #'normalize': True,
       #'logz': True,
     },
@@ -1817,7 +1818,7 @@ if __name__ == "__main__":
       'binning': [120,-10,110,60,-5,55],
       'var': "primTrkXs:primTrkZs",
       'captionright1': "Track #phi #geq 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
       #'normalize': True,
       #'logz': True,
     },
@@ -1828,7 +1829,7 @@ if __name__ == "__main__":
       'binning': [60,-5,55,60,-30,30],
       'var': "primTrkYs:primTrkXs",
       'captionright1': "Track #phi < 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
       #'normalize': True,
       #'logz': True,
     },
@@ -1839,7 +1840,7 @@ if __name__ == "__main__":
       'binning': [120,-10,110,60,-30,30],
       'var': "primTrkYs:primTrkZs",
       'captionright1': "Track #phi < 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
       #'normalize': True,
       #'logz': True,
     },
@@ -1850,7 +1851,7 @@ if __name__ == "__main__":
       'binning': [120,-10,110,60,-5,55],
       'var': "primTrkXs:primTrkZs",
       'captionright1': "Track #phi < 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
       #'normalize': True,
       #'logz': True,
     },
@@ -1861,7 +1862,7 @@ if __name__ == "__main__":
       'binning': [240,0,240,60,-5,55],
       'var': "primTrkXs:primTrkTrueWires",
       'captionright1': "Track #phi < 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
       #'normalize': True,
       #'logz': True,
     },
@@ -1872,7 +1873,7 @@ if __name__ == "__main__":
       'binning': [240,0,240,60,-5,55],
       'var': "primTrkXs:primTrkTrueWires",
       'captionright1': "Track #phi #geq 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
       #'normalize': True,
       #'logz': True,
     },
@@ -1883,7 +1884,7 @@ if __name__ == "__main__":
       'binning': [240,0,240,60,-30,30],
       'var': "primTrkYs:primTrkTrueWires",
       'captionright1': "Track #phi < 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
       #'normalize': True,
       #'logz': True,
     },
@@ -1894,7 +1895,7 @@ if __name__ == "__main__":
       'binning': [240,0,240,60,-30,30],
       'var': "primTrkYs:primTrkTrueWires",
       'captionright1': "Track #phi #geq 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
       #'normalize': True,
       #'logz': True,
     },
@@ -1905,7 +1906,7 @@ if __name__ == "__main__":
       'binning': [240,0,240,120,-10,110],
       'var': "primTrkZs:primTrkTrueWires",
       'captionright1': "Track #phi < 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) * (primTrkStartPhi < 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
       #'normalize': True,
       #'logz': True,
     },
@@ -1916,7 +1917,7 @@ if __name__ == "__main__":
       'binning': [240,0,240,120,-10,110],
       'var': "primTrkZs:primTrkTrueWires",
       'captionright1': "Track #phi #geq 0 & Angle Cuts",
-      'cuts': "( iBestMatch >= 0) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
+      'cuts': "( iBestMatch >= 0) && (nTracks == 1) * (primTrkStartPhi >= 0)*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)",
       #'normalize': True,
       #'logz': True,
     },
