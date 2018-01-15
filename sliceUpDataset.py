@@ -78,8 +78,9 @@ class TalkToSAM(object):
       return result
 
   def count(self,firstRun,lastRun,onlyPrint=False):
-    command = ["samweb","count-files","'defname: {} and run_number >= {} and run_number < {}'".format(self.basedefname,firstRun,lastRun)]
+    command = ["samweb","count-files","defname:", self.basedefname, "and", "run_number", ">=", str(firstRun), "and", "run_number", "<", str(lastRun)]
     print " ".join(command)
+    sys.stdout.flush()
     result = None
     if not onlyPrint:
       result = self.call(command)
@@ -87,6 +88,7 @@ class TalkToSAM(object):
           raise Exception("Couldn't count files")
       result = int(result)
     print "nFiles: {}".format(result)
+    sys.stdout.flush()
     return result
 
   def createDefinition(self,sub_name,firstRun,lastRun,prefix="",suffix="_v1",onlyPrint=False,stripVersion=False):
@@ -95,7 +97,7 @@ class TalkToSAM(object):
     if match:
         new_basedefname = match.group(1)
     newname = "{}{}_{}{}".format(prefix,new_basedefname,sub_name,suffix)
-    command = ["samweb","create-definition",newname,"'defname: {} and run_number >= {} and run_number < {}'".format(self.basedefname,firstRun,lastRun)]
+    command = ["samweb","create-definition",newname,"defname:", self.basedefname, "and", "run_number", ">=", str(firstRun), "and", "run_number", "<", str(lastRun)]
     print " ".join(command)
     if not onlyPrint:
       call_result = self.call(command)
@@ -131,6 +133,7 @@ class MakeSubDatasets(object):
       if firstRun == self.last:
         break
       print "\nWorking on dataset starting at {}".format(firstRun)
+      sys.stdout.flush()
       allcount = countFunc(firstRun,self.last)
       if allcount <= (self.nFilesPerSet - self.nFilesPerSetError):
         self.firstRuns.append(firstRun)
@@ -168,17 +171,18 @@ class MakeSubDatasets(object):
     print "New Definitions:"
     for f,l,n,a in zip(self.firstRuns,self.lastRuns,self.nFiles,string.ascii_lowercase[:len(self.firstRuns)]):
       tts.createDefinition(a,f,l,onlyPrint=True)
+    sys.stdout.flush()
 
 if __name__ == "__main__":
 
-  sam = TalkToSAM("Lovely1_Neg_RunII_jhugon_current20_secondary64_v1",pause_time=5,nTries=2)
-  sam.count(8000,9000)
-  sam.createDefinition("test1",8000,9000)
+  sam = TalkToSAM("Lovely1_Neg_RunII_jhugon_current60_secondary64_v1",pause_time=60,nTries=2)
+  #sam.count(9000,12000)
+  #sam.createDefinition("test1",9000,12000)
 
   #fakesam = FakeSAM()
 
-#  msd = MakeSubDatasets(8000,10227)
-#  msd.run(sam.count)
-#  #msd.run(fakesam.count)
-#  print msd
-#  msd.printDefinitions(sam)
+  msd = MakeSubDatasets(8000,10227)
+  msd.run(sam.count)
+  #msd.run(fakesam.count)
+  print msd
+  msd.printDefinitions(sam)
