@@ -2,13 +2,15 @@
 
 import random
 import sys
+import re
 import os
 import time
 import subprocess
+import string
 
 class FakeSAM(object):
 
-  def __init__(self,first=8000,last=10000):
+  def __init__(self,first=8000,last=10227):
     self.data = self.genRandomNFiles(self.genRandomNums(first,last))
 
   def genRandomNums(self,first,last):
@@ -34,11 +36,13 @@ class FakeSAM(object):
 
   def count(self,firstRun,lastRun):
     result = 0
+    print "Runs: {} {}".format(firstRun,lastRun)
     for iRun in range(len(self.data)):
         run = self.data[iRun][0]
         if run >= firstRun and run < lastRun:
             nfiles = self.data[iRun][1]
             result += nfiles
+    print "nFiles: {}".format(result)
     return result
 
   def __str__(self):
@@ -48,23 +52,55 @@ class FakeSAM(object):
     return result
 
 class TalkToSAM(object):
-  def __init__(self,basedefname,pause_time=0):
+  def __init__(self,basedefname,pause_time=120,nTries=5):
+    """
+    basedefname is the definition name to start from
+    pause_time is number of seconds to pause after running a samweb command
+    nTries is the number of tries to run a samweb command before raising an exception
+    """
     self.basedefname = basedefname
     self.pause_time = pause_time
+    self.nTries = nTries
 
-  def count(self,firstRun,lastRun):
+  def call(self,commandlist):
+      result = None
+      pause_time = self.pause_time
+      for iTry in range(self.nTries):
+        try:
+          result = subprocess.check_output(commandlist)
+        except Exception as e:
+          print "Error: '{}' running: check_output on {}".format(e,commandlist)
+        else: # if no exception
+          break
+        finally: #always
+          time.sleep(pause_time)
+          #pause_time *= 2
+      return result
+
+  def count(self,firstRun,lastRun,onlyPrint=False):
     command = ["samweb","count-files","'defname: {} and run_number >= {} and run_number < {}'".format(self.basedefname,firstRun,lastRun)]
     print " ".join(command)
-    result = subprocess.check_output(command)
-    result = int(result)
-    time.sleep(self.pause_time)
+    result = None
+    if not onlyPrint:
+      result = self.call(command)
+      if result is None:
+          raise Exception("Couldn't count files")
+      result = int(result)
+    print "nFiles: {}".format(result)
     return result
 
-  def createDefinition(self,sub_name,firstRun,lastRun,prefix="",suffix="_v1"):
-    newname = "{}{}_{}{}".format(prefix,self.basedefname,sub_name,suffix)
+  def createDefinition(self,sub_name,firstRun,lastRun,prefix="",suffix="_v1",onlyPrint=False,stripVersion=False):
+    match = re.match(r"(.+)_v\d+",self.basedefname)
+    new_basedefname = self.basedefname
+    if match:
+        new_basedefname = match.group(1)
+    newname = "{}{}_{}{}".format(prefix,new_basedefname,sub_name,suffix)
     command = ["samweb","create-definition",newname,"'defname: {} and run_number >= {} and run_number < {}'".format(self.basedefname,firstRun,lastRun)]
     print " ".join(command)
-    time.sleep(self.pause_time)
+    if not onlyPrint:
+      call_result = self.call(command)
+      if call_result is None:
+          raise Exception("Couldn't create definition")
 
 class MakeSubDatasets(object):
   def __init__(self,first,last,nFilesPerSet=5000,nFilesPerSetError=100):
@@ -94,6 +130,7 @@ class MakeSubDatasets(object):
         firstRun = self.lastRuns[-1]
       if firstRun == self.last:
         break
+      print "\nWorking on dataset starting at {}".format(firstRun)
       allcount = countFunc(firstRun,self.last)
       if allcount <= (self.nFilesPerSet - self.nFilesPerSetError):
         self.firstRuns.append(firstRun)
@@ -126,12 +163,22 @@ class MakeSubDatasets(object):
     else:
         return self.binomial(countFunc,firstRun,lastmid,lastmax+1)
 
+  def printDefinitions(self,tts):
+    print ""
+    print "New Definitions:"
+    for f,l,n,a in zip(self.firstRuns,self.lastRuns,self.nFiles,string.ascii_lowercase[:len(self.firstRuns)]):
+      tts.createDefinition(a,f,l,onlyPrint=True)
+
 if __name__ == "__main__":
-  sam = FakeSAM()
-  msd = MakeSubDatasets(8000,10000)
-  msd.run(sam.count)
-  print msd
-  
-  tts = TalkToSAM("aslhglkhasdg_v1",pause_time=0)
-  tts.count(1000,2000)
-  tts.createDefinition("yay",1000,2000)
+
+  sam = TalkToSAM("Lovely1_Neg_RunII_jhugon_current20_secondary64_v1",pause_time=5,nTries=2)
+  sam.count(8000,9000)
+  sam.createDefinition("test1",8000,9000)
+
+  #fakesam = FakeSAM()
+
+#  msd = MakeSubDatasets(8000,10227)
+#  msd.run(sam.count)
+#  #msd.run(fakesam.count)
+#  print msd
+#  msd.printDefinitions(sam)
