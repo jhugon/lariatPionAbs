@@ -219,28 +219,55 @@ def fitGaussCore(c,hist,postfix,caption,fitMin=1.4,fitMax=2.4):
 
   return (mg.getVal(),float('nan'),sg.getVal()), (mg.getError(),float('nan'),sg.getError()), fwhm
 
-def fitLandauCore(c,hist,postfix,caption,fitMin=1.6,fitMax=2.3,fixedLandauWidth=None):
+def fitLandauCore(c,hist,postfix,caption,fitMin=1.6,fitMax=2.3,fixedLandauWidth=None,dQdx=False):
 
   xMin = hist.GetXaxis().GetBinLowEdge(1)
   xMax = hist.GetXaxis().GetBinUpEdge(hist.GetNbinsX())
-  xMax = min(xMax,5.)
-  t = root.RooRealVar("t","dE/dx [MeV/cm]",xMin,xMax)
+  if not dQdx:
+    xMax = min(xMax,5.)
+  xTitle = "dE/dx [MeV/cm]"
+  if dQdx:
+    xTitle = "dQ/dx [ADC ns / cm]"
+  t = root.RooRealVar("t",xTitle,xMin,xMax)
   observables = root.RooArgSet(t)
 
   data = root.RooDataHist("data_"+hist.GetName(),"Data Hist",root.RooArgList(t),hist)
 
-  ##############
-  mpvl = root.RooRealVar("mpvl","mpv landau",1.7,0,5)
+  mpvl = None
   wl = None
-  if fixedLandauWidth is None:
-    wl = root.RooRealVar("wl","width landau",0.42,0.01,10)
-  else:
-    wl = root.RooRealVar("wl","width landau",fixedLandauWidth)
-  ml = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(mpvl,wl))
-  landau = root.RooLandau("lx","lx",t,ml,wl)
+  ml = None
+  mg = None
+  sg = None
+  ##############
+  if dQdx:
+    mpvl = root.RooRealVar("mpvl","mpv landau",0.5*(fitMin+fitMax),0,xMax*1.5)
+    if fixedLandauWidth is None:
+      wl = root.RooRealVar("wl","width landau",0.5*(fitMax-fitMin),0.01*(fitMax-fitMin),2*(fitMax-fitMin))
+    else:
+      wl = root.RooRealVar("wl","width landau",fixedLandauWidth)
+    ml = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(mpvl,wl))
 
-  mg = root.RooRealVar("mg","mg",0)
-  sg = root.RooRealVar("sg","sg",0.1,0.01,2.)
+    mg = root.RooRealVar("mg","mg",0)
+    sg = root.RooRealVar("sg","sg",0.5*(fitMax-fitMin),0.01*(fitMax-fitMin),2*(fitMax-fitMin))
+  else:
+    mpvl = root.RooRealVar("mpvl","mpv landau",1.7,0,5)
+    if fixedLandauWidth is None:
+      wl = root.RooRealVar("wl","width landau",0.42,0.01,10)
+    else:
+      wl = root.RooRealVar("wl","width landau",fixedLandauWidth)
+    ml = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(mpvl,wl))
+
+    mg = root.RooRealVar("mg","mg",0)
+    sg = root.RooRealVar("sg","sg",0.1,0.01,2.)
+
+  t.Print()
+  mpvl.Print()
+  wl.Print()
+  ml.Print()
+  mg.Print()
+  sg.Print()
+
+  landau = root.RooLandau("lx","lx",t,ml,wl)
   gauss = root.RooGaussian("gauss","gauss",t,mg,sg)
 
   t.setBins(10000,"cache")
@@ -253,7 +280,11 @@ def fitLandauCore(c,hist,postfix,caption,fitMin=1.6,fitMax=2.3,fixedLandauWidth=
 
   fitResult = model.fitTo(data,root.RooFit.Save(),root.RooFit.Range(fitMin,fitMax))
 
-  fwhm = calcFWHM(model,t,1.,4.,0.01)
+  fwhm = None
+  if dQdx:
+    fwhm = calcFWHM(model,t,0.5*fitMin,fitMax*1.5,(fitMax-fitMin)/200.)
+  else:
+    fwhm = calcFWHM(model,t,1.,4.,0.01)
 
   frame = t.frame(root.RooFit.Title("landau (x) gauss convolution"))
   data.plotOn(frame)
@@ -273,7 +304,7 @@ def fitLandauCore(c,hist,postfix,caption,fitMin=1.6,fitMax=2.3,fixedLandauWidth=
 
   return (mpvl.getVal(),wl.getVal(),sg.getVal()), (mpvl.getError(),wl.getError(),sg.getError()), fwhm
 
-def fitSlicesLandauCore(c,hist,fileprefix,nJump=1):
+def fitSlicesLandauCore(c,hist,fileprefix,nJump=1,fracMax=0.4,fixedLandauWidth=0.12,dQdx=False):
   xaxis = hist.GetXaxis()
   xTitle = xaxis.GetTitle()
   yaxis = hist.GetYaxis()
@@ -296,9 +327,9 @@ def fitSlicesLandauCore(c,hist,fileprefix,nJump=1):
       caption = "{} from {} to {}".format(xTitle,xMin,xMax)
       xMiddle = 0.5*(xMax+xMin)
       xError = 0.5*(xMax-xMin)
-      startFit, endFit = getFracMaxVals(histAll,0.4)
-      (mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histAll,postfix,caption,startFit,endFit,fixedLandauWidth=0.12)
-      if mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5:
+      startFit, endFit = getFracMaxVals(histAll,fracMax)
+      (mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histAll,postfix,caption,startFit,endFit,fixedLandauWidth=fixedLandauWidth,dQdx=dQdx)
+      if (not dQdx) and (mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5):
             continue
       mpvlGraph.SetPoint(iPoint,xMiddle,mpvl)
       wlGraph.SetPoint(iPoint,xMiddle,wl)
@@ -376,6 +407,18 @@ if __name__ == "__main__":
     elif "primTrkdEdxs_zoom3_phiLt0" in name:
       pass
     elif "primTrkdEdxs_zoom3" in name:
+      pass
+    elif "primTrkdQdxs_phiLt0" in name:
+      hist = key.ReadObj()
+      hist.Print()
+      startFit, endFit = getFracMaxVals(hist,0.5)
+      params, errs, fwhm = fitLandauCore(c,hist,name,name,startFit,endFit,fixedLandauWidth=180,dQdx=True)
+    elif "primTrkdQdxs_phiGeq0" in name:
+      hist = key.ReadObj()
+      hist.Print()
+      startFit, endFit = getFracMaxVals(hist,0.5)
+      params, errs, fwhm = fitLandauCore(c,hist,name,name,startFit,endFit,fixedLandauWidth=280,dQdx=True)
+    elif "primTrkdQdxs" in name:
       pass
   dataParamsErrs = []
   dataFWHMs = []
@@ -465,31 +508,31 @@ if __name__ == "__main__":
 #    plotSlices(c,fCosmics.Get("primTrkdEdxVwire_RunIIP60"),"SlicesWireRunIIP60_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"wire",rebinX=1,xunits="",normalize=not logy)
 #    plotSlices(c,fCosmics.Get("primTrkdEdxVwire_RunIIP100"),"SlicesWireRunIIP100_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"wire",rebinX=1,xunits="",normalize=not logy)
 #
-#    plotSlices(c,fCosmics.Get("primTrkdEdxsVx_RunIIPos"),"SlicesXRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"x",rebinX=5,xunits="cm",normalize=not logy)
+#    plotSlices(c,fCosmics.Get("primTrkdEdxsVx_RunII"),"SlicesXRunII_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"x",rebinX=5,xunits="cm",normalize=not logy)
 #    plotSlices(c,fCosmics.Get("primTrkdEdxsVx_CosmicMC"),"SlicesXCosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"x",rebinX=5,xunits="cm",normalize=not logy)
 
-    #plotSlices(c,fCosmics.Get("primTrkdEdxsVy_RunIIPos"),"SlicesYRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"y",rebinX=10,xunits="cm",normalize=not logy)
+    #plotSlices(c,fCosmics.Get("primTrkdEdxsVy_RunII"),"SlicesYRunII_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"y",rebinX=10,xunits="cm",normalize=not logy)
     #plotSlices(c,fCosmics.Get("primTrkdEdxsVy_CosmicMC"),"SlicesYCosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"y",rebinX=10,xunits="cm",normalize=not logy)
 
-    #plotSlices(c,fCosmics.Get("primTrkdEdxsVz_RunIIPos"),"SlicesZRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=10,xunits="cm",normalize=not logy)
+    #plotSlices(c,fCosmics.Get("primTrkdEdxsVz_RunII"),"SlicesZRunII_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=10,xunits="cm",normalize=not logy)
     #plotSlices(c,fCosmics.Get("primTrkdEdxsVz_CosmicMC"),"SlicesZ_CosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=10,xunits="cm",normalize=not logy)
 
-    #plotSlices(c,fCosmics.Get("primTrkdEdxsVyFromCenter_RunIIPos"),"SlicesYFromCenterRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|y|",rebinX=8,xunits="cm",normalize=not logy)
+    #plotSlices(c,fCosmics.Get("primTrkdEdxsVyFromCenter_RunII"),"SlicesYFromCenterRunII_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|y|",rebinX=8,xunits="cm",normalize=not logy)
     #plotSlices(c,fCosmics.Get("primTrkdEdxsVyFromCenter_CosmicMC"),"SlicesYFromCenterCosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|y|",rebinX=8,xunits="cm",normalize=not logy)
 
-    #plotSlices(c,fCosmics.Get("primTrkdEdxsVzFromCenter_RunIIPos"),"SlicesZFromCenterRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=4,xunits="cm",normalize=not logy)
+    #plotSlices(c,fCosmics.Get("primTrkdEdxsVzFromCenter_RunII"),"SlicesZFromCenterRunII_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"z",rebinX=4,xunits="cm",normalize=not logy)
     #plotSlices(c,fCosmics.Get("primTrkdEdxsVzFromCenter_CosmicMC"),"SlicesZFromCenter_CosmicMC"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"|z-45cm|",rebinX=8,xunits="cm",normalize=not logy)
 #
-#    plotSlices(c,fCosmics.Get("primTrkdEdxsVrun_RunIIPos"),"SlicesRunRunIIPos_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"Run",rebinX=2,normalize=not logy)
+#    plotSlices(c,fCosmics.Get("primTrkdEdxsVrun_RunII"),"SlicesRunRunII_Cosmics"+outext,[0,xmax],"dE/dx [MeV/cm]",ytitle,"Run",rebinX=2,normalize=not logy)
 
   ##############################################
 
 #  c.SetLogy(False)
 #  graphConfigs = [
-#    (fCosmics.Get("primTrkdEdxsVrun_RunIIPos"),"Slices_modefwhm_run_cosmics","Run Number","Mode & FWHM of dE/dx [MeV/cm]"),
-#    (fCosmics.Get("primTrkdEdxsVx_RunIIPos"),"Slices_modefwhm_x_cosmics","Hit x [cm]","Mode & FWHM of dE/dx [MeV/cm]"),
-#    (fCosmics.Get("primTrkdEdxsVy_RunIIPos"),"Slices_modefwhm_y_cosmics","Hit y [cm]","Mode & FWHM of dE/dx [MeV/cm]"),
-#    (fCosmics.Get("primTrkdEdxsVz_RunIIPos"),"Slices_modefwhm_z_cosmics","Hit z [cm]","Mode & FWHM of dE/dx [MeV/cm]"),
+#    (fCosmics.Get("primTrkdEdxsVrun_RunII"),"Slices_modefwhm_run_cosmics","Run Number","Mode & FWHM of dE/dx [MeV/cm]"),
+#    (fCosmics.Get("primTrkdEdxsVx_RunII"),"Slices_modefwhm_x_cosmics","Hit x [cm]","Mode & FWHM of dE/dx [MeV/cm]"),
+#    (fCosmics.Get("primTrkdEdxsVy_RunII"),"Slices_modefwhm_y_cosmics","Hit y [cm]","Mode & FWHM of dE/dx [MeV/cm]"),
+#    (fCosmics.Get("primTrkdEdxsVz_RunII"),"Slices_modefwhm_z_cosmics","Hit z [cm]","Mode & FWHM of dE/dx [MeV/cm]"),
 #  ]
 #
 #  for hist, savename, xtitle, ytitle, in graphConfigs:
@@ -504,18 +547,55 @@ if __name__ == "__main__":
 #    c.SaveAs(savename+".png")
 #    c.SaveAs(savename+".pdf")
 
-  #fitSlicesLandaus(c,fCosmics.Get("primTrkdEdxsVy_RunIIPos"))
+  #fitSlicesLandaus(c,fCosmics.Get("primTrkdEdxsVy_RunII"))
   #fitSlicesLandaus(c,fCosmics.Get("primTrkdEdxsVy_CosmicMC"))
 
-  hist = fCosmics.Get("primTrkdEdxsVrun_RunIIPos")
+  hist = fCosmics.Get("primTrkdQdxsVrun_RunII")
+  #graphsdQdxRuns = fitSlicesLandauCore(c,hist,"Run_1_",dQdx=True,fixedLandauWidth=None)
+  graphsdQdxRuns = fitSlicesLandauCore(c,hist,"dQdxRun_10_",nJump=10,dQdx=True,fixedLandauWidth=None)
+
+  sys.exit()
+
+  hist = fCosmics.Get("primTrkdQdxsVrun_phiGeq0_RunII")
+  #graphsdQdxRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"dQdxRun_phiGeq0_1_",dQdx=True,fixedLandauWidth=None)
+  graphsdQdxRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"dQdxRun_phiGeq0_10_",nJump=10,dQdx=True,fixedLandauWidth=None)
+
+  hist = fCosmics.Get("primTrkdQdxsVrun_phiLt0_RunII")
+  #graphsdQdxRuns_phiLt0 = fitSlicesLandauCore(c,hist,"dQdxRun_phiLt0_1_",dQdx=True,fixedLandauWidth=None)
+  graphsdQdxRuns_phiLt0 = fitSlicesLandauCore(c,hist,"dQdxRun_phiLt0_10_",nJump=10,dQdx=True,fixedLandauWidth=None)
+
+  graphsdQdxRunsList = [graphsdQdxRuns,graphsdQdxRuns_phiGeq0,graphsdQdxRuns_phiLt0]
+  compareGraphs(c,"ComparedQdxRuns_MPV",graphsdQdxRunsList,0,"Run Number","Landau MPV [ADC ns / cm]",["All","#phi #geq 0","#phi < 0"])
+  compareGraphs(c,"ComparedQdxRuns_Sigma",graphsdQdxRunsList,2,"Run Number","Gaussian Sigma [ADC ns / cm]",["All","#phi #geq 0","#phi < 0"])
+
+
+  hist = fCosmics.Get("primTrkdQdxVwire_RunII")
+  #graphsdQdxWires = fitSlicesLandauCore(c,hist,"dQdxWire_1_",dQdx=True,fixedLandauWidth=None)
+  graphsdQdxWires = fitSlicesLandauCore(c,hist,"dQdxWire_8_",nJump=8,dQdx=True,fixedLandauWidth=None)
+
+  hist = fCosmics.Get("primTrkdQdxVwire_phiGeq0_RunII")
+  #graphsdQdxWires_phiGeq0 = fitSlicesLandauCore(c,hist,"dQdxWire_phiGeq0_1_",dQdx=True,fixedLandauWidth=None)
+  graphsdQdxWires_phiGeq0 = fitSlicesLandauCore(c,hist,"dQdxWire_phiGeq0_8_",nJump=8,dQdx=True,fixedLandauWidth=None)
+
+  hist = fCosmics.Get("primTrkdQdxVwire_phiLt0_RunII")
+  #graphsdQdxWires_phiLt0 = fitSlicesLandauCore(c,hist,"dQdxWire_phiLt0_1_",dQdx=True,fixedLandauWidth=None)
+  graphsdQdxWires_phiLt0 = fitSlicesLandauCore(c,hist,"dQdxWire_phiLt0_8_",nJump=8,dQdx=True,fixedLandauWidth=None)
+
+  graphsdQdxWiresList = [graphsdQdxWires,graphsdQdxWires_phiGeq0,graphsdQdxWires_phiLt0]
+  compareGraphs(c,"ComparedQdxWires_MPV",graphsdQdxWiresList,0,"Wire Number","Landau MPV [ADC ns / cm]",["All","#phi #geq 0","#phi < 0"])
+  compareGraphs(c,"ComparedQdxWires_Sigma",graphsdQdxWiresList,2,"Wire Number","Gaussian Sigma [ADC ns / cm]",["All","#phi #geq 0","#phi < 0"])
+
+  #################################################
+
+  hist = fCosmics.Get("primTrkdEdxsVrun_RunII")
   #graphsRuns = fitSlicesLandauCore(c,hist,"Run_1_")
   graphsRuns = fitSlicesLandauCore(c,hist,"Run_10_",nJump=10)
 
-  hist = fCosmics.Get("primTrkdEdxsVrun_phiGeq0_RunIIPos")
+  hist = fCosmics.Get("primTrkdEdxsVrun_phiGeq0_RunII")
   #graphsRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"Run_phiGeq0_1_")
   graphsRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"Run_phiGeq0_10_",nJump=10)
 
-  hist = fCosmics.Get("primTrkdEdxsVrun_phiLt0_RunIIPos")
+  hist = fCosmics.Get("primTrkdEdxsVrun_phiLt0_RunII")
   #graphsRuns_phiLt0 = fitSlicesLandauCore(c,hist,"Run_phiLt0_1_")
   graphsRuns_phiLt0 = fitSlicesLandauCore(c,hist,"Run_phiLt0_10_",nJump=10)
 
@@ -524,15 +604,15 @@ if __name__ == "__main__":
   compareGraphs(c,"CompareRuns_Sigma",graphsRunsList,2,"Run Number","Gaussian Sigma [MeV/cm]",["All","#phi #geq 0","#phi < 0"])
 
 
-  hist = fCosmics.Get("primTrkdEdxVwire_RunIIPos")
+  hist = fCosmics.Get("primTrkdEdxVwire_RunII")
   #graphsWires = fitSlicesLandauCore(c,hist,"Wire_1_")
   graphsWires = fitSlicesLandauCore(c,hist,"Wire_8_",nJump=8)
 
-  hist = fCosmics.Get("primTrkdEdxVwire_phiGeq0_RunIIPos")
+  hist = fCosmics.Get("primTrkdEdxVwire_phiGeq0_RunII")
   #graphsWires_phiGeq0 = fitSlicesLandauCore(c,hist,"Wire_phiGeq0_1_")
   graphsWires_phiGeq0 = fitSlicesLandauCore(c,hist,"Wire_phiGeq0_8_",nJump=8)
 
-  hist = fCosmics.Get("primTrkdEdxVwire_phiLt0_RunIIPos")
+  hist = fCosmics.Get("primTrkdEdxVwire_phiLt0_RunII")
   #graphsWires_phiLt0 = fitSlicesLandauCore(c,hist,"Wire_phiLt0_1_")
   graphsWires_phiLt0 = fitSlicesLandauCore(c,hist,"Wire_phiLt0_8_",nJump=8)
 
@@ -540,25 +620,25 @@ if __name__ == "__main__":
   compareGraphs(c,"CompareWires_MPV",graphsWiresList,0,"Wire Number","Landau MPV [MeV/cm]",["All","#phi #geq 0","#phi < 0"])
   compareGraphs(c,"CompareWires_Sigma",graphsWiresList,2,"Wire Number","Gaussian Sigma [MeV/cm]",["All","#phi #geq 0","#phi < 0"])
 
-  hist = fCosmics.Get("primTrkdEdxsVx_phiLt0_RunIIPos")
+  hist = fCosmics.Get("primTrkdEdxsVx_phiLt0_RunII")
   graphsX_phiLt0 = fitSlicesLandauCore(c,hist,"X_phiLt0_1_")
   #graphsX_phiLt0 = fitSlicesLandauCore(c,hist,"X_phiLt0_2_",nJump=2)
 
-  hist = fCosmics.Get("primTrkdEdxsVy_phiLt0_RunIIPos")
+  hist = fCosmics.Get("primTrkdEdxsVy_phiLt0_RunII")
   graphsY_phiLt0 = fitSlicesLandauCore(c,hist,"Y_phiLt0_1_")
   #graphsY_phiLt0 = fitSlicesLandauCore(c,hist,"Y_phiLt0_2_",nJump=2)
 
-  hist = fCosmics.Get("primTrkdEdxsVz_phiLt0_RunIIPos")
+  hist = fCosmics.Get("primTrkdEdxsVz_phiLt0_RunII")
   graphsZ_phiLt0 = fitSlicesLandauCore(c,hist,"Z_phiLt0_1_")
   #graphsZ_phiLt0 = fitSlicesLandauCore(c,hist,"Z_phiLt0_5_",nJump=5)
 
-#  hist = fCosmics.Get("primTrkdQdxVwire_RunIIPos")
+#  hist = fCosmics.Get("primTrkdQdxVwire_RunII")
 #  graphsdQdxWires = fitSlicesLandauCore(c,hist,"dQdxWire_8_",nJump=8)
 #
-#  hist = fCosmics.Get("primTrkdQdxVwire_phiGeq0_RunIIPos")
+#  hist = fCosmics.Get("primTrkdQdxVwire_phiGeq0_RunII")
 #  graphsdQdxWires_phiGeq0 = fitSlicesLandauCore(c,hist,"dQdxWire_phiGeq0_8_",nJump=8)
 #
-#  hist = fCosmics.Get("primTrkdQdxVwire_phiLt0_RunIIPos")
+#  hist = fCosmics.Get("primTrkdQdxVwire_phiLt0_RunII")
 #  graphsdQdxWires_phiLt0 = fitSlicesLandauCore(c,hist,"dQdxWire_phiLt0_8_",nJump=8)
 #
 #  graphsdQdxWiresList = [graphsdQdxWires,graphsdQdxWires_phiGeq0,graphsdQdxWires_phiLt0]
