@@ -617,8 +617,8 @@ def plotManyHistsOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",ou
 
 def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint,writeImages=True):
   """
-  For each histogram in each file, plot a histogram on one plot. Works with 1D
-    and 2D histograms.
+  For each histogram in each file, plot a histogram on one plot. Works with 1D,
+    2D, and 3D histograms.
 
   fileConfigs is a list of dictionaries configuring the files. fileConfigs is a
     list so you can plots for multiple samples.
@@ -703,8 +703,11 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       var = histConfig['var']
       ncolon = var.count(":")
       is2D = False
-      if ncolon > 1:
-        raise Exception("Multiple ':' not allowed in variable, only 1D/2D hists allowed",var)
+      is3D = False
+      if ncolon > 2:
+        raise Exception("More than 2 ':' not allowed in variable, only 1D/2D/3D hists allowed",var)
+      elif ncolon > 1:
+        is3D = True
       elif ncolon == 1:
         is2D = True
       cuts = histConfig['cuts']
@@ -719,8 +722,10 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       if "ztitle" in histConfig: ztitle = histConfig['ztitle']
       xlim = []
       ylim = []
+      zlim = []
       if "xlim" in histConfig: xlim = histConfig['xlim']
       if "ylim" in histConfig: ylim = histConfig['ylim']
+      if "zlim" in histConfig: zlim = histConfig['zlim']
       logz = False
       logy = False
       logx = False
@@ -772,7 +777,14 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       if "writeImage" in histConfig: writeImageHist = histConfig["writeImage"]
       # now on to the real work
       hist = None
-      if is2D:
+      if is3D:
+        if len(binning) == 3:
+          hist = Hist3D(binning[0],binning[1],binning[2])
+        else:
+          hist = Hist3D(*binning)
+        hist.SetMarkerStyle(1)
+        hist.SetMarkerSize(1)
+      elif is2D:
         if len(binning) == 2:
           hist = Hist2D(binning[0],binning[1])
         else:
@@ -823,13 +835,24 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
           prof = hist.ProfileY()
           hist = prof
       axisHist = None
-      if hist.InheritsFrom("TH2"):
+      if hist.InheritsFrom("TH3"):
+        axisHist = hist
+        if xlim:
+            axisHist.GetXaxis().SetRangeUser(*xlim)
+        if ylim:
+            axisHist.GetYaxis().SetRangeUser(*ylim)
+        if zlim:
+            axisHist.GetYaxis().SetRangeUser(*zlim)
+        hist.Draw("")
+      elif hist.InheritsFrom("TH2"):
         setupCOLZFrame(canvas)
         axisHist = hist
         if xlim:
             axisHist.GetXaxis().SetRangeUser(*xlim)
         if ylim:
             axisHist.GetYaxis().SetRangeUser(*ylim)
+        if zlim:
+            axisHist.GetYaxis().SetRangeUser(*zlim)
         hist.Draw("colz")
         if doProfileXtoo:
             prof.Draw("Esame")
@@ -2551,7 +2574,7 @@ def Hist(*args,**kargs):
 
 def Hist2D(*args,**kargs):
   """
-  Returns TH1F with UUID for name and "" for title.
+  Returns TH2F with UUID for name and "" for title.
   The arguments are used as the binning.
   """
   func = root.TH2F
@@ -2582,6 +2605,28 @@ def Hist2D(*args,**kargs):
   else:
     raise Exception("Hist: Innapropriate arguments, requires either nBins, low, high or a list of bin edges:",args)
   return hist
+
+def Hist3D(*args,**kargs):
+  """
+  Returns TH3F with UUID for name and "" for title.
+  The arguments are used as the binning.
+  """
+  func = root.TH3F
+  if "TH3D" in kargs and kargs["TH3D"]:
+    func = root.TH3D
+  name = uuid.uuid1().hex
+  hist = None
+  if len(args) == 3 and type(args[0]) == list and type(args[1]) == list and type(args[2]) == list:
+    hist = func(name,"",len(args[0])-1,array.array('f',args[0]),len(args[1])-1,array.array('f',args[1]),len(args[2])-2,array.array('f',args[2]))
+  elif len(args) == 9:
+    for i in range(9):
+      if not isinstance(args[i],numbers.Number):
+        raise Exception(i,"th argument is not a number")
+    hist = func(name,"",args[0],args[1],args[2],args[3],args[4],args[5],args[6],args[7],args[8])
+  else:
+    raise Exception("Hist: Innapropriate arguments, requires either nBins, low, high or a list of bin edges:",args)
+  return hist
+
 
 def drawVline(axisHist,x):
   axis = axisHist.GetYaxis()
