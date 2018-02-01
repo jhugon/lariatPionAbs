@@ -327,7 +327,14 @@ def fitSlicesLandauCore(c,hist,fileprefix,nJump=1,fracMax=0.4,fixedLandauWidth=0
       caption = "{} from {} to {}".format(xTitle,xMin,xMax)
       xMiddle = 0.5*(xMax+xMin)
       xError = 0.5*(xMax-xMin)
-      startFit, endFit = getFracMaxVals(histAll,fracMax)
+      startFit = 0.
+      endFit = 0.
+      if dQdx:
+        histAllRebin = histAll.Clone(histAll.GetName()+"_rebin")
+        histAllRebin.Rebin(2)
+        startFit, endFit = getFracMaxVals(histAllRebin,fracMax)
+      else:
+        startFit, endFit = getFracMaxVals(histAll,fracMax)
       (mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histAll,postfix,caption,startFit,endFit,fixedLandauWidth=fixedLandauWidth,dQdx=dQdx)
       if (not dQdx) and (mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5):
             continue
@@ -553,8 +560,6 @@ if __name__ == "__main__":
   hist = fCosmics.Get("primTrkdQdxsVrun_RunII")
   #graphsdQdxRuns = fitSlicesLandauCore(c,hist,"Run_1_",dQdx=True,fixedLandauWidth=None)
   graphsdQdxRuns = fitSlicesLandauCore(c,hist,"dQdxRun_10_",nJump=10,dQdx=True,fixedLandauWidth=None)
-
-  sys.exit()
 
   hist = fCosmics.Get("primTrkdQdxsVrun_phiGeq0_RunII")
   #graphsdQdxRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"dQdxRun_phiGeq0_1_",dQdx=True,fixedLandauWidth=None)
