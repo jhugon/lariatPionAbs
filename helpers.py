@@ -676,6 +676,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     profileStdDev: if True, profile errors are std deviation instead of std error on mean
     profileXtoo: if True, draw profileX of 2D hist, on top of 2D hist
     funcs: List of TF1's to draw on top of the histogram
+    graphs: List of TGraphs to draw on top of the histogram
     writeImage: if False, don't make an image for this hist
   """
   
@@ -773,6 +774,9 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
       funcs = []
       if "funcs" in histConfig and type(histConfig["funcs"]) == list:
         funcs = histConfig["funcs"]
+      graphs = []
+      if "graphs" in histConfig and type(histConfig["graphs"]) == list:
+        graphs = histConfig["graphs"]
       writeImageHist = True
       if "writeImage" in histConfig: writeImageHist = histConfig["writeImage"]
       # now on to the real work
@@ -834,6 +838,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         else:
           prof = hist.ProfileY()
           hist = prof
+      setHistTitles(hist,xtitle,ytitle)
       axisHist = None
       if hist.InheritsFrom("TH3"):
         axisHist = hist
@@ -842,7 +847,8 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
         if ylim:
             axisHist.GetYaxis().SetRangeUser(*ylim)
         if zlim:
-            axisHist.GetYaxis().SetRangeUser(*zlim)
+            axisHist.GetZaxis().SetRangeUser(*zlim)
+        axisHist.GetZaxis().SetTitle(ztitle)
         hist.Draw("")
       elif hist.InheritsFrom("TH2"):
         setupCOLZFrame(canvas)
@@ -853,6 +859,7 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
             axisHist.GetYaxis().SetRangeUser(*ylim)
         if zlim:
             axisHist.GetYaxis().SetRangeUser(*zlim)
+        axisHist.GetZaxis().SetTitle(ztitle)
         hist.Draw("colz")
         if doProfileXtoo:
             prof.Draw("Esame")
@@ -868,14 +875,16 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
           hist.Draw("Esame")
         else:
           hist.Draw("histsame")
+      setHistTitles(axisHist,xtitle,ytitle)
       if writeImages and writeImageFile and writeImageHist:
         for hlineY in hlineYs:
           hlines.append(drawHline(axisHist,hlineY))
         for vlineX in vlineXs:
           vlines.append(drawVline(axisHist,vlineX))
-        setHistTitles(axisHist,xtitle,ytitle)
         for func in funcs:
           func.Draw("LSAME")
+        for graph in graphs:
+          graph.Draw("PEZ")
         drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
         canvas.RedrawAxis()
         saveNameBase = outPrefix + histConfig['name'] + "_" + fileConfig['name'] + outSuffix

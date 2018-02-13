@@ -369,6 +369,90 @@ def fitSlicesLandauCore(c,hist,fileprefix,nJump=1,fracMax=0.4,fixedLandauWidth=0
   c.SaveAs(fileprefix+".pdf")
   return mpvlGraph,wlGraph,sgGraph
 
+def fitSlicesLandauCore3D(c,hist,fileprefix,nJump=1,fracMax=0.4,fixedLandauWidth=0.12,dQdx=False):
+  xaxis = hist.GetXaxis()
+  xTitle = xaxis.GetTitle()
+  yaxis = hist.GetYaxis()
+  yTitle = yaxis.GetTitle()
+  zaxis = hist.GetZaxis()
+  zTitle = zaxis.GetTitle()
+  binning = [xaxis.GetNbins(),xaxis.GetXmin(),xaxis.GetXmax(),
+             yaxis.GetNbins(),yaxis.GetXmin(),yaxis.GetXmax()
+  ]
+  zBinning = [zaxis.GetNbins(),zaxis.GetXmin(),zaxis.GetXmax()]
+  mpvlHist = Hist2D(*binning)
+  wlHist = Hist2D(*binning)
+  sgHist = Hist2D(*binning)
+  mpvlErrorHist = Hist2D(*binning)
+  wlErrorHist = Hist2D(*binning)
+  sgErrorHist = Hist2D(*binning)
+  fwhmHist = Hist2D(*binning)
+  minMPV = 1e9
+  minWL = 1e9
+  minSG = 1e9
+  maxMPV = -1e9
+  maxWL = -1e9
+  maxSG = -1e9
+  for iBinX in range(1,xaxis.GetNbins()+1):
+    for iBinY in range(1,yaxis.GetNbins()+1):
+      postfix = "_"+fileprefix+"bins{}_{}".format(iBinX,iBinY)
+      xMin = xaxis.GetBinLowEdge(iBinX)
+      xMax = xaxis.GetBinUpEdge(iBinX)
+      yMin = yaxis.GetBinLowEdge(iBinY)
+      yMax = yaxis.GetBinUpEdge(iBinY)
+      caption = "{} in [{},{}), {} in [{},{})".format(xTitle,xMin,xMax,yTitle,yMin,yMax)
+      histForFit = Hist(*zBinning)
+      histForFit.GetXaxis().SetTitle(zTitle)
+      for iBinZ in range(1,zaxis.GetNbins()+1):
+        histForFit.SetBinContent(iBinZ,hist.GetBinContent(iBinX,iBinY,iBinZ))
+      if histForFit.Integral(1,zaxis.GetNbins()+1) < 10:
+        continue
+      if dQdx:
+        histForFit.Rebin(2)
+
+      startFit = 0.
+      endFit = 0.
+      startFit, endFit = getFracMaxVals(histForFit,fracMax)
+      (mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histForFit,postfix,caption,startFit,endFit,fixedLandauWidth=fixedLandauWidth,dQdx=dQdx)
+      if (not dQdx) and (mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5):
+            continue
+      mpvlHist.SetBinContent(iBinX,iBinY,mpvl)
+      wlHist.SetBinContent(iBinX,iBinY,wl)
+      sgHist.SetBinContent(iBinX,iBinY,sg)
+      fwhmHist.SetBinContent(iBinX,iBinY,fwhm)
+      mpvlErrorHist.SetBinContent(iBinX,iBinY,mpvlErr)
+      wlErrorHist.SetBinContent(iBinX,iBinY,wlErr)
+      sgErrorHist.SetBinContent(iBinX,iBinY,sgErr)
+      minMPV = min(mpvl,minMPV)
+      minWL = min(wl,minWL)
+      minSG = min(sg,minSG)
+      maxMPV = max(mpvl,maxMPV)
+      maxWL = max(wl,maxWL)
+      maxSG = max(sg,maxSG)
+  if maxMPV > minMPV:
+    mpvlHist.GetZaxis().SetRangeUser(minMPV,maxMPV)
+  if maxWL > minWL:
+    wlHist.GetZaxis().SetRangeUser(minWL,maxWL)
+  if maxSG > minSG:
+    sgHist.GetZaxis().SetRangeUser(minSG,maxSG)
+  graphs = [mpvlHist,wlHist,sgHist,mpvlErrorHist,wlErrorHist,sgErrorHist,fwhmHist]
+  labels = ["Best-Fit Landau MPV", "Best-Fit Landau Width", "Best-Fit Gaussian #sigma",
+            "Standard Error Landau MPV", "Standard Error Landau Width", "Standard Error Gaussian #sigma",
+            "FWHM"]
+  names = ["bfMPV", "bfWL", "bfSigma",
+            "stderrMPV", "stderrWL", "stderrSigma",
+            "FWHM"]
+  setupCOLZFrame(c)
+  for graph,label,name in zip(graphs,labels,names):
+    graph.Draw("colz")
+    print xTitle,yTitle
+    setHistTitles(graph,xTitle,yTitle)
+    drawStandardCaptions(c,label)
+    c.SaveAs(fileprefix+name+".png")
+    c.SaveAs(fileprefix+name+".pdf")
+  setupCOLZFrame(c,True)
+  return mpvlHist,wlHist,sgHist
+
 def compareGraphs(c,outfilePrefix,graphsList,histIndex,xTitle,yTitle,legendTitles,yStartZero=False):
   c.Clear()
   for iColor, graphs in enumerate(graphsList):
@@ -386,6 +470,16 @@ if __name__ == "__main__":
   c = root.TCanvas("c")
   fCosmics = root.TFile("cosmics_hists.root")
   fCosmics.ls()
+
+  hist3D1 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunIINocrct")
+  hist3D1.Rebin3D(5,1,1)
+  fitSlicesLandauCore3D(c,hist3D1,"Fit3D_dEdxVWireAndY_phiLt0_RunIINocrct")
+
+  hist3D2 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunIINocrct")
+  hist3D2.Rebin3D(5,1,1)
+  fitSlicesLandauCore3D(c,hist3D1,"Fit3D_dEdxVWireAndY_phiLt0_RunIINocrct")
+  sys.exit(0)
+
   nameLists = []
   paramLists = []
   errorLists = []
