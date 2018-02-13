@@ -28,6 +28,7 @@ if __name__ == "__main__":
   cuts += "*(nTracks == 1)"
 
   hitExtraCuts = "*(primTrkXs > 3. && primTrkXs < 46. && primTrkYs < 18. && primTrkYs > -18. && primTrkZs > 3. && primTrkZs < 87.)"
+  #hitExtraCuts += "*((primTrkStartPhi >= 0 && primTrkPitches >= 0.45 && primTrkPitches < 0.47) || (primTrkStartPhi < 0 && primTrkPitches >= 0.68 && primTrkPitches < 0.70))" #small pitch region
 
   weightStr = "1"+cuts
   logy = True
@@ -2148,3 +2149,44 @@ if __name__ == "__main__":
   ]
   plotOneHistOnePlot([x for x in fileConfigs if not ("smear" in x["name"])],histConfigs,
         c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_HitPos_")
+
+  ######################################################################################
+  ## Compare Cuts -- Phi >= or < 0 and restrict pitch ##################################
+  ######################################################################################
+
+  histConfigs = [
+    {
+      'title': "Track #phi #geq 0",
+      'cuts': weightStr+hitExtraCuts+" * (primTrkStartPhi >= 0)",
+    },
+    {
+      'title': "Track #phi < 0",
+      'cuts': weightStr+hitExtraCuts+" * (primTrkStartPhi < 0)",
+    },
+    {
+      'title': "Track #phi #geq 0 & 0.45 #leq Pitch < 0.47",
+      'cuts': weightStr+hitExtraCuts+" * (primTrkStartPhi >= 0 && primTrkPitches >= 0.45 && primTrkPitches < 0.47)",
+    },
+    {
+      'title': "Track #phi < 0 & 0.68 #leq Pitch < 0.70",
+      'cuts': weightStr+hitExtraCuts+" * (primTrkStartPhi < 0 && primTrkPitches >= 0.68 && primTrkPitches < 0.70)",
+    },
+  ]
+  #hitExtraCuts += "*((primTrkStartPhi >= 0) || (primTrkStartPhi < 0))" #small pitch region
+  for i in range(len(histConfigs)):
+    histConfigs[i]["color"] = COLORLIST[i]
+
+  for i in range(len(histConfigs)):
+    histConfigs[i].update(
+      {
+      'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
+      'ytitle': "Events / bin",
+      'binning': [50,0,5],
+      'var': "primTrkdEdxs",
+      'normalize': True,
+      'logy': False,
+      },
+    )
+  plotManyHistsOnePlot([x for x in fileConfigs if not ("smear" in x["name"])],histConfigs,
+        c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_pitchCuts_primTrkdEdxs_zoom3")
+
