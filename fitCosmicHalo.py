@@ -338,6 +338,8 @@ def fitSlicesLandauCore(c,hist,fileprefix,nJump=1,fracMax=0.4,fixedLandauWidth=0
       (mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histAll,postfix,caption,startFit,endFit,fixedLandauWidth=fixedLandauWidth,dQdx=dQdx)
       if (not dQdx) and (mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5):
             continue
+      if dQdx and mpvl > 4000 :
+            continue
       mpvlGraph.SetPoint(iPoint,xMiddle,mpvl)
       wlGraph.SetPoint(iPoint,xMiddle,wl)
       sgGraph.SetPoint(iPoint,xMiddle,sg)
@@ -471,138 +473,142 @@ if __name__ == "__main__":
   fCosmics = root.TFile("cosmics_hists.root")
   fCosmics.ls()
 
-  hist3D1 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunIINocrct")
-  hist3D1.Rebin3D(5,1,1)
-  fitSlicesLandauCore3D(c,hist3D1,"Fit3D_dEdxVWireAndY_phiLt0_RunIINocrct")
+  #hist3D1 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunII")
+  #hist3D1.Rebin3D(5,1,1)
+  #fitSlicesLandauCore3D(c,hist3D1,"Fit3D_dEdxVWireAndY_phiLt0_RunII")
 
-  hist3D2 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunIINocrct")
-  hist3D2.Rebin3D(5,1,1)
-  fitSlicesLandauCore3D(c,hist3D1,"Fit3D_dEdxVWireAndY_phiLt0_RunIINocrct")
-  sys.exit(0)
+  #hist3D1 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunIINocrct")
+  #hist3D1.Rebin3D(5,1,1)
+  #fitSlicesLandauCore3D(c,hist3D1,"Fit3D_dEdxVWireAndY_phiLt0_RunIINocrct")
 
-  nameLists = []
-  paramLists = []
-  errorLists = []
-  paramGausLists = []
-  errorGausLists = []
-  fwhmLists = []
-  for key in fCosmics.GetListOfKeys():
-    name = key.GetName()
-    if "primTrkdEdxs_zoom3_phiGeq0" in name:
-        hist = key.ReadObj()
-        hist.Rebin(2)
-        startFit, endFit = getFracMaxVals(hist,0.4)
-        #####
-        params, errs, fwhm = fitLandauCore(c,hist,name,name,startFit,endFit,fixedLandauWidth=0.12)
-        #params, errs, fwhm = fitLandauCore(c,hist,name,name,1.,4.)
-        #params, errs, fwhm = fitLandauCore(c,hist,name,name,1.4,2.)
-        nameLists.append(name)
-        paramLists.append(params)
-        errorLists.append(errs)
-        fwhmLists.append(fwhm)
-        #xMin,xMax = getHistFracMaxVals(hist,0.25)
-        #params, errs = fitGaussCore(c,hist,name,name,xMin,xMax)
-        #params, errs, fwhm = fitGaussCore(c,hist,name,name,startFit,endFit)
-        #paramGausLists.append(params)
-        #errorGausLists.append(errs)
-    elif "primTrkdEdxs_zoom3_phiLt0" in name:
-      pass
-    elif "primTrkdEdxs_zoom3" in name:
-      pass
-    elif "primTrkdQdxs_phiLt0" in name:
-      hist = key.ReadObj()
-      hist.Print()
-      startFit, endFit = getFracMaxVals(hist,0.5)
-      params, errs, fwhm = fitLandauCore(c,hist,name,name,startFit,endFit,fixedLandauWidth=180,dQdx=True)
-    elif "primTrkdQdxs_phiGeq0" in name:
-      hist = key.ReadObj()
-      hist.Print()
-      startFit, endFit = getFracMaxVals(hist,0.5)
-      params, errs, fwhm = fitLandauCore(c,hist,name,name,startFit,endFit,fixedLandauWidth=280,dQdx=True)
-    elif "primTrkdQdxs" in name:
-      pass
-  dataParamsErrs = []
-  dataFWHMs = []
-  dataLabels = []
-  mcSmearingVals = []
-  mcParams = []
-  mcErrs = []
-  fwhmVals = []
-  for name, params, errors, fwhm in zip(nameLists,paramLists,errorLists,fwhmLists):
-    printStr = "{:55} ".format(name)
-    for i in range(len(params)):
-        printStr += "{:6.3f} +/- {:8.3g} ".format(params[i],errors[i])
-    printStr += "FWHM: {:6.3f} ".format(fwhm)
-    print(printStr)
-    if "RunII" in name:
-        print("name",name)
-        dataParamsErrs.append((params,errors))
-        dataFWHMs.append(fwhm)
-        match = re.search(r"RunIIP([0-9]+)",name)
-        if match:
-          current = match.group(1)
-          dataLabels.append("Run II + {} Data".format(current))
-        else:
-          dataLabels.append("Run II Data")
-    else:
-        match = re.match(r".*_presmear(\d+)perc$",name)
-        if match:
-            mcParams.append(params)
-            mcErrs.append(errors)
-            fwhmVals.append(fwhm)
-            mcSmearingVals.append(float(match.group(1)))
-        else:
-            mcParams.append(params)
-            mcErrs.append(errors)
-            fwhmVals.append(fwhm)
-            mcSmearingVals.append(0.)
+  #hist3D2 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunIINocrct")
+  #hist3D2.Rebin3D(5,1,1)
+  #fitSlicesLandauCore3D(c,hist3D1,"Fit3D_dEdxVWireAndY_phiLt0_RunIINocrct")
+  #sys.exit(0)
 
-  try:
-    import numpy
-    from matplotlib import pyplot as mpl
-
-    mcParams = numpy.array(mcParams)
-    mcErrs = numpy.array(mcErrs)
-    fig, ax = mpl.subplots(figsize=(7,7))
-    for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
-      ax.axhspan(dataParamsErr[0][2]-dataParamsErr[1][2],dataParamsErr[0][2]+dataParamsErr[1][2],facecolor='k',edgecolor='k',alpha=0.3)
-      ax.axhline(dataParamsErr[0][2],c='k')
-    ax.errorbar(mcSmearingVals,mcParams[:,2],yerr=mcErrs[:,2],fmt=".b")
-    #ax.set_xlim(-10,50)
-    ax.set_xlabel("MC Smearing [%]")
-    ax.set_ylabel("Gaussian $\sigma$ Parameter [MeV/cm]")
-    for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
-      ax.annotate(dataLabel,(45,dataParamsErr[0][2]+0.5*dataParamsErr[1][2]),ha='right',va='center')
-    fig.savefig("Cosmic_Gaus_Widths.png")
-    fig.savefig("Cosmic_Gaus_Widths.pdf")
-
-    fig, ax = mpl.subplots(figsize=(7,7))
-    for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
-      ax.axhspan(dataParamsErr[0][0]-dataParamsErr[1][0],dataParamsErr[0][0]+dataParamsErr[1][0],facecolor='k',edgecolor='k',alpha=0.3)
-      ax.axhline(dataParamsErr[0][0],c='k')
-    ax.errorbar(mcSmearingVals,mcParams[:,0],yerr=mcErrs[:,0],fmt=".b")
-    #ax.set_xlim(-10,50)
-    ax.set_xlabel("MC Smearing [%]")
-    ax.set_ylabel("Landau MPV Parameter [MeV/cm]")
-    for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
-      ax.annotate(dataLabel,(45,dataParamsErr[0][0]+0.5*dataParamsErr[1][0]),ha='right',va='center')
-    fig.savefig("Cosmic_Gaus_MPV.png")
-    fig.savefig("Cosmic_Gaus_MPV.pdf")
-
-    fig, ax = mpl.subplots(figsize=(7,7))
-    for dataLabel, dataFWHM in zip(dataLabels,dataFWHMs):
-      ax.axhline(dataFWHM,c='k',lw=2)
-    ax.errorbar(mcSmearingVals,fwhmVals,fmt="ob")
-    #ax.set_xlim(-10,50)
-    ax.set_xlabel("MC Smearing [%]")
-    ax.set_ylabel("Full Width Half Max of Fit PDF [MeV/cm]")
-    for dataLabel, dataFWHM in zip(dataLabels,dataFWHMs):
-      ax.annotate(dataLabel,(45,dataFWHM),ha='right',va='bottom')
-    fig.savefig("Cosmic_FWHM.png")
-    fig.savefig("Cosmic_FWHM.pdf")
-  except ImportError:
-    pass
-
+#  nameLists = []
+#  paramLists = []
+#  errorLists = []
+#  paramGausLists = []
+#  errorGausLists = []
+#  fwhmLists = []
+#  for key in fCosmics.GetListOfKeys():
+#    name = key.GetName()
+#    if "primTrkdEdxs_zoom3_phiGeq0" in name:
+#        hist = key.ReadObj()
+#        hist.Rebin(2)
+#        startFit, endFit = getFracMaxVals(hist,0.4)
+#        #####
+#        params, errs, fwhm = fitLandauCore(c,hist,name,name,startFit,endFit,fixedLandauWidth=0.12)
+#        #params, errs, fwhm = fitLandauCore(c,hist,name,name,1.,4.)
+#        #params, errs, fwhm = fitLandauCore(c,hist,name,name,1.4,2.)
+#        nameLists.append(name)
+#        paramLists.append(params)
+#        errorLists.append(errs)
+#        fwhmLists.append(fwhm)
+#        #xMin,xMax = getHistFracMaxVals(hist,0.25)
+#        #params, errs = fitGaussCore(c,hist,name,name,xMin,xMax)
+#        #params, errs, fwhm = fitGaussCore(c,hist,name,name,startFit,endFit)
+#        #paramGausLists.append(params)
+#        #errorGausLists.append(errs)
+#    elif "primTrkdEdxs_zoom3_phiLt0" in name:
+#      pass
+#    elif "primTrkdEdxs_zoom3" in name:
+#      pass
+#    elif "primTrkdQdxs_phiLt0" in name:
+#      hist = key.ReadObj()
+#      hist.Print()
+#      startFit, endFit = getFracMaxVals(hist,0.5)
+#      params, errs, fwhm = fitLandauCore(c,hist,name,name,startFit,endFit,fixedLandauWidth=180,dQdx=True)
+#    elif "primTrkdQdxs_phiGeq0" in name:
+#      hist = key.ReadObj()
+#      hist.Print()
+#      startFit, endFit = getFracMaxVals(hist,0.5)
+#      params, errs, fwhm = fitLandauCore(c,hist,name,name,startFit,endFit,fixedLandauWidth=280,dQdx=True)
+#    elif "primTrkdQdxs" in name:
+#      pass
+#  dataParamsErrs = []
+#  dataFWHMs = []
+#  dataLabels = []
+#  mcSmearingVals = []
+#  mcParams = []
+#  mcErrs = []
+#  fwhmVals = []
+#  for name, params, errors, fwhm in zip(nameLists,paramLists,errorLists,fwhmLists):
+#    printStr = "{:55} ".format(name)
+#    for i in range(len(params)):
+#        printStr += "{:6.3f} +/- {:8.3g} ".format(params[i],errors[i])
+#    printStr += "FWHM: {:6.3f} ".format(fwhm)
+#    print(printStr)
+#    if "RunII" in name:
+#        print("name",name)
+#        dataParamsErrs.append((params,errors))
+#        dataFWHMs.append(fwhm)
+#        match = re.search(r"RunIIP([0-9]+)",name)
+#        if match:
+#          current = match.group(1)
+#          dataLabels.append("Run II + {} Data".format(current))
+#        else:
+#          dataLabels.append("Run II Data")
+#    else:
+#        match = re.match(r".*_presmear(\d+)perc$",name)
+#        if match:
+#            mcParams.append(params)
+#            mcErrs.append(errors)
+#            fwhmVals.append(fwhm)
+#            mcSmearingVals.append(float(match.group(1)))
+#        else:
+#            mcParams.append(params)
+#            mcErrs.append(errors)
+#            fwhmVals.append(fwhm)
+#            mcSmearingVals.append(0.)
+#
+#  try:
+#    import numpy
+#    from matplotlib import pyplot as mpl
+#
+#    mcParams = numpy.array(mcParams)
+#    mcErrs = numpy.array(mcErrs)
+#    fig, ax = mpl.subplots(figsize=(7,7))
+#    for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
+#      ax.axhspan(dataParamsErr[0][2]-dataParamsErr[1][2],dataParamsErr[0][2]+dataParamsErr[1][2],facecolor='k',edgecolor='k',alpha=0.3)
+#      ax.axhline(dataParamsErr[0][2],c='k')
+#    ax.errorbar(mcSmearingVals,mcParams[:,2],yerr=mcErrs[:,2],fmt=".b")
+#    #ax.set_xlim(-10,50)
+#    ax.set_xlabel("MC Smearing [%]")
+#    ax.set_ylabel("Gaussian $\sigma$ Parameter [MeV/cm]")
+#    for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
+#      ax.annotate(dataLabel,(45,dataParamsErr[0][2]+0.5*dataParamsErr[1][2]),ha='right',va='center')
+#    fig.savefig("Cosmic_Gaus_Widths.png")
+#    fig.savefig("Cosmic_Gaus_Widths.pdf")
+#
+#    fig, ax = mpl.subplots(figsize=(7,7))
+#    for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
+#      ax.axhspan(dataParamsErr[0][0]-dataParamsErr[1][0],dataParamsErr[0][0]+dataParamsErr[1][0],facecolor='k',edgecolor='k',alpha=0.3)
+#      ax.axhline(dataParamsErr[0][0],c='k')
+#    ax.errorbar(mcSmearingVals,mcParams[:,0],yerr=mcErrs[:,0],fmt=".b")
+#    #ax.set_xlim(-10,50)
+#    ax.set_xlabel("MC Smearing [%]")
+#    ax.set_ylabel("Landau MPV Parameter [MeV/cm]")
+#    for dataLabel, dataParamsErr in zip(dataLabels,dataParamsErrs):
+#      ax.annotate(dataLabel,(45,dataParamsErr[0][0]+0.5*dataParamsErr[1][0]),ha='right',va='center')
+#    fig.savefig("Cosmic_Gaus_MPV.png")
+#    fig.savefig("Cosmic_Gaus_MPV.pdf")
+#
+#    fig, ax = mpl.subplots(figsize=(7,7))
+#    for dataLabel, dataFWHM in zip(dataLabels,dataFWHMs):
+#      ax.axhline(dataFWHM,c='k',lw=2)
+#    ax.errorbar(mcSmearingVals,fwhmVals,fmt="ob")
+#    #ax.set_xlim(-10,50)
+#    ax.set_xlabel("MC Smearing [%]")
+#    ax.set_ylabel("Full Width Half Max of Fit PDF [MeV/cm]")
+#    for dataLabel, dataFWHM in zip(dataLabels,dataFWHMs):
+#      ax.annotate(dataLabel,(45,dataFWHM),ha='right',va='bottom')
+#    fig.savefig("Cosmic_FWHM.png")
+#    fig.savefig("Cosmic_FWHM.pdf")
+#  except ImportError:
+#    pass
+#
 #  for logy,xmax,outext,ytitle in [(False,4,"","Normalized--Hits"),(True,50,"_logy","Hits/bin")]:
 #    c.SetLogy(logy)
 #
@@ -651,15 +657,15 @@ if __name__ == "__main__":
   #fitSlicesLandaus(c,fCosmics.Get("primTrkdEdxsVy_RunII"))
   #fitSlicesLandaus(c,fCosmics.Get("primTrkdEdxsVy_CosmicMC"))
 
-  hist = fCosmics.Get("primTrkdQdxsVrun_RunII")
+  hist = fCosmics.Get("primTrkdQdxsVrun_RunIINocrct")
   #graphsdQdxRuns = fitSlicesLandauCore(c,hist,"Run_1_",dQdx=True,fixedLandauWidth=None)
   graphsdQdxRuns = fitSlicesLandauCore(c,hist,"dQdxRun_10_",nJump=10,dQdx=True,fixedLandauWidth=None)
 
-  hist = fCosmics.Get("primTrkdQdxsVrun_phiGeq0_RunII")
+  hist = fCosmics.Get("primTrkdQdxsVrun_phiGeq0_RunIINocrct")
   #graphsdQdxRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"dQdxRun_phiGeq0_1_",dQdx=True,fixedLandauWidth=None)
   graphsdQdxRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"dQdxRun_phiGeq0_10_",nJump=10,dQdx=True,fixedLandauWidth=None)
 
-  hist = fCosmics.Get("primTrkdQdxsVrun_phiLt0_RunII")
+  hist = fCosmics.Get("primTrkdQdxsVrun_phiLt0_RunIINocrct")
   #graphsdQdxRuns_phiLt0 = fitSlicesLandauCore(c,hist,"dQdxRun_phiLt0_1_",dQdx=True,fixedLandauWidth=None)
   graphsdQdxRuns_phiLt0 = fitSlicesLandauCore(c,hist,"dQdxRun_phiLt0_10_",nJump=10,dQdx=True,fixedLandauWidth=None)
 
@@ -668,15 +674,15 @@ if __name__ == "__main__":
   compareGraphs(c,"ComparedQdxRuns_Sigma",graphsdQdxRunsList,2,"Run Number","Gaussian Sigma [ADC ns / cm]",["All","#phi #geq 0","#phi < 0"])
 
 
-  hist = fCosmics.Get("primTrkdQdxVwire_RunII")
+  hist = fCosmics.Get("primTrkdQdxVwire_RunIINocrct")
   #graphsdQdxWires = fitSlicesLandauCore(c,hist,"dQdxWire_1_",dQdx=True,fixedLandauWidth=None)
   graphsdQdxWires = fitSlicesLandauCore(c,hist,"dQdxWire_8_",nJump=8,dQdx=True,fixedLandauWidth=None)
 
-  hist = fCosmics.Get("primTrkdQdxVwire_phiGeq0_RunII")
+  hist = fCosmics.Get("primTrkdQdxVwire_phiGeq0_RunIINocrct")
   #graphsdQdxWires_phiGeq0 = fitSlicesLandauCore(c,hist,"dQdxWire_phiGeq0_1_",dQdx=True,fixedLandauWidth=None)
   graphsdQdxWires_phiGeq0 = fitSlicesLandauCore(c,hist,"dQdxWire_phiGeq0_8_",nJump=8,dQdx=True,fixedLandauWidth=None)
 
-  hist = fCosmics.Get("primTrkdQdxVwire_phiLt0_RunII")
+  hist = fCosmics.Get("primTrkdQdxVwire_phiLt0_RunIINocrct")
   #graphsdQdxWires_phiLt0 = fitSlicesLandauCore(c,hist,"dQdxWire_phiLt0_1_",dQdx=True,fixedLandauWidth=None)
   graphsdQdxWires_phiLt0 = fitSlicesLandauCore(c,hist,"dQdxWire_phiLt0_8_",nJump=8,dQdx=True,fixedLandauWidth=None)
 
@@ -686,15 +692,15 @@ if __name__ == "__main__":
 
   #################################################
 
-  hist = fCosmics.Get("primTrkdEdxsVrun_RunII")
+  hist = fCosmics.Get("primTrkdEdxsVrun_RunIINocrct")
   #graphsRuns = fitSlicesLandauCore(c,hist,"Run_1_")
   graphsRuns = fitSlicesLandauCore(c,hist,"Run_10_",nJump=10)
 
-  hist = fCosmics.Get("primTrkdEdxsVrun_phiGeq0_RunII")
+  hist = fCosmics.Get("primTrkdEdxsVrun_phiGeq0_RunIINocrct")
   #graphsRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"Run_phiGeq0_1_")
   graphsRuns_phiGeq0 = fitSlicesLandauCore(c,hist,"Run_phiGeq0_10_",nJump=10)
 
-  hist = fCosmics.Get("primTrkdEdxsVrun_phiLt0_RunII")
+  hist = fCosmics.Get("primTrkdEdxsVrun_phiLt0_RunIINocrct")
   #graphsRuns_phiLt0 = fitSlicesLandauCore(c,hist,"Run_phiLt0_1_")
   graphsRuns_phiLt0 = fitSlicesLandauCore(c,hist,"Run_phiLt0_10_",nJump=10)
 
@@ -703,15 +709,15 @@ if __name__ == "__main__":
   compareGraphs(c,"CompareRuns_Sigma",graphsRunsList,2,"Run Number","Gaussian Sigma [MeV/cm]",["All","#phi #geq 0","#phi < 0"])
 
 
-  hist = fCosmics.Get("primTrkdEdxVwire_RunII")
+  hist = fCosmics.Get("primTrkdEdxVwire_RunIINocrct")
   #graphsWires = fitSlicesLandauCore(c,hist,"Wire_1_")
   graphsWires = fitSlicesLandauCore(c,hist,"Wire_8_",nJump=8)
 
-  hist = fCosmics.Get("primTrkdEdxVwire_phiGeq0_RunII")
+  hist = fCosmics.Get("primTrkdEdxVwire_phiGeq0_RunIINocrct")
   #graphsWires_phiGeq0 = fitSlicesLandauCore(c,hist,"Wire_phiGeq0_1_")
   graphsWires_phiGeq0 = fitSlicesLandauCore(c,hist,"Wire_phiGeq0_8_",nJump=8)
 
-  hist = fCosmics.Get("primTrkdEdxVwire_phiLt0_RunII")
+  hist = fCosmics.Get("primTrkdEdxVwire_phiLt0_RunIINocrct")
   #graphsWires_phiLt0 = fitSlicesLandauCore(c,hist,"Wire_phiLt0_1_")
   graphsWires_phiLt0 = fitSlicesLandauCore(c,hist,"Wire_phiLt0_8_",nJump=8)
 
@@ -719,15 +725,15 @@ if __name__ == "__main__":
   compareGraphs(c,"CompareWires_MPV",graphsWiresList,0,"Wire Number","Landau MPV [MeV/cm]",["All","#phi #geq 0","#phi < 0"])
   compareGraphs(c,"CompareWires_Sigma",graphsWiresList,2,"Wire Number","Gaussian Sigma [MeV/cm]",["All","#phi #geq 0","#phi < 0"])
 
-  hist = fCosmics.Get("primTrkdEdxsVx_phiLt0_RunII")
+  hist = fCosmics.Get("primTrkdEdxsVx_phiLt0_RunIINocrct")
   graphsX_phiLt0 = fitSlicesLandauCore(c,hist,"X_phiLt0_1_")
   #graphsX_phiLt0 = fitSlicesLandauCore(c,hist,"X_phiLt0_2_",nJump=2)
 
-  hist = fCosmics.Get("primTrkdEdxsVy_phiLt0_RunII")
+  hist = fCosmics.Get("primTrkdEdxsVy_phiLt0_RunIINocrct")
   graphsY_phiLt0 = fitSlicesLandauCore(c,hist,"Y_phiLt0_1_")
   #graphsY_phiLt0 = fitSlicesLandauCore(c,hist,"Y_phiLt0_2_",nJump=2)
 
-  hist = fCosmics.Get("primTrkdEdxsVz_phiLt0_RunII")
+  hist = fCosmics.Get("primTrkdEdxsVz_phiLt0_RunIINocrct")
   graphsZ_phiLt0 = fitSlicesLandauCore(c,hist,"Z_phiLt0_1_")
   #graphsZ_phiLt0 = fitSlicesLandauCore(c,hist,"Z_phiLt0_5_",nJump=5)
 

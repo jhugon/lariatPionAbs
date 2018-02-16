@@ -28,4 +28,12 @@ def getLifetimeGraphs(scaleFactor=1.):
   return singleGraph,multiGraph
 
 if __name__ == "__main__":
-  getLifetimeGraphs()
+  from helpers import *
+  singleGraph, multiGraph = getLifetimeGraphs()
+  c = ROOT.TCanvas()
+  graphs = [singleGraph,multiGraph]
+  labels = ["Single Track Method","Multi Track Method"]
+  axisHist = drawGraphs(c,graphs,"Run Number","Electron Lifetime",freeTopSpace=0.35,ylims=[0,300])
+  leg = drawNormalLegend(graphs,labels,option="lep",wide=True)
+  c.SaveAs("MonicaElectonLifetimes.png")
+  c.SaveAs("MonicaElectonLifetimes.pdf")
