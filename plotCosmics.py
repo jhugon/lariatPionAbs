@@ -1790,6 +1790,26 @@ if __name__ == "__main__":
       'cuts': weightStr+hitExtraCuts+"*(primTrkStartPhi < 0)",
       'writeImage': False,
     },
+    {
+      'name': "primTrkdEdxsVHitZAndHitY_phiLt0",
+      'xtitle': "Hit z position [cm]",
+      'ytitle': "Hit y position [cm]",
+      'ztitle': "dE/dx [MeV/cm]",
+      'binning': [60,3,87,60,-18,18,50,0,5],
+      'var': "primTrkdEdxs:primTrkYs:primTrkZs",
+      'cuts': weightStr+hitExtraCuts+"*(primTrkStartPhi < 0)",
+      'writeImage': False,
+    },
+    {
+      'name': "primTrkdEdxsVHitZAndHitY_phiGeq0",
+      'xtitle': "Hit z position [cm]",
+      'ytitle': "Hit y position [cm]",
+      'ztitle': "dE/dx [MeV/cm]",
+      'binning': [60,3,87,60,-18,18,50,0,5],
+      'var': "primTrkdEdxs:primTrkYs:primTrkZs",
+      'cuts': weightStr+hitExtraCuts+"*(primTrkStartPhi >= 0)",
+      'writeImage': False,
+    },
   ]
 
   hists = plotOneHistOnePlot([x for x in fileConfigs if x["isData"]],
