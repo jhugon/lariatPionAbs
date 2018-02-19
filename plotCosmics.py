@@ -39,12 +39,10 @@ if __name__ == "__main__":
   NMAX=1000000000
   #NMAX=100
 
-  singleLifetimeGraph, multiLifetimeGraph = getLifetimeGraphs(10)
-  singleLifetimeGraph.SetMarkerSize(0.7)
-  multiLifetimeGraph.SetMarkerSize(0.7)
-  singleLifetimeGraph.SetLineWidth(1)
-  multiLifetimeGraph.SetLineWidth(1)
-  lifetimeGraphs = [singleLifetimeGraph,multiLifetimeGraph]
+  lifetimeGraph = getLifetimeGraphs()
+  lifetimeGraph.SetMarkerSize(0.7)
+  lifetimeGraph.SetLineWidth(1)
+  lifetimeGraphs = [lifetimeGraph]
 
   ########################################################
   ## File Definitions ####################################
