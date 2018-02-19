@@ -286,21 +286,15 @@ def fitLandauCore(c,hist,postfix,caption,fitMin=1.6,fitMax=2.3,fixedLandauWidth=
   else:
     fwhm = calcFWHM(model,t,1.,4.,0.01)
 
-  frame = t.frame(root.RooFit.Title("landau (x) gauss convolution"))
-  data.plotOn(frame)
-  model.plotOn(frame,root.RooFit.Range(fitMin,fitMax))
+  if False:
+    frame = t.frame(root.RooFit.Title("landau (x) gauss convolution"))
+    data.plotOn(frame)
+    model.plotOn(frame,root.RooFit.Range(fitMin,fitMax))
 
-  #root.gPad.SetLeftMargin(0.15)
-  #frame.GetYaxis().SetTitleOffset(1.4)
-  #frame.Draw("same")
-  #axisHist = root.TH2F("axisHist","",1,0,50,1,0,1000)
-  ##axisHist = root.TH2F("axisHist","",1,-1,1,1,1000,1300)
-  #axisHist.Draw()
-  #frame.Draw("same")
-  frame.Draw()
-  frame.SetTitle(caption)
-  c.SaveAs("roofit_landau_{}.png".format(postfix))
-  c.SaveAs("roofit_landau_{}.pdf".format(postfix))
+    frame.Draw()
+    frame.SetTitle(caption)
+    c.SaveAs("roofit_landau_{}.png".format(postfix))
+    c.SaveAs("roofit_landau_{}.pdf".format(postfix))
 
   return (mpvl.getVal(),wl.getVal(),sg.getVal()), (mpvl.getError(),wl.getError(),sg.getError()), fwhm
 
@@ -414,15 +408,15 @@ def fitSlicesLandauCore3D(c,hist,fileprefix,nJump=1,fracMax=0.4,fixedLandauWidth
       endFit = 0.
       startFit, endFit = getFracMaxVals(histForFit,fracMax)
       (mpvl,wl,sg),(mpvlErr,wlErr,sgErr), fwhm = fitLandauCore(c,histForFit,postfix,caption,startFit,endFit,fixedLandauWidth=fixedLandauWidth,dQdx=dQdx)
-      if (not dQdx) and (mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5):
+      if (mpvlErr/mpvl > 0.02 or wlErr/wl > 0.2 or sgErr/sg > 0.2):
             continue
       mpvlHist.SetBinContent(iBinX,iBinY,mpvl)
       wlHist.SetBinContent(iBinX,iBinY,wl)
       sgHist.SetBinContent(iBinX,iBinY,sg)
       fwhmHist.SetBinContent(iBinX,iBinY,fwhm)
-      mpvlErrorHist.SetBinContent(iBinX,iBinY,mpvlErr)
-      wlErrorHist.SetBinContent(iBinX,iBinY,wlErr)
-      sgErrorHist.SetBinContent(iBinX,iBinY,sgErr)
+      mpvlErrorHist.SetBinContent(iBinX,iBinY,mpvlErr/mpvl)
+      wlErrorHist.SetBinContent(iBinX,iBinY,wlErr/wl)
+      sgErrorHist.SetBinContent(iBinX,iBinY,sgErr/sg)
       minMPV = min(mpvl,minMPV)
       minWL = min(wl,minWL)
       minSG = min(sg,minSG)
@@ -437,10 +431,10 @@ def fitSlicesLandauCore3D(c,hist,fileprefix,nJump=1,fracMax=0.4,fixedLandauWidth
     sgHist.GetZaxis().SetRangeUser(minSG,maxSG)
   graphs = [mpvlHist,wlHist,sgHist,mpvlErrorHist,wlErrorHist,sgErrorHist,fwhmHist]
   labels = ["Best-Fit Landau MPV", "Best-Fit Landau Width", "Best-Fit Gaussian #sigma",
-            "Standard Error Landau MPV", "Standard Error Landau Width", "Standard Error Gaussian #sigma",
+            "Relative Error Landau MPV", "Relative Error Landau Width", "Relative Error Gaussian #sigma",
             "FWHM"]
   names = ["bfMPV", "bfWL", "bfSigma",
-            "stderrMPV", "stderrWL", "stderrSigma",
+            "relerrMPV", "relerrWL", "relerrSigma",
             "FWHM"]
   setupCOLZFrame(c)
   for graph,label,name in zip(graphs,labels,names):
@@ -472,12 +466,88 @@ if __name__ == "__main__":
   fCosmics.ls()
 
   hist3D1 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunIINocrct")
-  hist3D1.Rebin3D(5,1,1)
-  fitSlicesLandauCore3D(c,hist3D1,"Fit3D_dEdxVWireAndY_phiLt0_RunIINocrct")
+  hist3D1 = hist3D1.Clone("hist3D1")
+  hist3D1.Rebin3D(20,1,1)
+  fitSlicesLandauCore3D(c,hist3D1,"Fit3D_dEdxVWireAndY_phiLt0_RunIINocrct_manyY")
 
   hist3D2 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunIINocrct")
-  hist3D2.Rebin3D(5,1,1)
-  fitSlicesLandauCore3D(c,hist3D1,"Fit3D_dEdxVWireAndY_phiLt0_RunIINocrct")
+  hist3D2 = hist3D2.Clone("hist3D2")
+  hist3D2.Rebin3D(5,5,1)
+  fitSlicesLandauCore3D(c,hist3D2,"Fit3D_dEdxVWireAndY_phiLt0_RunIINocrct_manyWire")
+
+  hist3D3 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiGeq0_RunIINocrct")
+  hist3D3 = hist3D3.Clone("hist3D3")
+  hist3D3.Rebin3D(20,1,1)
+  fitSlicesLandauCore3D(c,hist3D3,"Fit3D_dEdxVWireAndY_phiGeq0_RunIINocrct_manyY")
+
+  hist3D4 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiGeq0_RunIINocrct")
+  hist3D4 = hist3D4.Clone("hist3D4")
+  hist3D4.Rebin3D(5,5,1)
+  fitSlicesLandauCore3D(c,hist3D4,"Fit3D_dEdxVWireAndY_phiGeq0_RunIINocrct_manyWire")
+
+  hist3D5 = fCosmics.Get("primTrkdQdxsVHitWireAndHitY_phiLt0_RunIINocrct")
+  hist3D5.Rebin3D(10,2,1)
+  fitSlicesLandauCore3D(c,hist3D5,"Fit3D_dQdxVWireAndY_phiLt0_RunIINocrct",dQdx=True)
+
+  hist3D6 = fCosmics.Get("primTrkdQdxsVrunAndHitX_phiLt0_RunIINocrct")
+  hist3D6.Rebin3D(10,2,1)
+  fitSlicesLandauCore3D(c,hist3D6,"Fit3D_dQdxVrunAndX_phiLt0_RunIINocrct",dQdx=True)
+
+  hist3D7 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunII")
+  hist3D7 = hist3D7.Clone("hist3D7")
+  hist3D7.Rebin3D(20,1,1)
+  fitSlicesLandauCore3D(c,hist3D7,"Fit3D_dEdxVWireAndY_phiLt0_RunII_manyY")
+
+  hist3D8 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunII")
+  hist3D8 = hist3D8.Clone("hist3D8")
+  hist3D8.Rebin3D(5,5,1)
+  fitSlicesLandauCore3D(c,hist3D8,"Fit3D_dEdxVWireAndY_phiLt0_RunII_manyWire")
+
+  hist3D9 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunII")
+  hist3D9 = hist3D9.Clone("hist3D9")
+  hist3D9.Rebin3D(20,1,1)
+  fitSlicesLandauCore3D(c,hist3D9,"Fit3D_dEdxVWireAndY_phiLt0_RunII_manyY")
+
+  hist3D10 = fCosmics.Get("primTrkdEdxsVHitWireAndHitY_phiLt0_RunII")
+  hist3D10 = hist3D10.Clone("hist3D10")
+  hist3D10.Rebin3D(5,5,1)
+  fitSlicesLandauCore3D(c,hist3D10,"Fit3D_dEdxVWireAndY_phiLt0_RunII_manyWire")
+
+  hist3D100 = fCosmics.Get("primTrkdEdxsVHitZAndHitY_phiLt0_RunIINocrct")
+  hist3D100 = hist3D100.Clone("hist3D100")
+  hist3D100.Rebin3D(5,5,1)
+  fitSlicesLandauCore3D(c,hist3D100,"Fit3D_dEdxVZAndY_phiLt0_RunIINocrct")
+
+  hist3D101 = fCosmics.Get("primTrkdEdxsVHitZAndHitY_phiLt0_RunII")
+  hist3D101 = hist3D101.Clone("hist3D101")
+  hist3D101.Rebin3D(5,5,1)
+  fitSlicesLandauCore3D(c,hist3D101,"Fit3D_dEdxVZAndY_phiLt0_RunII")
+
+  hist3D102 = fCosmics.Get("primTrkdEdxsVHitZAndHitY_phiGeq0_RunII")
+  hist3D102 = hist3D102.Clone("hist3D102")
+  hist3D102.Rebin3D(5,5,1)
+  fitSlicesLandauCore3D(c,hist3D102,"Fit3D_dEdxVZAndY_phiGeq0_RunII")
+
+  hist3D103 = fCosmics.Get("primTrkdEdxsVHitZAndHitY_phiLt0_RunII")
+  hist3D103 = hist3D103.Clone("hist3D103")
+  hist3D103.Rebin3D(2,10,1)
+  fitSlicesLandauCore3D(c,hist3D103,"Fit3D_dEdxVZAndY_phiLt0_RunII_moreZ")
+
+  hist3D104 = fCosmics.Get("primTrkdEdxsVHitZAndHitY_phiGeq0_RunII")
+  hist3D104 = hist3D104.Clone("hist3D104")
+  hist3D104.Rebin3D(2,10,1)
+  fitSlicesLandauCore3D(c,hist3D104,"Fit3D_dEdxVZAndY_phiGeq0_RunII_moreZ")
+
+  hist3D105 = fCosmics.Get("primTrkdEdxsVHitZAndHitY_phiLt0_RunII")
+  hist3D105 = hist3D105.Clone("hist3D105")
+  hist3D105.Rebin3D(10,2,1)
+  fitSlicesLandauCore3D(c,hist3D105,"Fit3D_dEdxVZAndY_phiLt0_RunII_moreY")
+
+  hist3D106 = fCosmics.Get("primTrkdEdxsVHitZAndHitY_phiGeq0_RunII")
+  hist3D106 = hist3D106.Clone("hist3D106")
+  hist3D106.Rebin3D(10,2,1)
+  fitSlicesLandauCore3D(c,hist3D106,"Fit3D_dEdxVZAndY_phiGeq0_RunII_moreY")
+
   sys.exit(0)
 
   nameLists = []
