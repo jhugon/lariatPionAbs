@@ -74,8 +74,13 @@ def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True):
       isMCStr = "_MC"
     fig.suptitle(title)
     fig.savefig("{}{}_r{:04d}_sr{:03d}_e{:04d}.pdf".format(fileprefix,isMCStr,tree.runNumber,tree.subRunNumber,tree.eventNumber))
+    mpl.close()
 
-def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=True,cutFunc=lambda x: True):
+def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lambda x: True):
+  nBeforeC = 100
+  nAfterC = 100
+  nBeforeI = 100
+  nAfterI = 100
   collectionWireBranchNames = []
   inductionWireBranchNames = []
   for branch in tree.GetListOfBranches():
@@ -111,10 +116,6 @@ def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=True,cutFunc=lamb
     dataMaxI = dataArrayI.max()
     dataMinI = dataArrayI.min()
     dataWidthI = (dataMaxI - dataMinI)*0.75
-    nBeforeC = 100
-    nAfterC = 100
-    nBeforeI = 100
-    nAfterI = 100
     for iWire in range(nWiresC):
         amplitude = numpy.max(dataArrayC[iWire])
         rms = numpy.std(dataArrayC[iWire])
@@ -158,6 +159,7 @@ def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=True,cutFunc=lamb
     axi.set_xlim(-nBeforeI,nAfterI)
     #axi.set_ylim(dataMinI,dataMinI+dataWidthI*nWiresC)
     axi.set_xlabel("Time Tick - Time Tick of Max")
+    yLabelSuffix = ""
     if normToAmp:
       yLabelSuffix = " (Normalized to Max)"
     axc.set_ylabel("Collection Wire Response"+yLabelSuffix)
@@ -169,8 +171,9 @@ def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=True,cutFunc=lamb
       isMCStr = "_MC"
     fig.suptitle(title)
     fig.savefig("{}{}_r{:05d}_sr{:03d}_e{:04d}.pdf".format(fileprefix,isMCStr,tree.runNumber,tree.subRunNumber,tree.eventNumber))
+    mpl.close()
 
-def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=True,cutFunc=lambda x: True,logz=False):
+def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lambda x: True,logz=False):
   nBeforeC = 100
   nAfterC = 100
   nBeforeI = 100
@@ -178,7 +181,7 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=True,cu
 
   nBinsC = 400
   yMinC = -20
-  yMaxC = 200
+  yMaxC = 300
 
   nBinsI = 400
   yMinI = -50
@@ -186,7 +189,7 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=True,cu
 
   if normToAmp:
     yMinC = -0.1
-    yMinI = -0.3
+    yMinI = -0.4
     yMaxC = 1.1
     yMaxI = 1.1
 
@@ -308,6 +311,7 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=True,cu
   fig.suptitle(title)
   #fig.colorbar(pcolormeshi,ax=[axc,axi])
   fig.savefig("{}{}.png".format(fileprefix,isMCStr))
+  mpl.close()
 
 if __name__ == "__main__":
 
@@ -339,9 +343,13 @@ if __name__ == "__main__":
   #plotAroundMaxWires(tree,"allMax",10,cutFunc=makeCuts)
   plotAllWholeWires(tree,"phiLt0",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
   plotAroundMaxWires(tree,"phiLt0Max",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
+  plotAroundMaxWires(tree,"phiLt0MaxNorm",20,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
   plotAllWholeWires(tree,"phiGeq0",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
   plotAroundMaxWires(tree,"phiGeq0Max",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
+  plotAroundMaxWires(tree,"phiGeq0MaxNorm",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
 
-  plotMultiEventAroundMaxWires(tree,"phiLt0Hist",100,cutFunc=lambda x: makeCuts(x,phiLt0=True))
-  plotMultiEventAroundMaxWires(tree,"phiGeq0Hist",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
+  plotMultiEventAroundMaxWires(tree,"phiLt0Hist",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
+  plotMultiEventAroundMaxWires(tree,"phiGeq0Hist",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
+  plotMultiEventAroundMaxWires(tree,"phiLt0HistNorm",20,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
+  plotMultiEventAroundMaxWires(tree,"phiGeq0HistNorm",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
 
