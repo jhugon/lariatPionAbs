@@ -7,13 +7,7 @@ import numpy
 import matplotlib.pyplot as mpl
 import matplotlib.patches as patches
 
-if __name__ == "__main__":
-
-  f = root.TFile("CosmicsWires.root")
-  #f.ls()
-  tree = f.Get("cosmicanalyzer/tree")
-  tree.Print()
-
+def plotAllWholeWires(tree,fileprefix,maxEvents=100):
   collectionWireBranchNames = []
   inductionWireBranchNames = []
   for branch in tree.GetListOfBranches():
@@ -52,16 +46,14 @@ if __name__ == "__main__":
         axc.plot(dataArrayC[iWire]+dataWidthC*iWire,'-b',lw=0.2)
         hitStartsC = getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitStarts"))
         hitEndsC = getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitEnds"))
-        for iHit in range(hitStartsC.size()):
-            axc.add_patch(
-                patches.Rectangle(
-                    (hitStartsC[iHit], dataWidthC*iWire),   # (x,y)
-                    hitEndsC[iHit],hitStartsC[iHit],          # width
-                    dataWidthC,          # height
-                )
-            )
+        axc.plot(hitStartsC,dataWidthC*iWire*numpy.ones(len(hitStartsC))+dataWidthC,',g')
+        axc.plot(hitEndsC,dataWidthC*iWire*numpy.ones(len(hitEndsC))+dataWidthC,',r')
     for iWire in range(nWiresI):
         axi.plot(dataArrayI[iWire]+dataWidthI*iWire,'-b',lw=0.2)
+        hitStartsI = getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitStarts"))
+        hitEndsI = getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitEnds"))
+        axi.plot(hitStartsI,dataWidthI*iWire*numpy.ones(len(hitStartsI)),',g')
+        axi.plot(hitEndsI,dataWidthI*iWire*numpy.ones(len(hitEndsI)),',r')
     axc.set_xlim(0,4096)
     axc.set_ylim(dataMinC,dataMinC+dataWidthC*nWiresC)
     axi.set_xlim(0,4096)
@@ -69,4 +61,13 @@ if __name__ == "__main__":
     axi.set_xlabel("Time tick")
     axc.set_ylabel("Collection Wire Response")
     axi.set_ylabel("Induction Wire Response")
-    fig.savefig("test_event{}.png".format(iEvent))
+    fig.savefig("{}_event{}.pdf".format(fileprefix,iEvent))
+
+if __name__ == "__main__":
+
+  f = root.TFile("CosmicsWires.root")
+  #f.ls()
+  tree = f.Get("cosmicanalyzer/tree")
+  #tree.Print()
+  plotAllWholeWires(tree,"test",5)
+
