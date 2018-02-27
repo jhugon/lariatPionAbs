@@ -355,7 +355,6 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
     transparent_cmap = matplotlib.colors.ListedColormap(cmap_colors)
     transparent_cmaps.append(transparent_cmap)
 
-  #gs = gridspec(nrows=2,height_ratios=[5,1],hspace=0)
   gs = {'height_ratios':[5,1],'hspace':0}
 
   fig, (ax,ax2) = mpl.subplots(nrows=2,figsize=(8.5,8.5),sharex=True,gridspec_kw=gs,dpi=200)
@@ -393,18 +392,217 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
   line2 = lines.Line2D([],[],color='k',ls=":",label="Hit End")
   ax2.legend(handles=[line1,line2])
 
-  fig.savefig("Test_{}{}.png".format(fileprefix,isMCStr))
+  fig.savefig("{}{}_SamePlot.png".format(fileprefix,isMCStr))
+  mpl.close()
+
+def compareMultiEventAroundMaxWires(trees,fileprefix,maxEvents=100,normToAmp=False,
+                                    cutFuncs=[lambda x: True,lambda x: True],labels=["1","2"],logz=False):
+  nBeforeC = 100
+  nAfterC = 100
+  nBeforeI = 100
+  nAfterI = 100
+
+  nBinsC = 400
+  yMinC = -20
+  yMaxC = 300
+
+  nBinsI = 400
+  yMinI = -50
+  yMaxI = 200
+
+  if normToAmp:
+    yMinC = -0.4
+    yMinI = -0.4
+    yMaxC = 1.1
+    yMaxI = 1.1
+
+  arangeC = numpy.arange(nBeforeC+nAfterC,dtype="float64") - nBeforeC
+  arangeI = numpy.arange(nBeforeI+nAfterI,dtype="float64") - nBeforeI
+  xEdgesC = None
+  yEdgesC = None
+  xEdgesI = None
+  yEdgesI = None
+
+  histsC = []
+  histsI = []
+  hitStartsCList = []
+  hitStartsIList = []
+  hitEndsCList = []
+  hitEndsIList = []
+  for tree, cutFunc in zip(trees,cutFuncs):
+    collectionWireBranchNames = []
+    inductionWireBranchNames = []
+    for branch in tree.GetListOfBranches():
+      branchName = branch.GetName()
+      if "wireData" == branchName[:8]:
+          if branchName[-1] == "C":
+              collectionWireBranchNames.append(branchName)
+          else:
+              inductionWireBranchNames.append(branchName)
+
+    nEvents = min(maxEvents,tree.GetEntries())
+    #allHistC = Hist2D(nBeforeC+nAfterC,-nBeforeC,nAfterC,50,-20,400)
+    allHistC = None
+    allHistI = None
+    hitStartsC = []
+    hitEndsC = []
+    hitStartsI = []
+    hitEndsI = []
+    for iEvent in range(nEvents):
+      tree.GetEntry(iEvent)
+      if not cutFunc(tree):
+          continue
+      nSamples = 4096
+      nWiresC = len(collectionWireBranchNames)
+      nWiresI = len(inductionWireBranchNames)
+      for iWire in range(nWiresC):
+        wireData = getattr(tree,collectionWireBranchNames[iWire])
+        dataArray = numpy.zeros((nSamples))
+        for i in range(wireData.size()):
+          dataArray[i] = wireData[i]
+        amplitude = numpy.max(dataArray)
+        rms = numpy.std(dataArray)
+        if amplitude / rms < 8.:
+            continue
+        iMax = numpy.argmax(dataArray)
+        if iMax < nBeforeC:
+            continue
+        if iMax > (nSamples-nAfterC):
+            continue
+        iStart = max(iMax-nBeforeC,0)
+        iEnd = min(iMax+nAfterC,nSamples)
+        if normToAmp:
+            data = dataArray[iStart:iEnd] / amplitude
+        else:
+            data = dataArray[iStart:iEnd]
+        hist, xedgesC, yedgesC = numpy.histogram2d(arangeC,data,bins=[nBeforeC+nAfterC,nBinsC],range=[[-nBeforeC,nAfterC],[yMinC,yMaxC]])
+        if allHistC is None:
+            allHistC = hist
+        else:
+            allHistC += hist
+        hitStartsC.extend(numpy.array(getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitStarts")))-iStart-nBeforeC)
+        hitEndsC.extend(numpy.array(getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitEnds")))-iStart-nBeforeC)
+      for iWire in range(nWiresI):
+        wireData = getattr(tree,inductionWireBranchNames[iWire])
+        dataArray = numpy.zeros((nSamples))
+        for i in range(wireData.size()):
+          dataArray[i] = wireData[i]
+        amplitude = numpy.max(dataArray)
+        rms = numpy.std(dataArray)
+        if amplitude / rms < 8.:
+            continue
+        iMax = numpy.argmax(dataArray)
+        if iMax < nBeforeI:
+            continue
+        if iMax > (nSamples-nAfterI):
+            continue
+        iStart = max(iMax-nBeforeI,0)
+        iEnd = min(iMax+nAfterI,nSamples)
+        if normToAmp:
+            data = dataArray[iStart:iEnd] / amplitude
+        else:
+            data = dataArray[iStart:iEnd]
+        hist, xedgesI, yedgesI = numpy.histogram2d(arangeI,data,bins=[nBeforeI+nAfterI,nBinsI],range=[[-nBeforeI,nAfterI],[yMinI,yMaxI]])
+        if allHistI is None:
+            allHistI = hist
+        else:
+            allHistI += hist
+        hitStartsI.extend(numpy.array(getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitStarts"))) -iStart-nBeforeI)
+        hitEndsI.extend(numpy.array(getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitEnds"))) -iStart-nBeforeI)
+    histsC.append(allHistC)
+    histsI.append(allHistI)
+    hitStartsCList.append(hitStartsC)
+    hitStartsIList.append(hitStartsI)
+    hitEndsCList.append(hitEndsC)
+    hitEndsIList.append(hitEndsI)
+
+  transparent_cmaps = []
+  for cmap in [mpl.cm.Greens,mpl.cm.Blues,mpl.cm.Reds,mpl.cm.Purples,mpl.cm.Oranges]:
+    frac_transparent = 0.5
+    cmap_colors = cmap(numpy.arange(cmap.N))
+    cmap_colors[:int(frac_transparent*cmap.N),-1] = numpy.linspace(0,1,int(frac_transparent*cmap.N)) # bottom frac linearly increases opacity
+    transparent_cmap = matplotlib.colors.ListedColormap(cmap_colors)
+    transparent_cmaps.append(transparent_cmap)
+  colors = ['g','b','r','purple','o']
+
+  gs = {'height_ratios':[5,1],'hspace':0}
+
+  fig, (ax,ax2) = mpl.subplots(nrows=2,figsize=(8.5,8.5),sharex=True,gridspec_kw=gs,dpi=200)
+  for i, allHistC in enumerate(histsC):
+    if allHistC is None:
+      print "Error: allHistC is None, no events passed amplitude cut for fileprefix: ",fileprefix
+    else:
+      xC, yC = numpy.meshgrid(xedgesC, yedgesC)
+      norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=allHistC.max())
+      ax.pcolormesh(xC,yC,allHistC.T,norm=norm,cmap=transparent_cmaps[i])
+    ax2.hist(hitStartsCList[i],range=[-nBeforeC,nAfterC],bins=100,normed=True,histtype="step",color=colors[i])
+    ax2.hist(hitEndsCList[i],range=[-nBeforeC,nAfterC],bins=100,normed=True,histtype="step",color=colors[i],ls=':')
+  ax.set_xlim(-nBeforeC,nAfterC)
+  ax.set_ylim(yMinC,yMaxC)
+  yLabelSuffix = ""
+  if normToAmp:
+    yLabelSuffix = " (Normalized to Max)"
+  ax.set_ylabel("Collection Wire Response"+yLabelSuffix)
+  ax2.set_xlabel("Time Tick - Time Tick of Max")
+  ax2.set_ylabel("Normalized\nHits / Bin")
+  ax2.set_yticks([])
+  ax2.set_ylim(0,ax2.get_ylim()[1]*1.1)
+  patchList = []
+  for i in range(len(histsC)):
+    patchList.append(
+        patches.Patch(color=colors[i], label=labels[i])
+        )
+  ax.legend(handles=patchList)
+  line1 = lines.Line2D([],[],color='k',label="Hit Start")
+  line2 = lines.Line2D([],[],color='k',ls=":",label="Hit End")
+  ax2.legend(handles=[line1,line2])
+  fig.savefig("{}_Collection.png".format(fileprefix))
+  mpl.close()
+
+  ###
+
+  fig, (ax,ax2) = mpl.subplots(nrows=2,figsize=(8.5,8.5),sharex=True,gridspec_kw=gs,dpi=200)
+  for i, allHistI in enumerate(histsI):
+    if allHistI is None:
+      print "Error: allHistI is None, no events passed amplitude cut for fileprefix: ",fileprefix
+    else:
+      xI, yI = numpy.meshgrid(xedgesI, yedgesI)
+      norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=allHistI.max())
+      ax.pcolormesh(xI,yI,allHistI.T,norm=norm,cmap=transparent_cmaps[i])
+    ax2.hist(hitStartsIList[i],range=[-nBeforeI,nAfterI],bins=100,normed=True,histtype="step",color=colors[i])
+    ax2.hist(hitEndsIList[i],range=[-nBeforeI,nAfterI],bins=100,normed=True,histtype="step",color=colors[i],ls=':')
+  ax.set_xlim(-nBeforeI,nAfterI)
+  ax.set_ylim(yMinI,yMaxI)
+  yLabelSuffix = ""
+  if normToAmp:
+    yLabelSuffix = " (Normalized to Max)"
+  ax.set_ylabel("Induction Wire Response"+yLabelSuffix)
+  ax2.set_xlabel("Time Tick - Time Tick of Max")
+  ax2.set_ylabel("Normalized\nHits / Bin")
+  ax2.set_yticks([])
+  ax2.set_ylim(0,ax2.get_ylim()[1]*1.1)
+  patchList = []
+  for i in range(len(histsI)):
+    patchList.append(
+        patches.Patch(color=colors[i], label=labels[i])
+        )
+  ax.legend(handles=patchList)
+  line1 = lines.Line2D([],[],color='k',label="Hit Start")
+  line2 = lines.Line2D([],[],color='k',ls=":",label="Hit End")
+  ax2.legend(handles=[line1,line2])
+  fig.savefig("{}_Induction.png".format(fileprefix))
   mpl.close()
 
 if __name__ == "__main__":
 
-  #f = root.TFile("CosmicsWires.root")
   #f = root.TFile("WireData_RIIP100_64a.root")
   #f = root.TFile("WireData_RIIP100_64a_nocrct.root")
   #f = root.TFile("WireData_RIIP60_64a.root")
   f = root.TFile("Wires_RIIP60a_v2.root")
+  fMC = root.TFile("WiresMC_v2.root")
   #f.ls()
   tree = f.Get("cosmicanalyzer/tree")
+  treeMC = fMC.Get("cosmicanalyzer/tree")
   #tree.Print()
 
   def makeCuts(tree,phiGeq0=False,phiLt0=False):
@@ -426,8 +624,8 @@ if __name__ == "__main__":
         return False
     return True
 
-#  plotAllWholeWires(tree,"all",100,cutFunc=makeCuts)
-#  plotAroundMaxWires(tree,"allMax",100,cutFunc=makeCuts)
+  plotAllWholeWires(tree,"all",100,cutFunc=makeCuts)
+  plotAroundMaxWires(tree,"allMax",100,cutFunc=makeCuts)
 #  plotMultiEventAroundMaxWires(tree,"allHist",20,cutFunc=makeCuts)
 #  plotAllWholeWires(tree,"phiLt0",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
 #  plotAroundMaxWires(tree,"phiLt0Max",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
@@ -436,7 +634,33 @@ if __name__ == "__main__":
 #  plotAroundMaxWires(tree,"phiGeq0Max",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
 #  plotAroundMaxWires(tree,"phiGeq0MaxNorm",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
 #
-  plotMultiEventAroundMaxWires(tree,"phiLt0Hist",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
-  plotMultiEventAroundMaxWires(tree,"phiGeq0Hist",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
-  plotMultiEventAroundMaxWires(tree,"phiLt0HistNorm",20,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
-  plotMultiEventAroundMaxWires(tree,"phiGeq0HistNorm",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
+  plotMultiEventAroundMaxWires(tree,"phiLt0Hist",100,cutFunc=lambda x: makeCuts(x,phiLt0=True))
+  plotMultiEventAroundMaxWires(tree,"phiGeq0Hist",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
+  plotMultiEventAroundMaxWires(tree,"phiLt0HistNorm",100,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
+  plotMultiEventAroundMaxWires(tree,"phiGeq0HistNorm",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
+
+  compareMultiEventAroundMaxWires([tree,tree],"ComparePhi",100,
+                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiGeq0=True)],
+                    labels=["$\phi < 0$", "$\phi \geq 0$"]
+                    )
+  compareMultiEventAroundMaxWires([tree,tree],"ComparePhiNorm",100,normToAmp=True,
+                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiGeq0=True)],
+                    labels=["$\phi < 0$", "$\phi \geq 0$"]
+                    )
+  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiLt0",100,
+                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
+                    labels=["Data","MC"]
+                    )
+  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiLt0Norm",100,normToAmp=True,
+                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
+                    labels=["Data","MC"]
+                    )
+  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiGeq0",100,
+                    cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
+                    labels=["Data","MC"]
+                    )
+  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiGeq0Norm",100,normToAmp=True,
+                    cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
+                    labels=["Data","MC"]
+                    )
+
