@@ -19,6 +19,8 @@ def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True):
         else:
             inductionWireBranchNames.append(branchName)
         
+  collectionWireBranchNames.sort(key=lambda x: int(x.split('_')[1]))
+  inductionWireBranchNames.sort(key=lambda x: int(x.split('_')[1]))
   nEvents = min(maxEvents,tree.GetEntries())
   for iEvent in range(nEvents):
     tree.GetEntry(iEvent)
@@ -44,6 +46,8 @@ def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True):
     dataMaxI = dataArrayI.max()
     dataMinI = dataArrayI.min()
     dataWidthI = (dataMaxI - dataMinI)*0.75
+    zScoreC = []
+    zScoreI = []
     for iWire in range(nWiresC):
         axc.plot(dataArrayC[iWire]+dataWidthC*iWire,'-b',lw=0.2)
         hitStartsC = getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitStarts"))
@@ -52,6 +56,9 @@ def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True):
         axc.plot(hitEndsC,dataWidthC*iWire*numpy.ones(len(hitEndsC)),',r')
         #if hitStartsC.size() > 0:
         #  axc.plot(numpy.argmax(dataArrayC[iWire]),dataWidthC*iWire,',m')
+        amp = numpy.max(dataArrayC[iWire])
+        rms = numpy.std(dataArrayC[iWire])
+        zScoreC.append(amp/rms)
     for iWire in range(nWiresI):
         axi.plot(dataArrayI[iWire]+dataWidthI*iWire,'-b',lw=0.2)
         hitStartsI = getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitStarts"))
@@ -60,6 +67,9 @@ def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True):
         axi.plot(hitEndsI,dataWidthI*iWire*numpy.ones(len(hitEndsI)),',r')
         #if hitStartsI.size() > 0:
         #  axi.plot(numpy.argmax(dataArrayI[iWire]),dataWidthI*iWire,',m')
+        amp = numpy.max(dataArrayI[iWire])
+        rms = numpy.std(dataArrayI[iWire])
+        zScoreI.append(amp/rms)
     axc.set_xlim(0,4096)
     axc.set_ylim(dataMinC,dataMinC+dataWidthC*nWiresC)
     axi.set_xlim(0,4096)
@@ -74,6 +84,14 @@ def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True):
       isMCStr = "_MC"
     fig.suptitle(title)
     fig.savefig("{}{}_r{:04d}_sr{:03d}_e{:04d}.pdf".format(fileprefix,isMCStr,tree.runNumber,tree.subRunNumber,tree.eventNumber))
+    axc.cla()
+    axi.cla()
+    axc.hist(zScoreC,bins=20)
+    axi.hist(zScoreI,bins=20)
+    axi.set_xlabel("Max amplitude / RMS")
+    axc.set_ylabel("N Collection Wires / bin")
+    axi.set_ylabel("N Induction Wires / bin")
+    fig.savefig("ZScore_{}{}_r{:04d}_sr{:03d}_e{:04d}.pdf".format(fileprefix,isMCStr,tree.runNumber,tree.subRunNumber,tree.eventNumber))
     mpl.close()
 
 def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lambda x: True):
@@ -128,7 +146,7 @@ def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lam
             data = dataArrayC[iWire,iStart:iEnd] / amplitude
         else:
             data = dataArrayC[iWire,iStart:iEnd]
-        axc.plot(numpy.arange(nBeforeC+nAfterC)-nBeforeC,data,'-b',lw=0.2)
+        axc.plot(numpy.arange(iStart,iEnd)-iMax,data,'-b',lw=0.2)
         hitStartsC = getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitStarts"))
         hitEndsC = getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitEnds"))
         for x in hitStartsC:
@@ -147,7 +165,7 @@ def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lam
             data = dataArrayI[iWire,iStart:iEnd] / amplitude
         else:
             data = dataArrayI[iWire,iStart:iEnd]
-        axi.plot(numpy.arange(nBeforeI+nAfterI)-nBeforeI,data,'-b',lw=0.2)
+        axi.plot(numpy.arange(iStart,iEnd)-iMax,data,'-b',lw=0.2)
         hitStartsI = getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitStarts"))
         hitEndsI = getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitEnds"))
         for x in hitStartsI:
@@ -188,7 +206,7 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
   yMaxI = 200
 
   if normToAmp:
-    yMinC = -0.1
+    yMinC = -0.4
     yMinI = -0.4
     yMaxC = 1.1
     yMaxI = 1.1
@@ -238,6 +256,10 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
       if amplitude / rms < 8.:
           continue
       iMax = numpy.argmax(dataArray)
+      if iMax < nBeforeC:
+          continue
+      if iMax > (nSamples-nAfterC):
+          continue
       iStart = max(iMax-nBeforeC,0)
       iEnd = min(iMax+nAfterC,nSamples)
       if normToAmp:
@@ -261,6 +283,10 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
       if amplitude / rms < 8.:
           continue
       iMax = numpy.argmax(dataArray)
+      if iMax < nBeforeI:
+          continue
+      if iMax > (nSamples-nAfterI):
+          continue
       iStart = max(iMax-nBeforeI,0)
       iEnd = min(iMax+nAfterI,nSamples)
       if normToAmp:
@@ -274,15 +300,21 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
           allHistI += hist
       hitStartsI.extend(numpy.array(getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitStarts"))) -iStart-nBeforeI)
       hitEndsI.extend(numpy.array(getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitEnds"))) -iStart-nBeforeI)
-  allHistC[allHistC == 0.] = 0.5
-  allHistI[allHistI == 0.] = 0.5
   fig, (axc,axi) = mpl.subplots(nrows=2,figsize=(8.5,11),dpi=200)
-  xC, yC = numpy.meshgrid(xedgesC, yedgesC)
-  norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=max(allHistI.max(),allHistC.max()))
-  axc.pcolormesh(xC,yC,allHistC.T,norm=norm,cmap="Blues_r")
-  xI, yI = numpy.meshgrid(xedgesI, yedgesI)
-  normI = matplotlib.colors.LogNorm(vmin=allHistI.min(), vmax=allHistI.max())
-  pcolormeshi = axi.pcolormesh(xI,yI,allHistI.T,norm=norm,cmap="Blues_r")
+  if allHistC is None:
+    print "Error: allHistC is None, no events passed amplitude cut for fileprefix: ",fileprefix
+  else:
+    allHistC[allHistC == 0.] = 0.5
+    xC, yC = numpy.meshgrid(xedgesC, yedgesC)
+    norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=max(allHistI.max(),allHistC.max()))
+    axc.pcolormesh(xC,yC,allHistC.T,norm=norm,cmap="Blues_r")
+  if allHistI is None:
+    print "Error: allHistI is None, no events passed amplitude cut for fileprefix: ",fileprefix
+  else:
+    allHistI[allHistI == 0.] = 0.5
+    xI, yI = numpy.meshgrid(xedgesI, yedgesI)
+    normI = matplotlib.colors.LogNorm(vmin=allHistI.min(), vmax=allHistI.max())
+    pcolormeshi = axi.pcolormesh(xI,yI,allHistI.T,norm=norm,cmap="Blues_r")
   axc.set_xlim(-nBeforeC,nAfterC)
   axc.set_ylim(yMinC,yMaxC)
   axi.set_xlim(-nBeforeI,nAfterI)
@@ -315,7 +347,10 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
 
 if __name__ == "__main__":
 
-  f = root.TFile("CosmicsWires.root")
+  #f = root.TFile("CosmicsWires.root")
+  #f = root.TFile("WireData_RIIP100_64a.root")
+  #f = root.TFile("WireData_RIIP100_64a_nocrct.root")
+  f = root.TFile("WireData_RIIP60_64a.root")
   #f.ls()
   tree = f.Get("cosmicanalyzer/tree")
   #tree.Print()
@@ -348,8 +383,8 @@ if __name__ == "__main__":
   plotAroundMaxWires(tree,"phiGeq0Max",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
   plotAroundMaxWires(tree,"phiGeq0MaxNorm",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
 
-  plotMultiEventAroundMaxWires(tree,"phiLt0Hist",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
-  plotMultiEventAroundMaxWires(tree,"phiGeq0Hist",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
-  plotMultiEventAroundMaxWires(tree,"phiLt0HistNorm",20,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
-  plotMultiEventAroundMaxWires(tree,"phiGeq0HistNorm",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
+  plotMultiEventAroundMaxWires(tree,"phiLt0Hist",100,cutFunc=lambda x: makeCuts(x,phiLt0=True))
+  plotMultiEventAroundMaxWires(tree,"phiGeq0Hist",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
+  plotMultiEventAroundMaxWires(tree,"phiLt0HistNorm",100,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
+  plotMultiEventAroundMaxWires(tree,"phiGeq0HistNorm",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
 
