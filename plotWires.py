@@ -6,7 +6,9 @@ root.gROOT.SetBatch(True)
 import numpy
 import matplotlib.pyplot as mpl
 import matplotlib.patches as patches
+import matplotlib.lines as lines
 import matplotlib.colors
+import matplotlib.gridspec as gridspec
 
 def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True):
   collectionWireBranchNames = []
@@ -353,7 +355,10 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
     transparent_cmap = matplotlib.colors.ListedColormap(cmap_colors)
     transparent_cmaps.append(transparent_cmap)
 
-  fig, ax = mpl.subplots(figsize=(8.5,8.5),dpi=200)
+  #gs = gridspec(nrows=2,height_ratios=[5,1],hspace=0)
+  gs = {'height_ratios':[5,1],'hspace':0}
+
+  fig, (ax,ax2) = mpl.subplots(nrows=2,figsize=(8.5,8.5),sharex=True,gridspec_kw=gs,dpi=200)
   if allHistC is None:
     print "Error: allHistC is None, no events passed amplitude cut for fileprefix: ",fileprefix
   else:
@@ -366,13 +371,28 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
     xI, yI = numpy.meshgrid(xedgesI, yedgesI)
     normI = matplotlib.colors.LogNorm(vmin=allHistI.min(), vmax=allHistI.max())
     p = ax.pcolormesh(xI,yI,allHistI.T,norm=norm,cmap=transparent_cmaps[1])
+  ax2.hist(hitStartsC,range=[-nBeforeC,nAfterC],bins=100,normed=True,histtype="step",color="g")
+  ax2.hist(hitEndsC,range=[-nBeforeC,nAfterC],bins=100,normed=True,histtype="step",color="g",ls=':')
+  ax2.hist(hitStartsI,range=[-nBeforeI,nAfterI],bins=100,normed=True,histtype="step",color="b")
+  ax2.hist(hitEndsI,range=[-nBeforeI,nAfterI],bins=100,normed=True,histtype="step",color="b",ls=':')
   ax.set_xlim(-max(nBeforeC,nBeforeI),max(nAfterC,nAfterI))
   ax.set_ylim(max(yMinC,yMinI),min(yMaxC,yMaxI))
-  ax.set_xlabel("Time Tick - Time Tick of Max")
   yLabelSuffix = ""
   if normToAmp:
     yLabelSuffix = " (Normalized to Max)"
   ax.set_ylabel("Wire Response"+yLabelSuffix)
+  ax2.set_xlabel("Time Tick - Time Tick of Max")
+  ax2.set_ylabel("Normalized\nHits / Bin")
+  ax2.set_yticks([])
+  ax2.set_ylim(0,ax2.get_ylim()[1]*1.1)
+  ##
+  green_patch = patches.Patch(color='green', label='Collection Plane')
+  blue_patch = patches.Patch(color='blue', label='Induction Plane')
+  ax.legend(handles=[green_patch,blue_patch])
+  line1 = lines.Line2D([],[],color='k',label="Hit Start")
+  line2 = lines.Line2D([],[],color='k',ls=":",label="Hit End")
+  ax2.legend(handles=[line1,line2])
+
   fig.savefig("Test_{}{}.png".format(fileprefix,isMCStr))
   mpl.close()
 
