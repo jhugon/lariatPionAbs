@@ -19,8 +19,6 @@ def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True):
         else:
             inductionWireBranchNames.append(branchName)
         
-  collectionWireBranchNames.sort(key=lambda x: int(x.split('_')[1]))
-  inductionWireBranchNames.sort(key=lambda x: int(x.split('_')[1]))
   nEvents = min(maxEvents,tree.GetEntries())
   for iEvent in range(nEvents):
     tree.GetEntry(iEvent)
@@ -77,7 +75,7 @@ def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True):
     axi.set_xlabel("Time Tick")
     axc.set_ylabel("Collection Wire Response")
     axi.set_ylabel("Induction Wire Response")
-    title = "Run {} Subrun {} Event {}".format(tree.runNumber,tree.subRunNumber,tree.eventNumber)
+    title = "Run {} Subrun {} Event {}\n $\phi$: {:.1f}$^\circ$, Track Length: {:.1f} cm".format(tree.runNumber,tree.subRunNumber,tree.eventNumber,tree.primTrkStartPhi*180/math.pi,tree.primTrkLength)
     isMCStr = ""
     if tree.isMC:
       title = "MC " + title
@@ -182,7 +180,7 @@ def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lam
       yLabelSuffix = " (Normalized to Max)"
     axc.set_ylabel("Collection Wire Response"+yLabelSuffix)
     axi.set_ylabel("Induction Wire Response"+yLabelSuffix)
-    title = "Run {} Subrun {} Event {}".format(tree.runNumber,tree.subRunNumber,tree.eventNumber)
+    title = "Run {} Subrun {} Event {}\n $\phi$: {:.1f}$^\circ$, Track Length: {:.1f} cm".format(tree.runNumber,tree.subRunNumber,tree.eventNumber,tree.primTrkStartPhi*180/math.pi,tree.primTrkLength)
     isMCStr = ""
     if tree.isMC:
       title = "MC " + title
@@ -345,12 +343,46 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
   fig.savefig("{}{}.png".format(fileprefix,isMCStr))
   mpl.close()
 
+  #####
+
+  transparent_cmaps = []
+  for cmap in [mpl.cm.Greens,mpl.cm.Blues]:
+    frac_transparent = 0.5
+    cmap_colors = cmap(numpy.arange(cmap.N))
+    cmap_colors[:int(frac_transparent*cmap.N),-1] = numpy.linspace(0,1,int(frac_transparent*cmap.N)) # bottom frac linearly increases opacity
+    transparent_cmap = matplotlib.colors.ListedColormap(cmap_colors)
+    transparent_cmaps.append(transparent_cmap)
+
+  fig, ax = mpl.subplots(figsize=(8.5,8.5),dpi=200)
+  if allHistC is None:
+    print "Error: allHistC is None, no events passed amplitude cut for fileprefix: ",fileprefix
+  else:
+    xC, yC = numpy.meshgrid(xedgesC, yedgesC)
+    norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=max(allHistI.max(),allHistC.max()))
+    p = ax.pcolormesh(xC,yC,allHistC.T,norm=norm,cmap=transparent_cmaps[0])
+  if allHistI is None:
+    print "Error: allHistI is None, no events passed amplitude cut for fileprefix: ",fileprefix
+  else:
+    xI, yI = numpy.meshgrid(xedgesI, yedgesI)
+    normI = matplotlib.colors.LogNorm(vmin=allHistI.min(), vmax=allHistI.max())
+    p = ax.pcolormesh(xI,yI,allHistI.T,norm=norm,cmap=transparent_cmaps[1])
+  ax.set_xlim(-max(nBeforeC,nBeforeI),max(nAfterC,nAfterI))
+  ax.set_ylim(max(yMinC,yMinI),min(yMaxC,yMaxI))
+  ax.set_xlabel("Time Tick - Time Tick of Max")
+  yLabelSuffix = ""
+  if normToAmp:
+    yLabelSuffix = " (Normalized to Max)"
+  ax.set_ylabel("Wire Response"+yLabelSuffix)
+  fig.savefig("Test_{}{}.png".format(fileprefix,isMCStr))
+  mpl.close()
+
 if __name__ == "__main__":
 
   #f = root.TFile("CosmicsWires.root")
   #f = root.TFile("WireData_RIIP100_64a.root")
   #f = root.TFile("WireData_RIIP100_64a_nocrct.root")
-  f = root.TFile("WireData_RIIP60_64a.root")
+  #f = root.TFile("WireData_RIIP60_64a.root")
+  f = root.TFile("Wires_RIIP60a_v2.root")
   #f.ls()
   tree = f.Get("cosmicanalyzer/tree")
   #tree.Print()
@@ -374,17 +406,17 @@ if __name__ == "__main__":
         return False
     return True
 
-  #plotAllWholeWires(tree,"all",10,cutFunc=makeCuts)
-  #plotAroundMaxWires(tree,"allMax",10,cutFunc=makeCuts)
-  plotAllWholeWires(tree,"phiLt0",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
-  plotAroundMaxWires(tree,"phiLt0Max",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
-  plotAroundMaxWires(tree,"phiLt0MaxNorm",20,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
-  plotAllWholeWires(tree,"phiGeq0",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
-  plotAroundMaxWires(tree,"phiGeq0Max",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
-  plotAroundMaxWires(tree,"phiGeq0MaxNorm",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
-
-  plotMultiEventAroundMaxWires(tree,"phiLt0Hist",100,cutFunc=lambda x: makeCuts(x,phiLt0=True))
-  plotMultiEventAroundMaxWires(tree,"phiGeq0Hist",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
-  plotMultiEventAroundMaxWires(tree,"phiLt0HistNorm",100,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
-  plotMultiEventAroundMaxWires(tree,"phiGeq0HistNorm",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
-
+#  plotAllWholeWires(tree,"all",100,cutFunc=makeCuts)
+#  plotAroundMaxWires(tree,"allMax",100,cutFunc=makeCuts)
+#  plotMultiEventAroundMaxWires(tree,"allHist",20,cutFunc=makeCuts)
+#  plotAllWholeWires(tree,"phiLt0",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
+#  plotAroundMaxWires(tree,"phiLt0Max",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
+#  plotAroundMaxWires(tree,"phiLt0MaxNorm",20,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
+#  plotAllWholeWires(tree,"phiGeq0",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
+#  plotAroundMaxWires(tree,"phiGeq0Max",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
+#  plotAroundMaxWires(tree,"phiGeq0MaxNorm",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
+#
+  plotMultiEventAroundMaxWires(tree,"phiLt0Hist",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
+  plotMultiEventAroundMaxWires(tree,"phiGeq0Hist",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
+  plotMultiEventAroundMaxWires(tree,"phiLt0HistNorm",20,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
+  plotMultiEventAroundMaxWires(tree,"phiGeq0HistNorm",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
