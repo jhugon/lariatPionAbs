@@ -716,21 +716,21 @@ if __name__ == "__main__":
 
   compareMultiEventAroundMaxWires([tree,tree],"CompareRawPhiLt0",100,
                     cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
-                    branchNamePrefixes=["wireData","rawWireData"],
-                    labels=["De-convolved","Raw"]
+                    branchNamePrefixes=["rawWireData","wireData"],
+                    labels=["Raw","De-convolved"]
                     )
   compareMultiEventAroundMaxWires([tree,tree],"CompareRawPhiLt0Norm",100,normToAmp=True,
                     cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
-                    branchNamePrefixes=["wireData","rawWireData"],
-                    labels=["De-convolved","Raw"]
+                    branchNamePrefixes=["rawWireData","wireData"],
+                    labels=["Raw","De-convolved"]
                     )
   compareMultiEventAroundMaxWires([tree,tree],"CompareRawPhiGeq0",100,
                     cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
-                    branchNamePrefixes=["wireData","rawWireData"],
-                    labels=["De-convolved","Raw"]
+                    branchNamePrefixes=["rawWireData","wireData"],
+                    labels=["Raw","De-convolved"]
                     )
   compareMultiEventAroundMaxWires([tree,tree],"CompareRawPhiGeq0Norm",100,normToAmp=True,
                     cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
-                    branchNamePrefixes=["wireData","rawWireData"],
-                    labels=["De-convolved","Raw"]
+                    branchNamePrefixes=["rawWireData","wireData"],
+                    labels=["Raw","De-convolved"]
                     )
