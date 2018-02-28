@@ -10,12 +10,19 @@ import matplotlib.lines as lines
 import matplotlib.colors
 import matplotlib.gridspec as gridspec
 
-def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True):
+def getHitName(wireName,start=True):
+  firstPart = wireName.split("_")[0]
+  if start:
+    return wireName.replace(firstPart,"wireHitStarts")
+  else:
+    return wireName.replace(firstPart,"wireHitEnds")
+
+def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True,branchNamePrefix="wireData",getHits=True):
   collectionWireBranchNames = []
   inductionWireBranchNames = []
   for branch in tree.GetListOfBranches():
     branchName = branch.GetName()
-    if "wireData" == branchName[:8]:
+    if branchNamePrefix == branchName[:len(branchNamePrefix)]:
         if branchName[-1] == "C":
             collectionWireBranchNames.append(branchName)
         else:
@@ -50,23 +57,21 @@ def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True):
     zScoreI = []
     for iWire in range(nWiresC):
         axc.plot(dataArrayC[iWire]+dataWidthC*iWire,'-b',lw=0.2)
-        hitStartsC = getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitStarts"))
-        hitEndsC = getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitEnds"))
-        axc.plot(hitStartsC,dataWidthC*iWire*numpy.ones(len(hitStartsC)),',g')
-        axc.plot(hitEndsC,dataWidthC*iWire*numpy.ones(len(hitEndsC)),',r')
-        #if hitStartsC.size() > 0:
-        #  axc.plot(numpy.argmax(dataArrayC[iWire]),dataWidthC*iWire,',m')
+        if getHits:
+          hitStartsC = getattr(tree,getHitName(collectionWireBranchNames[iWire],start=True))
+          hitEndsC = getattr(tree,getHitName(collectionWireBranchNames[iWire],start=False))
+          axc.plot(hitStartsC,dataWidthC*iWire*numpy.ones(len(hitStartsC)),',g')
+          axc.plot(hitEndsC,dataWidthC*iWire*numpy.ones(len(hitEndsC)),',r')
         amp = numpy.max(dataArrayC[iWire])
         rms = numpy.std(dataArrayC[iWire])
         zScoreC.append(amp/rms)
     for iWire in range(nWiresI):
         axi.plot(dataArrayI[iWire]+dataWidthI*iWire,'-b',lw=0.2)
-        hitStartsI = getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitStarts"))
-        hitEndsI = getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitEnds"))
-        axi.plot(hitStartsI,dataWidthI*iWire*numpy.ones(len(hitStartsI)),',g')
-        axi.plot(hitEndsI,dataWidthI*iWire*numpy.ones(len(hitEndsI)),',r')
-        #if hitStartsI.size() > 0:
-        #  axi.plot(numpy.argmax(dataArrayI[iWire]),dataWidthI*iWire,',m')
+        if getHits:
+          hitStartsI = getattr(tree,getHitName(inductionWireBranchNames[iWire],start=True))
+          hitEndsI = getattr(tree,getHitName(inductionWireBranchNames[iWire],start=False))
+          axi.plot(hitStartsI,dataWidthI*iWire*numpy.ones(len(hitStartsI)),',g')
+          axi.plot(hitEndsI,dataWidthI*iWire*numpy.ones(len(hitEndsI)),',r')
         amp = numpy.max(dataArrayI[iWire])
         rms = numpy.std(dataArrayI[iWire])
         zScoreI.append(amp/rms)
@@ -94,7 +99,7 @@ def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True):
     fig.savefig("ZScore_{}{}_r{:04d}_sr{:03d}_e{:04d}.pdf".format(fileprefix,isMCStr,tree.runNumber,tree.subRunNumber,tree.eventNumber))
     mpl.close()
 
-def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lambda x: True):
+def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lambda x: True,branchNamePrefix="wireData"):
   nBeforeC = 100
   nAfterC = 100
   nBeforeI = 100
@@ -103,7 +108,7 @@ def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lam
   inductionWireBranchNames = []
   for branch in tree.GetListOfBranches():
     branchName = branch.GetName()
-    if "wireData" == branchName[:8]:
+    if branchNamePrefix == branchName[:len(branchNamePrefix)]:
         if branchName[-1] == "C":
             collectionWireBranchNames.append(branchName)
         else:
@@ -147,8 +152,8 @@ def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lam
         else:
             data = dataArrayC[iWire,iStart:iEnd]
         axc.plot(numpy.arange(iStart,iEnd)-iMax,data,'-b',lw=0.2)
-        hitStartsC = getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitStarts"))
-        hitEndsC = getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitEnds"))
+        hitStartsC = getattr(tree,getHitName(collectionWireBranchNames[iWire],start=True))
+        hitEndsC = getattr(tree,getHitName(collectionWireBranchNames[iWire],start=False))
         for x in hitStartsC:
           axc.axvline(x-iStart-nBeforeC,ymax=0.05,c='g',lw=0.2)
         for x in hitEndsC:
@@ -166,8 +171,8 @@ def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lam
         else:
             data = dataArrayI[iWire,iStart:iEnd]
         axi.plot(numpy.arange(iStart,iEnd)-iMax,data,'-b',lw=0.2)
-        hitStartsI = getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitStarts"))
-        hitEndsI = getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitEnds"))
+        hitStartsI = getattr(tree,getHitName(inductionWireBranchNames[iWire],start=True))
+        hitEndsI = getattr(tree,getHitName(inductionWireBranchNames[iWire],start=False))
         for x in hitStartsI:
           axi.axvline(x-iStart-nBeforeI,ymax=0.05,c='g',lw=0.2)
         for x in hitEndsI:
@@ -191,7 +196,7 @@ def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lam
     fig.savefig("{}{}_r{:05d}_sr{:03d}_e{:04d}.pdf".format(fileprefix,isMCStr,tree.runNumber,tree.subRunNumber,tree.eventNumber))
     mpl.close()
 
-def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lambda x: True,logz=False):
+def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lambda x: True,logz=False,branchNamePrefix="wireData"):
   nBeforeC = 100
   nAfterC = 100
   nBeforeI = 100
@@ -218,7 +223,7 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
   inductionWireBranchNames = []
   for branch in tree.GetListOfBranches():
     branchName = branch.GetName()
-    if "wireData" == branchName[:8]:
+    if branchNamePrefix == branchName[:len(branchNamePrefix)]:
         if branchName[-1] == "C":
             collectionWireBranchNames.append(branchName)
         else:
@@ -271,8 +276,8 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
           allHistC = hist
       else:
           allHistC += hist
-      hitStartsC.extend(numpy.array(getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitStarts")))-iStart-nBeforeC)
-      hitEndsC.extend(numpy.array(getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitEnds")))-iStart-nBeforeC)
+      hitStartsC.extend(numpy.array(getattr(tree,getHitName(collectionWireBranchNames[iWire],start=True)))-iStart-nBeforeC)
+      hitEndsC.extend(numpy.array(getattr(tree,getHitName(collectionWireBranchNames[iWire],start=False)))-iStart-nBeforeC)
     for iWire in range(nWiresI):
       wireData = getattr(tree,inductionWireBranchNames[iWire])
       dataArray = numpy.zeros((nSamples))
@@ -298,8 +303,8 @@ def plotMultiEventAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,c
           allHistI = hist
       else:
           allHistI += hist
-      hitStartsI.extend(numpy.array(getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitStarts"))) -iStart-nBeforeI)
-      hitEndsI.extend(numpy.array(getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitEnds"))) -iStart-nBeforeI)
+      hitStartsI.extend(numpy.array(getattr(tree,getHitName(inductionWireBranchNames[iWire],start=True)))-iStart-nBeforeI)
+      hitEndsI.extend(numpy.array(getattr(tree,getHitName(inductionWireBranchNames[iWire],start=False)))-iStart-nBeforeI)
   fig, (axc,axi) = mpl.subplots(nrows=2,figsize=(8.5,11),dpi=200)
   if allHistC is None:
     print "Error: allHistC is None, no events passed amplitude cut for fileprefix: ",fileprefix
@@ -480,8 +485,8 @@ def compareMultiEventAroundMaxWires(trees,fileprefix,maxEvents=100,normToAmp=Fal
             allHistC = hist
         else:
             allHistC += hist
-        hitStartsC.extend(numpy.array(getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitStarts")))-iStart-nBeforeC)
-        hitEndsC.extend(numpy.array(getattr(tree,collectionWireBranchNames[iWire].replace("wireData","wireHitEnds")))-iStart-nBeforeC)
+        hitStartsC.extend(numpy.array(getattr(tree,getHitName(collectionWireBranchNames[iWire],start=True)))-iStart-nBeforeC)
+        hitEndsC.extend(numpy.array(getattr(tree,getHitName(collectionWireBranchNames[iWire],start=False)))-iStart-nBeforeC)
       for iWire in range(nWiresI):
         wireData = getattr(tree,inductionWireBranchNames[iWire])
         dataArray = numpy.zeros((nSamples))
@@ -507,8 +512,8 @@ def compareMultiEventAroundMaxWires(trees,fileprefix,maxEvents=100,normToAmp=Fal
             allHistI = hist
         else:
             allHistI += hist
-        hitStartsI.extend(numpy.array(getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitStarts"))) -iStart-nBeforeI)
-        hitEndsI.extend(numpy.array(getattr(tree,inductionWireBranchNames[iWire].replace("wireData","wireHitEnds"))) -iStart-nBeforeI)
+        hitStartsI.extend(numpy.array(getattr(tree,getHitName(inductionWireBranchNames[iWire],start=True)))-iStart-nBeforeI)
+        hitEndsI.extend(numpy.array(getattr(tree,getHitName(inductionWireBranchNames[iWire],start=False)))-iStart-nBeforeI)
     histsC.append(allHistC)
     histsI.append(allHistI)
     hitStartsCList.append(hitStartsC)
@@ -598,7 +603,7 @@ if __name__ == "__main__":
   #f = root.TFile("WireData_RIIP100_64a.root")
   #f = root.TFile("WireData_RIIP100_64a_nocrct.root")
   #f = root.TFile("WireData_RIIP60_64a.root")
-  f = root.TFile("Wires_RIIP60a_v2.root")
+  f = root.TFile("Wires_RIIP60a_v3.root")
   fMC = root.TFile("WiresMC_v2.root")
   #f.ls()
   tree = f.Get("cosmicanalyzer/tree")
@@ -624,9 +629,12 @@ if __name__ == "__main__":
         return False
     return True
 
-  plotAllWholeWires(tree,"all",100,cutFunc=makeCuts)
-  plotAroundMaxWires(tree,"allMax",100,cutFunc=makeCuts)
+#  plotAllWholeWires(tree,"all",100,cutFunc=makeCuts)
+#  plotAllWholeWires(tree,"rawAll",100,cutFunc=makeCuts,branchNamePrefix="rawWireData")
+#  plotAroundMaxWires(tree,"allMax",100,cutFunc=makeCuts)
+  plotAroundMaxWires(tree,"rawAllMax",100,cutFunc=makeCuts,branchNamePrefix="rawWireData")
 #  plotMultiEventAroundMaxWires(tree,"allHist",20,cutFunc=makeCuts)
+  plotMultiEventAroundMaxWires(tree,"rawAllHist",100,cutFunc=makeCuts,branchNamePrefix="rawWireData")
 #  plotAllWholeWires(tree,"phiLt0",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
 #  plotAroundMaxWires(tree,"phiLt0Max",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
 #  plotAroundMaxWires(tree,"phiLt0MaxNorm",20,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
@@ -634,33 +642,33 @@ if __name__ == "__main__":
 #  plotAroundMaxWires(tree,"phiGeq0Max",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
 #  plotAroundMaxWires(tree,"phiGeq0MaxNorm",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
 #
-  plotMultiEventAroundMaxWires(tree,"phiLt0Hist",100,cutFunc=lambda x: makeCuts(x,phiLt0=True))
-  plotMultiEventAroundMaxWires(tree,"phiGeq0Hist",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
-  plotMultiEventAroundMaxWires(tree,"phiLt0HistNorm",100,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
-  plotMultiEventAroundMaxWires(tree,"phiGeq0HistNorm",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
-
-  compareMultiEventAroundMaxWires([tree,tree],"ComparePhi",100,
-                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiGeq0=True)],
-                    labels=["$\phi < 0$", "$\phi \geq 0$"]
-                    )
-  compareMultiEventAroundMaxWires([tree,tree],"ComparePhiNorm",100,normToAmp=True,
-                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiGeq0=True)],
-                    labels=["$\phi < 0$", "$\phi \geq 0$"]
-                    )
-  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiLt0",100,
-                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
-                    labels=["Data","MC"]
-                    )
-  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiLt0Norm",100,normToAmp=True,
-                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
-                    labels=["Data","MC"]
-                    )
-  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiGeq0",100,
-                    cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
-                    labels=["Data","MC"]
-                    )
-  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiGeq0Norm",100,normToAmp=True,
-                    cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
-                    labels=["Data","MC"]
-                    )
+#  plotMultiEventAroundMaxWires(tree,"phiLt0Hist",100,cutFunc=lambda x: makeCuts(x,phiLt0=True))
+#  plotMultiEventAroundMaxWires(tree,"phiGeq0Hist",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
+#  plotMultiEventAroundMaxWires(tree,"phiLt0HistNorm",100,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
+#  plotMultiEventAroundMaxWires(tree,"phiGeq0HistNorm",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
+#
+#  compareMultiEventAroundMaxWires([tree,tree],"ComparePhi",100,
+#                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiGeq0=True)],
+#                    labels=["$\phi < 0$", "$\phi \geq 0$"]
+#                    )
+#  compareMultiEventAroundMaxWires([tree,tree],"ComparePhiNorm",100,normToAmp=True,
+#                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiGeq0=True)],
+#                    labels=["$\phi < 0$", "$\phi \geq 0$"]
+#                    )
+#  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiLt0",100,
+#                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
+#                    labels=["Data","MC"]
+#                    )
+#  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiLt0Norm",100,normToAmp=True,
+#                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
+#                    labels=["Data","MC"]
+#                    )
+#  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiGeq0",100,
+#                    cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
+#                    labels=["Data","MC"]
+#                    )
+#  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiGeq0Norm",100,normToAmp=True,
+#                    cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
+#                    labels=["Data","MC"]
+#                    )
 
