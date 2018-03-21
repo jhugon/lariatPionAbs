@@ -135,14 +135,16 @@ def makeWireHists(tree,maxEvents,cutFunc,nBefore=150,nAfter=150,yMin=-400,yMax=4
   return rawHists, rawHistNorms, deconvHists, deconvHistNorms, rawAtDeconvHists, rawAtDeconvHistNorms, xedges, yedges, yedgesNorm, yedgesRaw, yedgesNormRaw, allHitStarts, allHitEnds, allHitStartsRaw, allHitEndsRaw
 
 def justPlot(hist,hitStarts,hitEnds,xedges,yedges,fn,xMin,xMax,yMin,yMax,xLabel,yLabel,title):
-  gs = {'height_ratios':[5,1],'hspace':0}
+  gs = {'height_ratios':[4,1],'hspace':0}
   fig, (ax1,ax2) = mpl.subplots(nrows=2,sharex=True,gridspec_kw=gs)
   if hist is None:
     print "Error: hist is None, no events passed amplitude cut for: ",fn
   else:
+    histToPlot = numpy.array(hist)
+    histToPlot[histToPlot == 0.] = 0.5
     x, y = numpy.meshgrid(xedges, yedges)
-    norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=hist.max())
-    p = ax1.pcolormesh(x,y,hist.T,norm=norm,cmap="Blues")
+    norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=histToPlot.max())
+    p = ax1.pcolormesh(x,y,histToPlot.T,norm=norm,cmap="Blues_r")
   ax2.hist(hitStarts,range=[xMin,xMax],bins=100,normed=True,histtype="step",color="b")
   ax2.hist(hitEnds,range=[xMin,xMax],bins=100,normed=True,histtype="step",color="b",ls=':')
   ax1.set_xlim(xMin,xMax)
@@ -152,11 +154,11 @@ def justPlot(hist,hitStarts,hitEnds,xedges,yedges,fn,xMin,xMax,yMin,yMax,xLabel,
   ax2.set_xlabel(xLabel)
   ax2.set_ylabel("Hits / Bin")
   ax2.set_yticks([])
-  ax2.set_ylim(0,ax2.get_ylim()[1]*1.1)
+  ax2.set_ylim(0,ax2.get_ylim()[1]*1.5)
   ##
   line1 = lines.Line2D([],[],color='k',label="Hit Start")
   line2 = lines.Line2D([],[],color='k',ls=":",label="Hit End")
-  ax2.legend(handles=[line1,line2],fontsize='small')
+  ax2.legend(handles=[line1,line2],ncol=2,fontsize='small')
   ax1.set_title(title)
 
   fig.savefig(fn)
@@ -242,11 +244,11 @@ def plotWireHists(*args,**kargs):
         ):
     
     justPlot(rawHist,hitStartsRaw,hitEndsRaw,xedges,yedgesRaw,"{}_raw_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
-    justPlot(rawHistNorm,hitStartsRaw,hitEndsRaw,xedges,yedgesNormRaw,"{}_raw_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+"Normalized to Max",title)
+    justPlot(rawHistNorm,hitStartsRaw,hitEndsRaw,xedges,yedgesNormRaw,"{}_raw_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
     justPlot(deconvHist,hitStarts,hitEnds,xedges,yedges,"{}_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
-    justPlot(deconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_deconv_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+"Normalized to Max",title)
+    justPlot(deconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_deconv_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
     justPlot(rawAtDeconvHist,hitStarts,hitEnds,xedges,yedges,"{}_raw_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
-    justPlot(rawAtDeconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_raw_norm_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+"Normalized to Max",title)
+    justPlot(rawAtDeconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_raw_norm_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
 
 def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True,branchNamePrefix="wireData",getHits=True):
   collectionWireBranchNames = []
@@ -673,12 +675,12 @@ if __name__ == "__main__":
     with open("dataAllHists.pkl",'wb') as outfile:
       cPickle.dump(dataAllHists,outfile)
   plotWireHists(*dataAllHists,filePrefix="TestPlot")
+  sys.exit(0)
 #  dataPhiGeq0Hists = makeWireHists(tree,nMax,lambda x: makeCuts(x,phiGeq0=True))
 #  dataPhiLt0Hists = makeWireHists(tree,nMax,lambda x: makeCuts(x,phiLt0=True))
 #  mcAllHists = makeWireHists(treeMC,nMax,makeCuts)
 #  mcPhiGeq0Hists = makeWireHists(treeMC,nMax,lambda x: makeCuts(x,phiGeq0=True))
 #  mcPhiLt0Hists = makeWireHists(treeMC,nMax,lambda x: makeCuts(x,phiLt0=True))
-  sys.exit(0)
 
 #  plotAllWholeWires(tree,"all",100,cutFunc=makeCuts)
 #  plotAllWholeWires(tree,"rawAll",100,cutFunc=makeCuts,branchNamePrefix="rawWireData")
@@ -686,7 +688,7 @@ if __name__ == "__main__":
 #  plotAroundMaxWires(tree,"rawAllMax",100,cutFunc=makeCuts,branchNamePrefix="rawWireData")
 #  plotMultiEventAroundMaxWires(tree,"allHist",20,cutFunc=makeCuts)
 #  plotMultiEventAroundMaxWires(tree,"rawAllHist",100,cutFunc=makeCuts,branchNamePrefix="rawWireData",nAfterC=150,nAfterI=150,yMinC=-50,yMinI=-200,yMaxC=400,yMaxI=250,nBinsC=450,nBinsI=450)
-  plotMultiEventAroundMaxWires(tree,"rawAllHistNorm",100,normToAmp=True,cutFunc=makeCuts,branchNamePrefix="rawWireData",nAfterC=150,nAfterI=150,yMinC=-50,yMinI=-200,yMaxC=400,yMaxI=250,nBinsC=450,nBinsI=450)
+#  plotMultiEventAroundMaxWires(tree,"rawAllHistNorm",10,normToAmp=True,cutFunc=makeCuts,branchNamePrefix="rawWireData",nAfterC=150,nAfterI=150,yMinC=-50,yMinI=-200,yMaxC=400,yMaxI=250,nBinsC=450,nBinsI=450)
 #  plotAllWholeWires(tree,"phiLt0",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
 #  plotAroundMaxWires(tree,"phiLt0Max",20,cutFunc=lambda x: makeCuts(x,phiLt0=True))
 #  plotAroundMaxWires(tree,"phiLt0MaxNorm",20,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
