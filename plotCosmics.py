@@ -26,6 +26,7 @@ if __name__ == "__main__":
   cuts += "*((primTrkStartTheta > 27*pi/180.) && (primTrkStartTheta < 42*pi/180.))*(primTrkStartPhi > -57*pi/180. && primTrkStartPhi < 60*pi/180.)*(primTrkStartPhi < -15*pi/180. || primTrkStartPhi > 22*pi/180.)" # only angles that match MC
   #cuts += "*(primTrkLength > 10.)" # didn't seem to make a difference
   cuts += "*(nTracks == 1)"
+  #cuts += "*(primTrkLength > 80. && primTrkLength < 85.)"
 
   hitExtraCuts = "*(primTrkXs > 3. && primTrkXs < 46. && primTrkYs < 18. && primTrkYs > -18. && primTrkZs > 3. && primTrkZs < 87.)"
   hitExtraCutsInduct = "*(primTrkXsInduct > 3. && primTrkXsInduct < 46. && primTrkYsInduct < 18. && primTrkYsInduct > -18. && primTrkZsInduct > 3. && primTrkZsInduct < 87.)"
@@ -2094,6 +2095,20 @@ if __name__ == "__main__":
   ]
   for i in range(len(histConfigs)):
     histConfigs[i]["color"] = COLORLIST[i]
+
+  for i in range(len(histConfigs)):
+    histConfigs[i].update(
+    {
+      'xtitle': "Primary TPC Track Length [cm]",
+      'ytitle': "Events / bin",
+      'binning': [40,0,120],
+      'var': "primTrkLength",
+      'normalize': True,
+      'logy': False,
+    },
+    )
+  plotManyHistsOnePlot([x for x in fileConfigs if not ("smear" in x["name"])],histConfigs,
+        c,"cosmicanalyzer/tree",nMax=NMAX,outPrefix="Cosmics_trackPhi_primTrkLength")
 
   for i in range(len(histConfigs)):
     histConfigs[i].update(
