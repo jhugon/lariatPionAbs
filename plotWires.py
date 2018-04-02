@@ -234,10 +234,11 @@ def plotWireHists(*args,**kargs):
 
   filePrefix=""
   fileSuffixes=["C","I"]
-  xMins=[-70,-50]
-  xMaxs=[70,100]
-  yMins=[-50,-150]
-  yMaxs=[300,150]
+  xMins=[-150,-150]
+  xMaxs=[150,150]
+  yMins=[-50,-200]
+  yMaxs=[300,200]
+  yMinNorms=[-0.2,-1.8]
   yLabels=["Collection Wire Response","Induction Wire Response"]
   xLabel="Time Tick - Time Tick of Max"
   title=""
@@ -285,16 +286,16 @@ def plotWireHists(*args,**kargs):
   if len(yLabels) != nRawHists:
     raise ValueError("yLabels length should be: ", nRawHists, " is ", len(yLabels))
 
-  for rawHist, rawHistNorm, deconvHist, deconvHistNorm, rawAtDeconvHist, rawAtDeconvHistNorm, hitStarts, hitEnds, hitStartsRaw, hitEndsRaw, fileSuffix, xMin, xMax, yMin, yMax, yLabel in zip(
+  for rawHist, rawHistNorm, deconvHist, deconvHistNorm, rawAtDeconvHist, rawAtDeconvHistNorm, hitStarts, hitEnds, hitStartsRaw, hitEndsRaw, fileSuffix, xMin, xMax, yMin, yMax, yMinNorm, yLabel in zip(
             rawHists, rawHistNorms, deconvHists, deconvHistNorms, rawAtDeconvHists, rawAtDeconvHistNorms,
             allHitStarts, allHitEnds, allHitStartsRaw, allHitEndsRaw,
-            fileSuffixes, xMins, xMaxs, yMins, yMaxs, yLabels
+            fileSuffixes, xMins, xMaxs, yMins, yMaxs, yMinNorms, yLabels
         ):
     
     justPlot(rawHist,hitStartsRaw,hitEndsRaw,xedges,yedgesRaw,"{}_raw_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
-    justPlot(rawHistNorm,hitStartsRaw,hitEndsRaw,xedges,yedgesNormRaw,"{}_raw_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
+    justPlot(rawHistNorm,hitStartsRaw,hitEndsRaw,xedges,yedgesNormRaw,"{}_raw_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMinNorm,1.2,xLabel,yLabel+" Normalized to Max",title)
     justPlot(deconvHist,hitStarts,hitEnds,xedges,yedges,"{}_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
-    justPlot(deconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_deconv_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
+    justPlot(deconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_deconv_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-0.8,1.1,xLabel,yLabel+" Normalized to Max",title)
     #justPlot(rawAtDeconvHist,hitStarts,hitEnds,xedges,yedges,"{}_raw_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
     #justPlot(rawAtDeconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_raw_norm_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
 
@@ -302,10 +303,10 @@ def compareWireHists(*cases,**kargs):
 
   filePrefix=""
   fileSuffixes=["C","I"]
-  xMins=[-70,-50]
-  xMaxs=[70,100]
+  xMins=[-150,-150]
+  xMaxs=[150,150]
   yMins=[-50,-150]
-  yMaxs=[300,150]
+  yMaxs=[300,200]
   yLabels=["Collection Wire Response","Induction Wire Response"]
   xLabel="Time Tick - Time Tick of Max"
   title=""
@@ -403,13 +404,14 @@ def compareWireHists(*cases,**kargs):
              "{}_raw_{}.png".format(filePrefix,fileSuffixes[iPlane]),
              xMins[iPlane],xMaxs[iPlane],yMins[iPlane],yMaxs[iPlane],
              xLabel,yLabels[iPlane],title,labels=labels,compare=True)
+    yMinNorm = [-0.2,-1.8][iPlane]
     justPlot([x[iPlane] for x in rawHistNorms],
              [x[iPlane] for x in allHitStartsRaw],
              [x[iPlane] for x in allHitEndsRaw],
              xedges,
              yedgesNormRaw,
              "{}_raw_norm_{}.png".format(filePrefix,fileSuffixes[iPlane]),
-             xMins[iPlane],xMaxs[iPlane],-2,2,
+             xMins[iPlane],xMaxs[iPlane],yMinNorm,1.2,
              xLabel,yLabels[iPlane]+" Normalized to Max",title,labels=labels,compare=True)
     justPlot([x[iPlane] for x in deconvHists],
              [x[iPlane] for x in allHitStarts],
@@ -425,7 +427,7 @@ def compareWireHists(*cases,**kargs):
              xedges,
              yedgesNormRaw,
              "{}_deconv_norm_{}.png".format(filePrefix,fileSuffixes[iPlane]),
-             xMins[iPlane],xMaxs[iPlane],-2,2,
+             xMins[iPlane],xMaxs[iPlane],-0.5,1.2,
              xLabel,yLabels[iPlane]+" Normalized to Max",title,labels=labels,compare=True)
 
     #justPlot(rawAtDeconvHist,hitStarts,hitEnds,xedges,yedges,"{}_raw_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title,labels=labels,compare=True)
