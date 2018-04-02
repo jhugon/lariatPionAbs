@@ -141,7 +141,7 @@ def makeWireHistsAndPkl(filePrefix, tree, maxEvents, cutFunc,**kargs):
     with open(fn) as infile:
       result = cPickle.load(infile)
   except IOError:
-    result = makeWireHists(tree,nMax,makeCuts)
+    result = makeWireHists(tree,nMax,cutFunc)
     with open(fn,'wb') as outfile:
       cPickle.dump(result,outfile)
   return result
@@ -210,6 +210,93 @@ def justPlot(hist,hitStarts,hitEnds,xedges,yedges,fn,xMin,xMax,yMin,yMax,xLabel,
 
   fig.savefig(fn)
   mpl.close()
+
+def plotWireHists(*args,**kargs):
+
+  if len(args) != 15:
+    print "plotWireHists n args isn't 15 as expected is ", len(args)
+    sys.exit(1)
+  rawHists = args[0]
+  rawHistNorms = args[1]
+  deconvHists = args[2]
+  deconvHistNorms = args[3]
+  rawAtDeconvHists = args[4]
+  rawAtDeconvHistNorms = args[5]
+  xedges = args[6]
+  yedges = args[7]
+  yedgesNorm = args[8]
+  yedgesRaw = args[9]
+  yedgesNormRaw = args[10]
+  allHitStarts = args[11]
+  allHitEnds = args[12]
+  allHitStartsRaw = args[13]
+  allHitEndsRaw = args[14]
+
+  filePrefix=""
+  fileSuffixes=["C","I"]
+  xMins=[-70,-50]
+  xMaxs=[70,100]
+  yMins=[-50,-150]
+  yMaxs=[300,150]
+  yLabels=["Collection Wire Response","Induction Wire Response"]
+  xLabel="Time Tick - Time Tick of Max"
+  title=""
+
+  try:
+    filePrefix = kargs["filePrefix"]
+  except KeyError:
+    raise Exception("plotWireHists: filePrefix=<prefix> argument required")
+  try:
+    fileSuffixes = kargs["fileSuffixes"]
+  except:
+    pass
+  try:
+    title = kargs["title"]
+  except:
+    pass
+  try:
+    xMins = kargs["xMins"]
+  except:
+    pass
+  try:
+    yMins = kargs["yMins"]
+  except:
+    pass
+  try:
+    xMins = kargs["xMaxs"]
+  except:
+    pass
+  try:
+    yMaxs = kargs["yMaxs"]
+  except:
+    pass
+
+  nRawHists = len(rawHists)
+  if len(fileSuffixes) != nRawHists:
+    raise ValueError("fileSuffixes length should be: ", nRawHists, " is ", len(fileSuffixes))
+  if len(xMins) != nRawHists:
+    raise ValueError("xMins length should be: ", nRawHists, " is ", len(xMins))
+  if len(yMins) != nRawHists:
+    raise ValueError("yMins length should be: ", nRawHists, " is ", len(yMins))
+  if len(xMaxs) != nRawHists:
+    raise ValueError("xMaxs length should be: ", nRawHists, " is ", len(xMaxs))
+  if len(yMaxs) != nRawHists:
+    raise ValueError("yMaxs length should be: ", nRawHists, " is ", len(yMaxs))
+  if len(yLabels) != nRawHists:
+    raise ValueError("yLabels length should be: ", nRawHists, " is ", len(yLabels))
+
+  for rawHist, rawHistNorm, deconvHist, deconvHistNorm, rawAtDeconvHist, rawAtDeconvHistNorm, hitStarts, hitEnds, hitStartsRaw, hitEndsRaw, fileSuffix, xMin, xMax, yMin, yMax, yLabel in zip(
+            rawHists, rawHistNorms, deconvHists, deconvHistNorms, rawAtDeconvHists, rawAtDeconvHistNorms,
+            allHitStarts, allHitEnds, allHitStartsRaw, allHitEndsRaw,
+            fileSuffixes, xMins, xMaxs, yMins, yMaxs, yLabels
+        ):
+    
+    justPlot(rawHist,hitStartsRaw,hitEndsRaw,xedges,yedgesRaw,"{}_raw_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
+    justPlot(rawHistNorm,hitStartsRaw,hitEndsRaw,xedges,yedgesNormRaw,"{}_raw_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
+    justPlot(deconvHist,hitStarts,hitEnds,xedges,yedges,"{}_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
+    justPlot(deconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_deconv_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
+    #justPlot(rawAtDeconvHist,hitStarts,hitEnds,xedges,yedges,"{}_raw_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
+    #justPlot(rawAtDeconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_raw_norm_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
 
 def compareWireHists(*cases,**kargs):
 
@@ -307,105 +394,42 @@ def compareWireHists(*cases,**kargs):
     if len(yLabels) != nRawHists:
       raise ValueError("yLabels length should be: ", nRawHists, " is ", len(yLabels))
 
-  for rawHist, rawHistNorm, deconvHist, deconvHistNorm, rawAtDeconvHist, rawAtDeconvHistNorm, hitStarts, hitEnds, hitStartsRaw, hitEndsRaw, fileSuffix, xMin, xMax, yMin, yMax, yLabel in zip(
-            rawHists, rawHistNorms, deconvHists, deconvHistNorms, rawAtDeconvHists, rawAtDeconvHistNorms,
-            allHitStarts, allHitEnds, allHitStartsRaw, allHitEndsRaw,
-            fileSuffixes, xMins, xMaxs, yMins, yMaxs, yLabels
-        ):
-    
-    justPlot(rawHist,hitStartsRaw,hitEndsRaw,xedges,yedgesRaw,"{}_raw_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title,labels=labels,compare=True)
-    justPlot(rawHistNorm,hitStartsRaw,hitEndsRaw,xedges,yedgesNormRaw,"{}_raw_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title,labels=labels,compare=True)
-    justPlot(deconvHist,hitStarts,hitEnds,xedges,yedges,"{}_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title,labels=labels,compare=True)
-    justPlot(deconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_deconv_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title,labels=labels,compare=True)
+  for iPlane in range(len(fileSuffixes)):
+    justPlot([x[iPlane] for x in rawHists],
+             [x[iPlane] for x in allHitStartsRaw],
+             [x[iPlane] for x in allHitEndsRaw],
+             xedges,
+             yedgesRaw,
+             "{}_raw_{}.png".format(filePrefix,fileSuffixes[iPlane]),
+             xMins[iPlane],xMaxs[iPlane],yMins[iPlane],yMaxs[iPlane],
+             xLabel,yLabels[iPlane],title,labels=labels,compare=True)
+    justPlot([x[iPlane] for x in rawHistNorms],
+             [x[iPlane] for x in allHitStartsRaw],
+             [x[iPlane] for x in allHitEndsRaw],
+             xedges,
+             yedgesNormRaw,
+             "{}_raw_norm_{}.png".format(filePrefix,fileSuffixes[iPlane]),
+             xMins[iPlane],xMaxs[iPlane],-2,2,
+             xLabel,yLabels[iPlane]+" Normalized to Max",title,labels=labels,compare=True)
+    justPlot([x[iPlane] for x in deconvHists],
+             [x[iPlane] for x in allHitStarts],
+             [x[iPlane] for x in allHitEnds],
+             xedges,
+             yedgesRaw,
+             "{}_deconv_{}.png".format(filePrefix,fileSuffixes[iPlane]),
+             xMins[iPlane],xMaxs[iPlane],yMins[iPlane],yMaxs[iPlane],
+             xLabel,yLabels[iPlane],title,labels=labels,compare=True)
+    justPlot([x[iPlane] for x in deconvHistNorms],
+             [x[iPlane] for x in allHitStarts],
+             [x[iPlane] for x in allHitEnds],
+             xedges,
+             yedgesNormRaw,
+             "{}_deconv_norm_{}.png".format(filePrefix,fileSuffixes[iPlane]),
+             xMins[iPlane],xMaxs[iPlane],-2,2,
+             xLabel,yLabels[iPlane]+" Normalized to Max",title,labels=labels,compare=True)
+
     #justPlot(rawAtDeconvHist,hitStarts,hitEnds,xedges,yedges,"{}_raw_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title,labels=labels,compare=True)
     #justPlot(rawAtDeconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_raw_norm_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title,labels=labels,compare=True)
-
-def plotWireHists(*args,**kargs):
-
-  if len(args) != 15:
-    print "plotWireHists n args isn't 15 as expected is ", len(args)
-    sys.exit(1)
-  rawHists = args[0]
-  rawHistNorms = args[1]
-  deconvHists = args[2]
-  deconvHistNorms = args[3]
-  rawAtDeconvHists = args[4]
-  rawAtDeconvHistNorms = args[5]
-  xedges = args[6]
-  yedges = args[7]
-  yedgesNorm = args[8]
-  yedgesRaw = args[9]
-  yedgesNormRaw = args[10]
-  allHitStarts = args[11]
-  allHitEnds = args[12]
-  allHitStartsRaw = args[13]
-  allHitEndsRaw = args[14]
-
-  filePrefix=""
-  fileSuffixes=["C","I"]
-  xMins=[-70,-50]
-  xMaxs=[70,100]
-  yMins=[-50,-150]
-  yMaxs=[300,150]
-  yLabels=["Collection Wire Response","Induction Wire Response"]
-  xLabel="Time Tick - Time Tick of Max"
-  title=""
-
-  try:
-    filePrefix = kargs["filePrefix"]
-  except KeyError:
-    raise Exception("plotWireHists: filePrefix=<prefix> argument required")
-  try:
-    fileSuffixes = kargs["fileSuffixes"]
-  except:
-    pass
-  try:
-    title = kargs["title"]
-  except:
-    pass
-  try:
-    xMins = kargs["xMins"]
-  except:
-    pass
-  try:
-    yMins = kargs["yMins"]
-  except:
-    pass
-  try:
-    xMins = kargs["xMaxs"]
-  except:
-    pass
-  try:
-    yMaxs = kargs["yMaxs"]
-  except:
-    pass
-
-  nRawHists = len(rawHists)
-  if len(fileSuffixes) != nRawHists:
-    raise ValueError("fileSuffixes length should be: ", nRawHists, " is ", len(fileSuffixes))
-  if len(xMins) != nRawHists:
-    raise ValueError("xMins length should be: ", nRawHists, " is ", len(xMins))
-  if len(yMins) != nRawHists:
-    raise ValueError("yMins length should be: ", nRawHists, " is ", len(yMins))
-  if len(xMaxs) != nRawHists:
-    raise ValueError("xMaxs length should be: ", nRawHists, " is ", len(xMaxs))
-  if len(yMaxs) != nRawHists:
-    raise ValueError("yMaxs length should be: ", nRawHists, " is ", len(yMaxs))
-  if len(yLabels) != nRawHists:
-    raise ValueError("yLabels length should be: ", nRawHists, " is ", len(yLabels))
-
-  for rawHist, rawHistNorm, deconvHist, deconvHistNorm, rawAtDeconvHist, rawAtDeconvHistNorm, hitStarts, hitEnds, hitStartsRaw, hitEndsRaw, fileSuffix, xMin, xMax, yMin, yMax, yLabel in zip(
-            rawHists, rawHistNorms, deconvHists, deconvHistNorms, rawAtDeconvHists, rawAtDeconvHistNorms,
-            allHitStarts, allHitEnds, allHitStartsRaw, allHitEndsRaw,
-            fileSuffixes, xMins, xMaxs, yMins, yMaxs, yLabels
-        ):
-    
-    justPlot(rawHist,hitStartsRaw,hitEndsRaw,xedges,yedgesRaw,"{}_raw_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
-    justPlot(rawHistNorm,hitStartsRaw,hitEndsRaw,xedges,yedgesNormRaw,"{}_raw_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
-    justPlot(deconvHist,hitStarts,hitEnds,xedges,yedges,"{}_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
-    justPlot(deconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_deconv_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
-    #justPlot(rawAtDeconvHist,hitStarts,hitEnds,xedges,yedges,"{}_raw_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
-    #justPlot(rawAtDeconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_raw_norm_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
 
 def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True,branchNamePrefix="wireData",getHits=True):
   collectionWireBranchNames = []
@@ -489,305 +513,6 @@ def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True,branc
     fig.savefig("ZScore_{}{}_r{:04d}_sr{:03d}_e{:04d}.pdf".format(fileprefix,isMCStr,tree.runNumber,tree.subRunNumber,tree.eventNumber))
     mpl.close()
 
-def plotAroundMaxWires(tree,fileprefix,maxEvents=100,normToAmp=False,cutFunc=lambda x: True,branchNamePrefix="wireData"):
-  nBeforeC = 100
-  nAfterC = 100
-  nBeforeI = 100
-  nAfterI = 100
-  collectionWireBranchNames = []
-  inductionWireBranchNames = []
-  for branch in tree.GetListOfBranches():
-    branchName = branch.GetName()
-    if branchNamePrefix == branchName[:len(branchNamePrefix)]:
-        if branchName[-1] == "C":
-            collectionWireBranchNames.append(branchName)
-        else:
-            inductionWireBranchNames.append(branchName)
-        
-  nEvents = min(maxEvents,tree.GetEntries())
-  for iEvent in range(nEvents):
-    tree.GetEntry(iEvent)
-    if not cutFunc(tree):
-        continue
-    fig, (axc,axi) = mpl.subplots(nrows=2,figsize=(8.5,11),dpi=200)
-    nSamples = 4096
-    nWiresC = len(collectionWireBranchNames)
-    nWiresI = len(inductionWireBranchNames)
-    dataArrayC = numpy.zeros((nWiresC,nSamples))
-    dataArrayI = numpy.zeros((nWiresI,nSamples))
-    for iWire in range(nWiresC):
-      wireData = getattr(tree,collectionWireBranchNames[iWire])
-      for i in range(wireData.size()):
-          dataArrayC[iWire,i] = wireData[i]
-    for iWire in range(nWiresI):
-      wireData = getattr(tree,inductionWireBranchNames[iWire])
-      for i in range(wireData.size()):
-          dataArrayI[iWire,i] = wireData[i]
-    dataMaxC = dataArrayC.max()
-    dataMinC = dataArrayC.min()
-    dataWidthC = (dataMaxC - dataMinC)*0.75
-    dataMaxI = dataArrayI.max()
-    dataMinI = dataArrayI.min()
-    dataWidthI = (dataMaxI - dataMinI)*0.75
-    for iWire in range(nWiresC):
-        amplitude = numpy.max(dataArrayC[iWire])
-        rms = numpy.std(dataArrayC[iWire])
-        if amplitude / rms < 8.:
-            continue
-        iMax = numpy.argmax(dataArrayC[iWire])
-        iStart = max(iMax-nBeforeC,0)
-        iEnd = min(iMax+nAfterC,nSamples)
-        if normToAmp:
-            data = dataArrayC[iWire,iStart:iEnd] / amplitude
-        else:
-            data = dataArrayC[iWire,iStart:iEnd]
-        axc.plot(numpy.arange(iStart,iEnd)-iMax,data,'-b',lw=0.2)
-        hitStartsC = getattr(tree,getHitName(collectionWireBranchNames[iWire],start=True))
-        hitEndsC = getattr(tree,getHitName(collectionWireBranchNames[iWire],start=False))
-        for x in hitStartsC:
-          axc.axvline(x-iStart-nBeforeC,ymax=0.05,c='g',lw=0.2)
-        for x in hitEndsC:
-          axc.axvline(x-iStart-nBeforeC,ymax=0.05,c='r',lw=0.2)
-    for iWire in range(nWiresI):
-        amplitude = numpy.max(dataArrayI[iWire])
-        rms = numpy.std(dataArrayI[iWire])
-        if amplitude / rms < 8.:
-            continue
-        iMax = numpy.argmax(dataArrayI[iWire])
-        iStart = max(iMax-nBeforeI,0)
-        iEnd = min(iMax+nAfterI,nSamples)
-        if normToAmp:
-            data = dataArrayI[iWire,iStart:iEnd] / amplitude
-        else:
-            data = dataArrayI[iWire,iStart:iEnd]
-        axi.plot(numpy.arange(iStart,iEnd)-iMax,data,'-b',lw=0.2)
-        hitStartsI = getattr(tree,getHitName(inductionWireBranchNames[iWire],start=True))
-        hitEndsI = getattr(tree,getHitName(inductionWireBranchNames[iWire],start=False))
-        for x in hitStartsI:
-          axi.axvline(x-iStart-nBeforeI,ymax=0.05,c='g',lw=0.2)
-        for x in hitEndsI:
-          axi.axvline(x-iStart-nBeforeI,ymax=0.05,c='r',lw=0.2)
-    axc.set_xlim(-nBeforeC,nAfterC)
-    #axc.set_ylim(dataMinC,dataMinC+dataWidthC*nWiresC)
-    axi.set_xlim(-nBeforeI,nAfterI)
-    #axi.set_ylim(dataMinI,dataMinI+dataWidthI*nWiresC)
-    axi.set_xlabel("Time Tick - Time Tick of Max")
-    yLabelSuffix = ""
-    if normToAmp:
-      yLabelSuffix = " (Normalized to Max)"
-    axc.set_ylabel("Collection Wire Response"+yLabelSuffix)
-    axi.set_ylabel("Induction Wire Response"+yLabelSuffix)
-    title = "Run {} Subrun {} Event {}\n $\phi$: {:.1f}$^\circ$, Track Length: {:.1f} cm".format(tree.runNumber,tree.subRunNumber,tree.eventNumber,tree.primTrkStartPhi*180/math.pi,tree.primTrkLength)
-    isMCStr = ""
-    if tree.isMC:
-      title = "MC " + title
-      isMCStr = "_MC"
-    fig.suptitle(title)
-    fig.savefig("{}{}_r{:05d}_sr{:03d}_e{:04d}.pdf".format(fileprefix,isMCStr,tree.runNumber,tree.subRunNumber,tree.eventNumber))
-    mpl.close()
-
-def compareMultiEventAroundMaxWires(trees,fileprefix,maxEvents=100,normToAmp=False,
-                                    cutFuncs=[lambda x: True,lambda x: True],
-                                    branchNamePrefixes=["wireData","wireData"],
-                                    labels=["1","2"],
-                                    logz=False
-                                    ):
-  nBeforeC = 100
-  nAfterC = 100
-  nBeforeI = 100
-  nAfterI = 100
-
-  nBinsC = 400
-  yMinC = -20
-  yMaxC = 300
-
-  nBinsI = 400
-  yMinI = -50
-  yMaxI = 200
-
-  if normToAmp:
-    yMinC = -0.4
-    yMinI = -0.4
-    yMaxC = 1.1
-    yMaxI = 1.1
-
-  arangeC = numpy.arange(nBeforeC+nAfterC,dtype="float64") - nBeforeC
-  arangeI = numpy.arange(nBeforeI+nAfterI,dtype="float64") - nBeforeI
-  xEdgesC = None
-  yEdgesC = None
-  xEdgesI = None
-  yEdgesI = None
-
-  histsC = []
-  histsI = []
-  hitStartsCList = []
-  hitStartsIList = []
-  hitEndsCList = []
-  hitEndsIList = []
-  for tree, cutFunc, branchNamePrefix in zip(trees,cutFuncs,branchNamePrefixes):
-    collectionWireBranchNames = []
-    inductionWireBranchNames = []
-    for branch in tree.GetListOfBranches():
-      branchName = branch.GetName()
-      if branchNamePrefix == branchName[:len(branchNamePrefix)]:
-          if branchName[-1] == "C":
-              collectionWireBranchNames.append(branchName)
-          else:
-              inductionWireBranchNames.append(branchName)
-
-    nEvents = min(maxEvents,tree.GetEntries())
-    #allHistC = Hist2D(nBeforeC+nAfterC,-nBeforeC,nAfterC,50,-20,400)
-    allHistC = None
-    allHistI = None
-    hitStartsC = []
-    hitEndsC = []
-    hitStartsI = []
-    hitEndsI = []
-    for iEvent in range(nEvents):
-      tree.GetEntry(iEvent)
-      if not cutFunc(tree):
-          continue
-      nSamples = 4096
-      nWiresC = len(collectionWireBranchNames)
-      nWiresI = len(inductionWireBranchNames)
-      for iWire in range(nWiresC):
-        wireData = getattr(tree,collectionWireBranchNames[iWire])
-        dataArray = numpy.zeros((nSamples))
-        for i in range(wireData.size()):
-          dataArray[i] = wireData[i]
-        amplitude = numpy.max(dataArray)
-        rms = numpy.std(dataArray)
-        if amplitude / rms < 8.:
-            continue
-        iMax = numpy.argmax(dataArray)
-        if iMax < nBeforeC:
-            continue
-        if iMax > (nSamples-nAfterC):
-            continue
-        iStart = max(iMax-nBeforeC,0)
-        iEnd = min(iMax+nAfterC,nSamples)
-        if normToAmp:
-            data = dataArray[iStart:iEnd] / amplitude
-        else:
-            data = dataArray[iStart:iEnd]
-        hist, xedgesC, yedgesC = numpy.histogram2d(arangeC,data,bins=[nBeforeC+nAfterC,nBinsC],range=[[-nBeforeC,nAfterC],[yMinC,yMaxC]])
-        if allHistC is None:
-            allHistC = hist
-        else:
-            allHistC += hist
-        hitStartsC.extend(numpy.array(getattr(tree,getHitName(collectionWireBranchNames[iWire],start=True)))-iStart-nBeforeC)
-        hitEndsC.extend(numpy.array(getattr(tree,getHitName(collectionWireBranchNames[iWire],start=False)))-iStart-nBeforeC)
-      for iWire in range(nWiresI):
-        wireData = getattr(tree,inductionWireBranchNames[iWire])
-        dataArray = numpy.zeros((nSamples))
-        for i in range(wireData.size()):
-          dataArray[i] = wireData[i]
-        amplitude = numpy.max(dataArray)
-        rms = numpy.std(dataArray)
-        if amplitude / rms < 8.:
-            continue
-        iMax = numpy.argmax(dataArray)
-        if iMax < nBeforeI:
-            continue
-        if iMax > (nSamples-nAfterI):
-            continue
-        iStart = max(iMax-nBeforeI,0)
-        iEnd = min(iMax+nAfterI,nSamples)
-        if normToAmp:
-            data = dataArray[iStart:iEnd] / amplitude
-        else:
-            data = dataArray[iStart:iEnd]
-        hist, xedgesI, yedgesI = numpy.histogram2d(arangeI,data,bins=[nBeforeI+nAfterI,nBinsI],range=[[-nBeforeI,nAfterI],[yMinI,yMaxI]])
-        if allHistI is None:
-            allHistI = hist
-        else:
-            allHistI += hist
-        hitStartsI.extend(numpy.array(getattr(tree,getHitName(inductionWireBranchNames[iWire],start=True)))-iStart-nBeforeI)
-        hitEndsI.extend(numpy.array(getattr(tree,getHitName(inductionWireBranchNames[iWire],start=False)))-iStart-nBeforeI)
-    histsC.append(allHistC)
-    histsI.append(allHistI)
-    hitStartsCList.append(hitStartsC)
-    hitStartsIList.append(hitStartsI)
-    hitEndsCList.append(hitEndsC)
-    hitEndsIList.append(hitEndsI)
-
-  transparent_cmaps = []
-  for cmap in [mpl.cm.Greens,mpl.cm.Blues,mpl.cm.Reds,mpl.cm.Purples,mpl.cm.Oranges]:
-    frac_transparent = 0.5
-    cmap_colors = cmap(numpy.arange(cmap.N))
-    cmap_colors[:int(frac_transparent*cmap.N),-1] = numpy.linspace(0,1,int(frac_transparent*cmap.N)) # bottom frac linearly increases opacity
-    transparent_cmap = matplotlib.colors.ListedColormap(cmap_colors)
-    transparent_cmaps.append(transparent_cmap)
-  colors = ['g','b','r','purple','o']
-
-  gs = {'height_ratios':[5,1],'hspace':0}
-
-  fig, (ax,ax2) = mpl.subplots(nrows=2,figsize=(8.5,8.5),sharex=True,gridspec_kw=gs,dpi=200)
-  for i, allHistC in enumerate(histsC):
-    if allHistC is None:
-      print "Error: allHistC is None, no events passed amplitude cut for fileprefix: ",fileprefix
-    else:
-      xC, yC = numpy.meshgrid(xedgesC, yedgesC)
-      norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=allHistC.max())
-      ax.pcolormesh(xC,yC,allHistC.T,norm=norm,cmap=transparent_cmaps[i])
-    ax2.hist(hitStartsCList[i],range=[-nBeforeC,nAfterC],bins=100,normed=True,histtype="step",color=colors[i])
-    ax2.hist(hitEndsCList[i],range=[-nBeforeC,nAfterC],bins=100,normed=True,histtype="step",color=colors[i],ls=':')
-  ax.set_xlim(-nBeforeC,nAfterC)
-  ax.set_ylim(yMinC,yMaxC)
-  yLabelSuffix = ""
-  if normToAmp:
-    yLabelSuffix = " (Normalized to Max)"
-  ax.set_ylabel("Collection Wire Response"+yLabelSuffix)
-  ax2.set_xlabel("Time Tick - Time Tick of Max")
-  ax2.set_ylabel("Normalized\nHits / Bin")
-  ax2.set_yticks([])
-  ax2.set_ylim(0,ax2.get_ylim()[1]*1.1)
-  patchList = []
-  for i in range(len(histsC)):
-    patchList.append(
-        patches.Patch(color=colors[i], label=labels[i])
-        )
-  ax.legend(handles=patchList)
-  line1 = lines.Line2D([],[],color='k',label="Hit Start")
-  line2 = lines.Line2D([],[],color='k',ls=":",label="Hit End")
-  ax2.legend(handles=[line1,line2])
-  fig.savefig("{}_Collection.png".format(fileprefix))
-  mpl.close()
-
-  ###
-
-  fig, (ax,ax2) = mpl.subplots(nrows=2,figsize=(8.5,8.5),sharex=True,gridspec_kw=gs,dpi=200)
-  for i, allHistI in enumerate(histsI):
-    if allHistI is None:
-      print "Error: allHistI is None, no events passed amplitude cut for fileprefix: ",fileprefix
-    else:
-      xI, yI = numpy.meshgrid(xedgesI, yedgesI)
-      norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=allHistI.max())
-      ax.pcolormesh(xI,yI,allHistI.T,norm=norm,cmap=transparent_cmaps[i])
-    ax2.hist(hitStartsIList[i],range=[-nBeforeI,nAfterI],bins=100,normed=True,histtype="step",color=colors[i])
-    ax2.hist(hitEndsIList[i],range=[-nBeforeI,nAfterI],bins=100,normed=True,histtype="step",color=colors[i],ls=':')
-  ax.set_xlim(-nBeforeI,nAfterI)
-  ax.set_ylim(yMinI,yMaxI)
-  yLabelSuffix = ""
-  if normToAmp:
-    yLabelSuffix = " (Normalized to Max)"
-  ax.set_ylabel("Induction Wire Response"+yLabelSuffix)
-  ax2.set_xlabel("Time Tick - Time Tick of Max")
-  ax2.set_ylabel("Normalized\nHits / Bin")
-  ax2.set_yticks([])
-  ax2.set_ylim(0,ax2.get_ylim()[1]*1.1)
-  patchList = []
-  for i in range(len(histsI)):
-    patchList.append(
-        patches.Patch(color=colors[i], label=labels[i])
-        )
-  ax.legend(handles=patchList)
-  line1 = lines.Line2D([],[],color='k',label="Hit Start")
-  line2 = lines.Line2D([],[],color='k',ls=":",label="Hit End")
-  ax2.legend(handles=[line1,line2])
-  fig.savefig("{}_Induction.png".format(fileprefix))
-  mpl.close()
-
 if __name__ == "__main__":
 
   import matplotlib
@@ -822,7 +547,7 @@ if __name__ == "__main__":
         return False
     return True
 
-  nMax = 10
+  nMax = 100
 
   dataAllHists = makeWireHistsAndPkl("dataAllHists",tree,nMax,makeCuts)
   dataPhiLt0Hists = makeWireHistsAndPkl("dataPhiLt0Hists",tree,nMax,lambda x: makeCuts(x,phiLt0=True))
@@ -837,7 +562,6 @@ if __name__ == "__main__":
   compareWireHists(dataPhiLt0Hists,dataPhiGeq0Hists,filePrefix="TestCompare",
                                     labels=["$\phi < 0$", "$\phi \geq 0$"])
 
-  sys.exit(0)
 #  dataPhiGeq0Hists = makeWireHists(tree,nMax,lambda x: makeCuts(x,phiGeq0=True))
 #  dataPhiLt0Hists = makeWireHists(tree,nMax,lambda x: makeCuts(x,phiLt0=True))
 #  mcAllHists = makeWireHists(treeMC,nMax,makeCuts)
@@ -857,89 +581,3 @@ if __name__ == "__main__":
 #  plotAllWholeWires(tree,"phiGeq0",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
 #  plotAroundMaxWires(tree,"phiGeq0Max",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
 #  plotAroundMaxWires(tree,"phiGeq0MaxNorm",20,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
-#
-#  plotMultiEventAroundMaxWires(tree,"phiLt0Hist",100,cutFunc=lambda x: makeCuts(x,phiLt0=True))
-#  plotMultiEventAroundMaxWires(tree,"phiGeq0Hist",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True))
-#  plotMultiEventAroundMaxWires(tree,"phiLt0HistNorm",100,cutFunc=lambda x: makeCuts(x,phiLt0=True),normToAmp=True)
-#  plotMultiEventAroundMaxWires(tree,"phiGeq0HistNorm",100,cutFunc=lambda x: makeCuts(x,phiGeq0=True),normToAmp=True)
-#
-#  compareMultiEventAroundMaxWires([tree,tree],"ComparePhi",100,
-#                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiGeq0=True)],
-#                    labels=["$\phi < 0$", "$\phi \geq 0$"]
-#                    )
-#  compareMultiEventAroundMaxWires([tree,tree],"ComparePhiNorm",100,normToAmp=True,
-#                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiGeq0=True)],
-#                    labels=["$\phi < 0$", "$\phi \geq 0$"]
-#                    )
-#  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiLt0",100,
-#                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
-#                    labels=["Data","MC"]
-#                    )
-#  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiLt0Norm",100,normToAmp=True,
-#                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
-#                    labels=["Data","MC"]
-#                    )
-#  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiGeq0",100,
-#                    cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
-#                    labels=["Data","MC"]
-#                    )
-#  compareMultiEventAroundMaxWires([tree,treeMC],"CompareMCPhiGeq0Norm",100,normToAmp=True,
-#                    cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
-#                    labels=["Data","MC"]
-#                    )
-
-
-  compareMultiEventAroundMaxWires([tree,tree],"ComparePhiRaw",100,
-                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiGeq0=True)],
-                    branchNamePrefixes=["rawWireData","rawWireData"],
-                    labels=["$\phi < 0$", "$\phi \geq 0$"]
-                    )
-  compareMultiEventAroundMaxWires([tree,tree],"ComparePhiRawNorm",100,normToAmp=True,
-                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiGeq0=True)],
-                    branchNamePrefixes=["rawWireData","rawWireData"],
-                    labels=["$\phi < 0$", "$\phi \geq 0$"]
-                    )
-
-
-  compareMultiEventAroundMaxWires([treeMC,tree],"CompareMCRawPhiLt0",100,
-                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
-                    branchNamePrefixes=["rawWireData","rawWireData"],
-                    labels=["MC","Data"]
-                    )
-  compareMultiEventAroundMaxWires([treeMC,tree],"CompareMCRawPhiLt0Norm",100,normToAmp=True,
-                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
-                    branchNamePrefixes=["rawWireData","rawWireData"],
-                    labels=["MC","Data"]
-                    )
-  compareMultiEventAroundMaxWires([treeMC,tree],"CompareMCRawPhiGeq0",100,
-                    cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
-                    branchNamePrefixes=["rawWireData","rawWireData"],
-                    labels=["MC","Data"]
-                    )
-  compareMultiEventAroundMaxWires([treeMC,tree],"CompareMCRawPhiGeq0Norm",100,normToAmp=True,
-                    cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
-                    branchNamePrefixes=["rawWireData","rawWireData"],
-                    labels=["MC","Data"]
-                    )
-
-
-  compareMultiEventAroundMaxWires([tree,tree],"CompareRawPhiLt0",100,
-                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
-                    branchNamePrefixes=["rawWireData","wireData"],
-                    labels=["Raw","De-convolved"]
-                    )
-  compareMultiEventAroundMaxWires([tree,tree],"CompareRawPhiLt0Norm",100,normToAmp=True,
-                    cutFuncs=[lambda x: makeCuts(x,phiLt0=True),lambda x: makeCuts(x,phiLt0=True)],
-                    branchNamePrefixes=["rawWireData","wireData"],
-                    labels=["Raw","De-convolved"]
-                    )
-  compareMultiEventAroundMaxWires([tree,tree],"CompareRawPhiGeq0",100,
-                    cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
-                    branchNamePrefixes=["rawWireData","wireData"],
-                    labels=["Raw","De-convolved"]
-                    )
-  compareMultiEventAroundMaxWires([tree,tree],"CompareRawPhiGeq0Norm",100,normToAmp=True,
-                    cutFuncs=[lambda x: makeCuts(x,phiGeq0=True),lambda x: makeCuts(x,phiGeq0=True)],
-                    branchNamePrefixes=["rawWireData","wireData"],
-                    labels=["Raw","De-convolved"]
-                    )
