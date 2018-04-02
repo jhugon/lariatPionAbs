@@ -134,19 +134,64 @@ def makeWireHists(tree,maxEvents,cutFunc,nBefore=150,nAfter=150,yMin=-400,yMax=4
     allHitEndsRaw.append(hitEndsRaw)
   return rawHists, rawHistNorms, deconvHists, deconvHistNorms, rawAtDeconvHists, rawAtDeconvHistNorms, xedges, yedges, yedgesNorm, yedgesRaw, yedgesNormRaw, allHitStarts, allHitEnds, allHitStartsRaw, allHitEndsRaw
 
-def justPlot(hist,hitStarts,hitEnds,xedges,yedges,fn,xMin,xMax,yMin,yMax,xLabel,yLabel,title):
+def makeWireHistsAndPkl(filePrefix, tree, maxEvents, cutFunc,**kargs):
+  fn = "{0}_{1:d}.pkl".format(filePrefix,nMax)
+  result = None
+  try:
+    with open(fn) as infile:
+      result = cPickle.load(infile)
+  except IOError:
+    result = makeWireHists(tree,nMax,makeCuts)
+    with open(fn,'wb') as outfile:
+      cPickle.dump(result,outfile)
+  return result
+
+def justPlot(hist,hitStarts,hitEnds,xedges,yedges,fn,xMin,xMax,yMin,yMax,xLabel,yLabel,title,labels=[],compare=False):
   gs = {'height_ratios':[4,1],'hspace':0}
   fig, (ax1,ax2) = mpl.subplots(nrows=2,sharex=True,gridspec_kw=gs)
-  if hist is None:
-    print "Error: hist is None, no events passed amplitude cut for: ",fn
+  patchList = []
+  if compare:
+    if len(hist) != len(labels):
+        raise Exception("Length of hist doesn't equal length of labels. Maybe you forgot to add labels")
+    if len(hist) != len(hitStarts):
+        raise Exception("Length of hist doesn't equal length of hitStarts")
+    if len(hist) != len(hitEnds):
+        raise Exception("Length of hist doesn't equal length of hitEnds")
+
+    transparent_cmaps = []
+    for cmap in [mpl.cm.Greens,mpl.cm.Blues,mpl.cm.Reds,mpl.cm.Purples,mpl.cm.Oranges]:
+      frac_transparent = 0.5
+      cmap_colors = cmap(numpy.arange(cmap.N))
+      cmap_colors[:int(frac_transparent*cmap.N),-1] = numpy.linspace(0,1,int(frac_transparent*cmap.N)) # bottom frac linearly increases opacity
+      transparent_cmap = matplotlib.colors.ListedColormap(cmap_colors)
+      transparent_cmaps.append(transparent_cmap)
+    colors = ['g','b','r','purple','o']
+
+    for h, xed, yed, starts, ends, label, t_cmap, col in zip(hist, xedges , yedges, hitStarts, hitEnds, labels, transparent_cmaps[:len(hist)], colors[:len(hist)]):
+      if h is None:
+        print "Error: element of hist is None, no events passed amplitude cut for: ",fn," label: ",label
+      else:
+        histToPlot = numpy.array(h)
+        histToPlot[histToPlot == 0.] = 0.5
+        x, y = numpy.meshgrid(xed, yed)
+        norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=histToPlot.max())
+        p = ax1.pcolormesh(x,y,histToPlot.T,norm=norm,cmap=t_cmap)
+      ax2.hist(starts,range=[xMin,xMax],bins=100,normed=True,histtype="step",color=col)
+      ax2.hist(ends,range=[xMin,xMax],bins=100,normed=True,histtype="step",color=col,ls=':')
+      patchList.append(
+            patches.Patch(color=col, label=label)
+          )
   else:
-    histToPlot = numpy.array(hist)
-    histToPlot[histToPlot == 0.] = 0.5
-    x, y = numpy.meshgrid(xedges, yedges)
-    norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=histToPlot.max())
-    p = ax1.pcolormesh(x,y,histToPlot.T,norm=norm,cmap="Blues_r")
-  ax2.hist(hitStarts,range=[xMin,xMax],bins=100,normed=True,histtype="step",color="b")
-  ax2.hist(hitEnds,range=[xMin,xMax],bins=100,normed=True,histtype="step",color="b",ls=':')
+    if hist is None:
+      print "Error: hist is None, no events passed amplitude cut for: ",fn
+    else:
+      histToPlot = numpy.array(hist)
+      histToPlot[histToPlot == 0.] = 0.5
+      x, y = numpy.meshgrid(xedges, yedges)
+      norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=histToPlot.max())
+      p = ax1.pcolormesh(x,y,histToPlot.T,norm=norm,cmap="Blues_r")
+    ax2.hist(hitStarts,range=[xMin,xMax],bins=100,normed=True,histtype="step",color="b")
+    ax2.hist(hitEnds,range=[xMin,xMax],bins=100,normed=True,histtype="step",color="b",ls=':')
   ax1.set_xlim(xMin,xMax)
   ax1.set_ylim(yMin,yMax)
   yLabelSuffix = ""
@@ -159,10 +204,121 @@ def justPlot(hist,hitStarts,hitEnds,xedges,yedges,fn,xMin,xMax,yMin,yMax,xLabel,
   line1 = lines.Line2D([],[],color='k',label="Hit Start")
   line2 = lines.Line2D([],[],color='k',ls=":",label="Hit End")
   ax2.legend(handles=[line1,line2],ncol=2,fontsize='small')
+  if len(patchList) > 0:
+    ax1.legend(handles=patchList)
   ax1.set_title(title)
 
   fig.savefig(fn)
   mpl.close()
+
+def compareWireHists(*cases,**kargs):
+
+  filePrefix=""
+  fileSuffixes=["C","I"]
+  xMins=[-70,-50]
+  xMaxs=[70,100]
+  yMins=[-50,-150]
+  yMaxs=[300,150]
+  yLabels=["Collection Wire Response","Induction Wire Response"]
+  xLabel="Time Tick - Time Tick of Max"
+  title=""
+  labels=[]
+
+  try:
+    filePrefix = kargs["filePrefix"]
+  except KeyError:
+    raise Exception("plotWireHists: filePrefix=<prefix> argument required")
+  try:
+    fileSuffixes = kargs["fileSuffixes"]
+  except:
+    pass
+  try:
+    title = kargs["title"]
+  except:
+    pass
+  try:
+    xMins = kargs["xMins"]
+  except:
+    pass
+  try:
+    yMins = kargs["yMins"]
+  except:
+    pass
+  try:
+    xMins = kargs["xMaxs"]
+  except:
+    pass
+  try:
+    yMaxs = kargs["yMaxs"]
+  except:
+    pass
+  try:
+    labels = kargs["labels"]
+  except KeyError:
+    raise Exception("plotWireHists: labels=[<label1>,<label2>,...] argument required")
+
+  rawHists = []
+  rawHistNorms = []
+  deconvHists = []
+  deconvHistNorms = []
+  rawAtDeconvHists = []
+  rawAtDeconvHistNorms = []
+  xedges = []
+  yedges = []
+  yedgesNorm = []
+  yedgesRaw = []
+  yedgesNormRaw = []
+  allHitStarts = []
+  allHitEnds = []
+  allHitStartsRaw = []
+  allHitEndsRaw = []
+
+  for args in cases:
+    if len(args) != 15:
+      print "compareWireHists n args isn't 15 as expected is ", len(args)
+      sys.exit(1)
+    rawHists.append(args[0])
+    rawHistNorms.append(args[1])
+    deconvHists.append(args[2])
+    deconvHistNorms.append(args[3])
+    rawAtDeconvHists.append(args[4])
+    rawAtDeconvHistNorms.append(args[5])
+    xedges.append(args[6])
+    yedges.append(args[7])
+    yedgesNorm.append(args[8])
+    yedgesRaw.append(args[9])
+    yedgesNormRaw.append(args[10])
+    allHitStarts.append(args[11])
+    allHitEnds.append(args[12])
+    allHitStartsRaw.append(args[13])
+    allHitEndsRaw.append(args[14])
+
+    nRawHists = len(args[0])
+    if len(fileSuffixes) != nRawHists:
+      raise ValueError("fileSuffixes length should be: ", nRawHists, " is ", len(fileSuffixes))
+    if len(xMins) != nRawHists:
+      raise ValueError("xMins length should be: ", nRawHists, " is ", len(xMins))
+    if len(yMins) != nRawHists:
+      raise ValueError("yMins length should be: ", nRawHists, " is ", len(yMins))
+    if len(xMaxs) != nRawHists:
+      raise ValueError("xMaxs length should be: ", nRawHists, " is ", len(xMaxs))
+    if len(yMaxs) != nRawHists:
+      raise ValueError("yMaxs length should be: ", nRawHists, " is ", len(yMaxs))
+    if len(yLabels) != nRawHists:
+      raise ValueError("yLabels length should be: ", nRawHists, " is ", len(yLabels))
+
+  for rawHist, rawHistNorm, deconvHist, deconvHistNorm, rawAtDeconvHist, rawAtDeconvHistNorm, hitStarts, hitEnds, hitStartsRaw, hitEndsRaw, fileSuffix, xMin, xMax, yMin, yMax, yLabel in zip(
+            rawHists, rawHistNorms, deconvHists, deconvHistNorms, rawAtDeconvHists, rawAtDeconvHistNorms,
+            allHitStarts, allHitEnds, allHitStartsRaw, allHitEndsRaw,
+            fileSuffixes, xMins, xMaxs, yMins, yMaxs, yLabels
+        ):
+    
+    justPlot(rawHist,hitStartsRaw,hitEndsRaw,xedges,yedgesRaw,"{}_raw_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title,labels=labels,compare=True)
+    justPlot(rawHistNorm,hitStartsRaw,hitEndsRaw,xedges,yedgesNormRaw,"{}_raw_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title,labels=labels,compare=True)
+    justPlot(deconvHist,hitStarts,hitEnds,xedges,yedges,"{}_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title,labels=labels,compare=True)
+    justPlot(deconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_deconv_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title,labels=labels,compare=True)
+    #justPlot(rawAtDeconvHist,hitStarts,hitEnds,xedges,yedges,"{}_raw_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title,labels=labels,compare=True)
+    #justPlot(rawAtDeconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_raw_norm_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title,labels=labels,compare=True)
 
 def plotWireHists(*args,**kargs):
 
@@ -224,18 +380,19 @@ def plotWireHists(*args,**kargs):
   except:
     pass
 
-  if len(fileSuffixes) != len(rawHists):
-    raise ValueError("fileSuffixes length should be: ", len(rawHists), " is ", len(fileSuffixes))
-  if len(xMins) != len(rawHists):
-    raise ValueError("xMins length should be: ", len(rawHists), " is ", len(xMins))
-  if len(yMins) != len(rawHists):
-    raise ValueError("yMins length should be: ", len(rawHists), " is ", len(yMins))
-  if len(xMaxs) != len(rawHists):
-    raise ValueError("xMaxs length should be: ", len(rawHists), " is ", len(xMaxs))
-  if len(yMaxs) != len(rawHists):
-    raise ValueError("yMaxs length should be: ", len(rawHists), " is ", len(yMaxs))
-  if len(yLabels) != len(rawHists):
-    raise ValueError("yLabels length should be: ", len(rawHists), " is ", len(yLabels))
+  nRawHists = len(rawHists)
+  if len(fileSuffixes) != nRawHists:
+    raise ValueError("fileSuffixes length should be: ", nRawHists, " is ", len(fileSuffixes))
+  if len(xMins) != nRawHists:
+    raise ValueError("xMins length should be: ", nRawHists, " is ", len(xMins))
+  if len(yMins) != nRawHists:
+    raise ValueError("yMins length should be: ", nRawHists, " is ", len(yMins))
+  if len(xMaxs) != nRawHists:
+    raise ValueError("xMaxs length should be: ", nRawHists, " is ", len(xMaxs))
+  if len(yMaxs) != nRawHists:
+    raise ValueError("yMaxs length should be: ", nRawHists, " is ", len(yMaxs))
+  if len(yLabels) != nRawHists:
+    raise ValueError("yLabels length should be: ", nRawHists, " is ", len(yLabels))
 
   for rawHist, rawHistNorm, deconvHist, deconvHistNorm, rawAtDeconvHist, rawAtDeconvHistNorm, hitStarts, hitEnds, hitStartsRaw, hitEndsRaw, fileSuffix, xMin, xMax, yMin, yMax, yLabel in zip(
             rawHists, rawHistNorms, deconvHists, deconvHistNorms, rawAtDeconvHists, rawAtDeconvHistNorms,
@@ -247,8 +404,8 @@ def plotWireHists(*args,**kargs):
     justPlot(rawHistNorm,hitStartsRaw,hitEndsRaw,xedges,yedgesNormRaw,"{}_raw_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
     justPlot(deconvHist,hitStarts,hitEnds,xedges,yedges,"{}_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
     justPlot(deconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_deconv_norm_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
-    justPlot(rawAtDeconvHist,hitStarts,hitEnds,xedges,yedges,"{}_raw_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
-    justPlot(rawAtDeconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_raw_norm_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
+    #justPlot(rawAtDeconvHist,hitStarts,hitEnds,xedges,yedges,"{}_raw_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title)
+    #justPlot(rawAtDeconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_raw_norm_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title)
 
 def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True,branchNamePrefix="wireData",getHits=True):
   collectionWireBranchNames = []
@@ -666,15 +823,20 @@ if __name__ == "__main__":
     return True
 
   nMax = 10
-  dataAllHists = None
-  try:
-    with open("dataAllHists.pkl") as infile:
-      dataAllHists = cPickle.load(infile)
-  except IOError:
-    dataAllHists = makeWireHists(tree,nMax,makeCuts)
-    with open("dataAllHists.pkl",'wb') as outfile:
-      cPickle.dump(dataAllHists,outfile)
+
+  dataAllHists = makeWireHistsAndPkl("dataAllHists",tree,nMax,makeCuts)
+  dataPhiLt0Hists = makeWireHistsAndPkl("dataPhiLt0Hists",tree,nMax,lambda x: makeCuts(x,phiLt0=True))
+  dataPhiGeq0Hists = makeWireHistsAndPkl("dataPhiGeq0Hists",tree,nMax,lambda x: makeCuts(x,phiGeq0=True))
+  #mcAllHists = makeWireHistsAndPkl("mcAllHists",treeMC,nMax,makeCuts)
+  #mcPhiLt0Hists = makeWireHistsAndPkl("mcPhiLt0Hists",treeMC,nMax,lambda x: makeCuts(x,phiLt0=True))
+  #mcPhiGeq0Hists = makeWireHistsAndPkl("mcPhiGeq0Hists",treeMC,nMax,lambda x: makeCuts(x,phiGeq0=True))
+
   plotWireHists(*dataAllHists,filePrefix="TestPlot")
+  plotWireHists(*dataPhiLt0Hists,filePrefix="TestPlot_PhiLt0")
+  plotWireHists(*dataPhiGeq0Hists,filePrefix="TestPlot_PhiGeq0")
+  compareWireHists(dataPhiLt0Hists,dataPhiGeq0Hists,filePrefix="TestCompare",
+                                    labels=["$\phi < 0$", "$\phi \geq 0$"])
+
   sys.exit(0)
 #  dataPhiGeq0Hists = makeWireHists(tree,nMax,lambda x: makeCuts(x,phiGeq0=True))
 #  dataPhiLt0Hists = makeWireHists(tree,nMax,lambda x: makeCuts(x,phiLt0=True))
