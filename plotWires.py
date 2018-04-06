@@ -236,8 +236,8 @@ def plotWireHists(*args,**kargs):
   fileSuffixes=["C","I"]
   xMins=[-150,-150]
   xMaxs=[150,150]
-  yMins=[-50,-200]
-  yMaxs=[300,200]
+  yMins=[-50,-250]
+  yMaxs=[400,300]
   yMinNorms=[-0.2,-1.8]
   yLabels=["Collection Wire Response","Induction Wire Response"]
   xLabel="Time Tick - Time Tick of Max"
@@ -306,7 +306,7 @@ def compareWireHists(*cases,**kargs):
   xMins=[-150,-150]
   xMaxs=[150,150]
   yMins=[-50,-150]
-  yMaxs=[300,200]
+  yMaxs=[400,300]
   yLabels=["Collection Wire Response","Induction Wire Response"]
   xLabel="Time Tick - Time Tick of Max"
   title=""
@@ -405,13 +405,14 @@ def compareWireHists(*cases,**kargs):
              xMins[iPlane],xMaxs[iPlane],yMins[iPlane],yMaxs[iPlane],
              xLabel,yLabels[iPlane],title,labels=labels,compare=True)
     yMinNorm = [-0.2,-1.8][iPlane]
+    yMaxNorm = [1.8,2.2][iPlane]
     justPlot([x[iPlane] for x in rawHistNorms],
              [x[iPlane] for x in allHitStartsRaw],
              [x[iPlane] for x in allHitEndsRaw],
              xedges,
              yedgesNormRaw,
              "{}_raw_norm_{}.png".format(filePrefix,fileSuffixes[iPlane]),
-             xMins[iPlane],xMaxs[iPlane],yMinNorm,1.2,
+             xMins[iPlane],xMaxs[iPlane],yMinNorm,yMaxNorm,
              xLabel,yLabels[iPlane]+" Normalized to Max",title,labels=labels,compare=True)
     justPlot([x[iPlane] for x in deconvHists],
              [x[iPlane] for x in allHitStarts],
@@ -427,7 +428,7 @@ def compareWireHists(*cases,**kargs):
              xedges,
              yedgesNormRaw,
              "{}_deconv_norm_{}.png".format(filePrefix,fileSuffixes[iPlane]),
-             xMins[iPlane],xMaxs[iPlane],-0.5,1.2,
+             xMins[iPlane],xMaxs[iPlane],-0.5,1.6,
              xLabel,yLabels[iPlane]+" Normalized to Max",title,labels=labels,compare=True)
 
     #justPlot(rawAtDeconvHist,hitStarts,hitEnds,xedges,yedges,"{}_raw_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title,labels=labels,compare=True)
@@ -524,13 +525,15 @@ if __name__ == "__main__":
   #f = root.TFile("WireData_RIIP100_64a_nocrct.root")
   #f = root.TFile("WireData_RIIP60_64a.root")
   f = root.TFile("Wires_RIIP60a_v3.root")
+  fBeam100A = root.TFile("Wires_Lovely1_Pos_RunII_jhugon_current100_secondary64_d_v1_v01.root")
   #fMC = root.TFile("WiresMC_v3.root")
   #f.ls()
   tree = f.Get("cosmicanalyzer/tree")
+  treeBeam100A = fBeam100A.Get("cosmicanalyzer/tree")
   #treeMC = fMC.Get("cosmicanalyzer/tree")
   #tree.Print()
 
-  def makeCuts(tree,phiGeq0=False,phiLt0=False):
+  def makeCuts(tree,phiGeq0=False,phiLt0=False,beam=False,tofLt25=False,tofGeq25=False):
     pi = math.pi
     result = True
     if tree.nTracks != 1:
@@ -541,28 +544,41 @@ if __name__ == "__main__":
         return False
     if phiLt0 and not tree.primTrkStartPhi < 0.:
         return False
-    if not (tree.isMC or ((tree.triggerBits >> 10) & 1)):
+    if not (tree.isMC or beam or ((tree.triggerBits >> 10) & 1)):
         return False
     if not ((not tree.isMC) or (tree.trueHitCosmic1 and tree.trueHitCosmic2) or (tree.trueHitCosmic3 and tree.trueHitCosmic4)):
         return False
-    if not ((tree.primTrkStartTheta > 27*pi/180.) and (tree.primTrkStartTheta < 42*pi/180.) and (tree.primTrkStartPhi > -57*pi/180. and tree.primTrkStartPhi < 60*pi/180.) and (tree.primTrkStartPhi < -15*pi/180. or tree.primTrkStartPhi > 22*pi/180.)):
+    if (not beam) and not ((tree.primTrkStartTheta > 27*pi/180.) and (tree.primTrkStartTheta < 42*pi/180.) and (tree.primTrkStartPhi > -57*pi/180. and tree.primTrkStartPhi < 60*pi/180.) and (tree.primTrkStartPhi < -15*pi/180. or tree.primTrkStartPhi > 22*pi/180.)):
+        return False
+    if tofLt25 and not (tree.firstTOF < 25.):
+        return False
+    if tofGeq25 and not (tree.firstTOF >= 25.):
         return False
     return True
 
-  nMax = 100
+  nMax = 200
 
   dataAllHists = makeWireHistsAndPkl("dataAllHists",tree,nMax,makeCuts)
   dataPhiLt0Hists = makeWireHistsAndPkl("dataPhiLt0Hists",tree,nMax,lambda x: makeCuts(x,phiLt0=True))
   dataPhiGeq0Hists = makeWireHistsAndPkl("dataPhiGeq0Hists",tree,nMax,lambda x: makeCuts(x,phiGeq0=True))
+  dataBeam100AHists = makeWireHistsAndPkl("dataBeam100AHists",treeBeam100A,nMax,lambda x: makeCuts(x,beam=True))
+  dataBeam100ATOFLt25Hists = makeWireHistsAndPkl("dataBeam100ATOFLt25Hists",treeBeam100A,nMax,lambda x: makeCuts(x,beam=True,tofLt25=True))
+  dataBeam100ATOFGeq25Hists = makeWireHistsAndPkl("dataBeam100ATOFGeq25Hists",treeBeam100A,nMax,lambda x: makeCuts(x,beam=True,tofGeq25=True))
   #mcAllHists = makeWireHistsAndPkl("mcAllHists",treeMC,nMax,makeCuts)
   #mcPhiLt0Hists = makeWireHistsAndPkl("mcPhiLt0Hists",treeMC,nMax,lambda x: makeCuts(x,phiLt0=True))
   #mcPhiGeq0Hists = makeWireHistsAndPkl("mcPhiGeq0Hists",treeMC,nMax,lambda x: makeCuts(x,phiGeq0=True))
 
-  plotWireHists(*dataAllHists,filePrefix="TestPlot")
-  plotWireHists(*dataPhiLt0Hists,filePrefix="TestPlot_PhiLt0")
-  plotWireHists(*dataPhiGeq0Hists,filePrefix="TestPlot_PhiGeq0")
-  compareWireHists(dataPhiLt0Hists,dataPhiGeq0Hists,filePrefix="TestCompare",
+  #plotWireHists(*dataAllHists,filePrefix="Scope_All")
+  plotWireHists(*dataPhiLt0Hists,filePrefix="Scope_PhiLt0")
+  plotWireHists(*dataPhiGeq0Hists,filePrefix="Scope_PhiGeq0")
+  plotWireHists(*dataBeam100ATOFLt25Hists,filePrefix="Scope_Beam100ATOFLt25")
+  plotWireHists(*dataBeam100ATOFGeq25Hists,filePrefix="Scope_Beam100ATOFGeq25")
+  compareWireHists(dataPhiLt0Hists,dataPhiGeq0Hists,filePrefix="ScopeCompare_Phi",
                                     labels=["$\phi < 0$", "$\phi \geq 0$"])
+  compareWireHists(dataPhiLt0Hists,dataPhiGeq0Hists,dataBeam100ATOFLt25Hists,filePrefix="ScopeCompare_PhiBeam",
+                                    labels=["$\phi < 0$", "$\phi \geq 0$",r"+100A TOF < 25 ns"])
+  compareWireHists(dataBeam100ATOFGeq25Hists,dataBeam100ATOFLt25Hists,filePrefix="ScopeCompare_Beam",
+                                    labels=["+100A TOF $\geq$ 25 ns",r"+100A TOF < 25 ns"])
 
 #  dataPhiGeq0Hists = makeWireHists(tree,nMax,lambda x: makeCuts(x,phiGeq0=True))
 #  dataPhiLt0Hists = makeWireHists(tree,nMax,lambda x: makeCuts(x,phiLt0=True))
