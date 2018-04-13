@@ -412,6 +412,8 @@ def compareWireHists(*cases,**kargs):
   allHitEnds = []
   allHitStartsRaw = []
   allHitEndsRaw = []
+  hitStartsHists = []
+  hitEndsHists = []
 
   for args in cases:
     if len(args) != 17:
