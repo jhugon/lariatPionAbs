@@ -235,22 +235,52 @@ def justDraw(hist,hitStarts,hitEnds,xedges,yedges,fn,xMin,xMax,yMin,yMax,xLabel,
   fig.savefig(fn)
   mpl.close()
 
-def drawHitVAmpHists(hist,xedges,yedges,fn,xMin,xMax,yMin,yMax,xLabel,yLabel,title,compare=False):
+def drawHitVAmpHists(hist,xedges,yedges,fn,xMin,xMax,yMin,yMax,xLabel,yLabel,title,labels=[],compare=False):
   fig, ax1 = mpl.subplots()
-  if hist is None:
-    print "Error: hist is None, no events passed amplitude cut for: ",fn
+  patchList = []
+  if compare:
+    if len(hist) != len(labels):
+        raise Exception("Length of hist doesn't equal length of labels. Maybe you forgot to add labels")
+
+    transparent_cmaps = []
+    for cmap in [mpl.cm.Greens,mpl.cm.Blues,mpl.cm.Reds,mpl.cm.Purples,mpl.cm.Oranges]:
+      frac_transparent = 0.5
+      cmap_colors = cmap(numpy.arange(cmap.N))
+      cmap_colors[:int(frac_transparent*cmap.N),-1] = numpy.linspace(0,1,int(frac_transparent*cmap.N)) # bottom frac linearly increases opacity
+      transparent_cmap = matplotlib.colors.ListedColormap(cmap_colors)
+      transparent_cmaps.append(transparent_cmap)
+    colors = ['g','b','r','purple','o']
+
+
+    for h, xed, yed, label, t_cmap, col in zip(hist, xedges , yedges, labels, transparent_cmaps[:len(hist)], colors[:len(hist)]):
+      if h is None:
+        print "Error: element of hist is None, no events passed amplitude cut for: ",fn," label: ",label
+      else:
+        histToPlot = numpy.array(h)
+        histToPlot[histToPlot == 0.] = 0.5
+        x, y = numpy.meshgrid(xed, yed)
+        norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=histToPlot.max())
+        p = ax1.pcolormesh(x,y,histToPlot.T,norm=norm,cmap=t_cmap)
+      patchList.append(
+            patches.Patch(color=col, label=label)
+          )
   else:
-    histToPlot = numpy.array(hist).T
-    histToPlot[histToPlot == 0.] = 0.5
-    x, y = numpy.meshgrid(xedges, yedges)
-    norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=histToPlot.max())
-    p = ax1.pcolormesh(x,y,histToPlot,norm=norm,cmap="Blues_r")
+    if hist is None:
+      print "Error: hist is None, no events passed amplitude cut for: ",fn
+    else:
+      histToPlot = numpy.array(hist).T
+      histToPlot[histToPlot == 0.] = 0.5
+      x, y = numpy.meshgrid(xedges, yedges)
+      norm = matplotlib.colors.LogNorm(vmin=0.5, vmax=histToPlot.max())
+      p = ax1.pcolormesh(x,y,histToPlot,norm=norm,cmap="Blues_r")
   ax1.set_xlim(xMin,xMax)
   ax1.set_ylim(yMin,yMax)
   yLabelSuffix = ""
   ax1.set_ylabel(yLabel)
   ax1.set_xlabel(xLabel)
   ax1.set_title(title)
+  if len(patchList) > 0:
+    ax1.legend(handles=patchList)
 
   fig.savefig(fn)
   mpl.close()
@@ -490,6 +520,9 @@ def compareWireHists(*cases,**kargs):
     #justDraw(rawAtDeconvHist,hitStarts,hitEnds,xedges,yedges,"{}_raw_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,yMin,yMax,xLabel,yLabel,title,labels=labels,compare=True)
     #justDraw(rawAtDeconvHistNorm,hitStarts,hitEnds,xedges,yedgesNorm,"{}_raw_norm_on_deconv_{}.png".format(filePrefix,fileSuffix),xMin,xMax,-2,2,xLabel,yLabel+" Normalized to Max",title,labels=labels,compare=True)
 
+    drawHitVAmpHists([x[iPlane] for x in hitStartsHists],xedges,yedges,"{}_hitStartVAmp_{}.png".format(filePrefix,fileSuffixes[iPlane]),xMins[iPlane],xMaxs[iPlane],0,400,"Hit Start Time - Time of Hit Maximum","Amplitude of "+yLabels[iPlane],title,labels=labels,compare=True)
+    drawHitVAmpHists([x[iPlane] for x in hitEndsHists],xedges,yedges,"{}_hitEndVAmp_{}.png".format(filePrefix,fileSuffixes[iPlane]),xMins[iPlane],xMaxs[iPlane],0,400,"Hit End Time - Time of Hit Maximum","Amplitude of "+yLabels[iPlane],title,labels=labels,compare=True)
+
 def plotAllWholeWires(tree,fileprefix,maxEvents=100,cutFunc=lambda x: True,branchNamePrefix="wireData",getHits=True):
   collectionWireBranchNames = []
   inductionWireBranchNames = []
@@ -635,6 +668,8 @@ if __name__ == "__main__":
                                     labels=["$\phi < 0$", "$\phi \geq 0$",r"+100A TOF < 25 ns"])
   compareWireHists(dataBeam100ATOFGeq25Hists,dataBeam100ATOFLt25Hists,filePrefix="ScopeCompare_Beam",
                                     labels=["+100A TOF $\geq$ 25 ns",r"+100A TOF < 25 ns"])
+  compareWireHists(dataBeam100ATOFLt25Hists,dataBeam100ATOFGeq25Hists,filePrefix="ScopeCompare_TOF",
+                                    labels=[r"100A TOF < 25 ns",r"+100A TOF $\geq$ 25 ns"])
 
 #  dataPhiGeq0Hists = makeWireHists(tree,nMax,lambda x: makeCuts(x,phiGeq0=True))
 #  dataPhiLt0Hists = makeWireHists(tree,nMax,lambda x: makeCuts(x,phiLt0=True))
