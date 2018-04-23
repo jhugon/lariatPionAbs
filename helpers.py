@@ -2705,6 +2705,99 @@ def drawGraphs(canvas,graphs,xTitle,yTitle,yStartZero=True,xlims=None,ylims=None
     graph.Draw("PEZ")
   return axisHist
 
+def smallMultiples(histLists,axisLabels=None,xlimits=[0.001,0.999],ylimits=[0.001,0.999],xlabel="X", ylabel="Counts",wide=True):
+  """
+  Don Bluth's small multiples for ROOT
+
+  histLists: a 2D list of histograms or tgraphs, (can be 3D)
+    Outermost list is list of rows
+    Next innermost list is list of columns
+    Innermost list (if present) is list of multiple hists
+      or graphs to plot on same axis
+
+  """
+  def getPadNumber(row,col): # index from 0
+    return row*nColumns + col + 1
+    padNum = getPadNumber(iRow,iCol)
+
+  nRows = len(histLists)
+  nColumns = 1
+  nHists = 1
+  for iRow in range(nRows):
+    tmpNColumns = len(histLists[iRow])
+    for iCol in range(tmpNColumns):
+      try:
+        tmpNHists = len(histLists[iRow][iCol])
+      except:
+        pass
+      else:
+        nHists = max(tmpNHists,nHists)
+    nColumns = max(tmpNColumns,nColumns)
+  height = 700
+  width = 700
+  if wide:
+    width = 1120
+  canvas = root.TCanvas(uuid.uuid1().hex,"",width,height)
+  if wide:
+    canvas.SetMargin(0.2,0.033,0.22,0.075)
+  else:
+    canvas.SetMargin(0.22,0.033,0.22,0.075)
+  canvas.Divide(nColumns,nRows,0,0)
+  axisHists = []
+  tlatex = root.TLatex()
+  tlatex.SetNDC()
+  tlatex.SetTextFont(root.gStyle.GetLabelFont())
+  tlatex.SetTextSize(0.04)
+  tlatex.SetTextAlign(12)
+  xmin = xlimits[0]
+  ymin = ylimits[0]
+  xmax = xlimits[1]
+  ymax = ylimits[1]
+  
+  for iRow in range(nRows):
+    for iCol in range(nColumns):
+      padNum = getPadNumber(iRow,iCol)
+      canvas.cd(padNum)
+      axisHist = Hist2D(1,xmin,xmax,1,ymin,ymax)
+      axisHist.GetXaxis().SetNdivisions(505)
+      axisHist.GetYaxis().SetNdivisions(505)
+      if iCol == 0:
+        axisHist.GetYaxis().SetLabelSize(0.08)
+      else:
+        axisHist.GetYaxis().SetLabelSize(0.)
+      if iRow == nRows-1:
+        axisHist.GetXaxis().SetLabelSize(0.08)
+      else:
+        axisHist.GetXaxis().SetLabelSize(0.)
+      axisHist.Draw()
+      try:
+        histLists[iRow][iCol].Draw("same")
+      except AttributeError:
+        try:
+          for hist in histLists[iRow][iCol]:
+            hist.Draw("same")
+        except TypeError:
+          pass
+      except IndexError:
+        pass
+      tlatex.SetTextSize(0.08)
+      tlatex.SetTextAlign(33)
+      #tlatex.DrawLatex(0.95,0.95,"{} {} {}".format(padNum,iRow,iCol))
+      try:
+        tlatex.DrawLatex(0.95,0.95,axisLabels[iRow][iCol])
+      except TypeError:
+        pass
+      axisHists.append(axisHist)
+  canvas.cd(0)
+  tlatex.SetTextSize(0.04)
+  tlatex.SetTextAlign(21)
+  tlatex.DrawLatex(0.55,0.01,xlabel)
+  tlatex.SetTextAlign(23)
+  tlatex.SetTextAngle(90)
+  tlatex.DrawLatex(0.01,0.55,ylabel)
+  
+  canvas.SaveAs("Test.png")
+
 COLORLIST=[
       root.kBlue-7,
       root.kRed-4,
