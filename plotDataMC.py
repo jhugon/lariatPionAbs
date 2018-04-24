@@ -23,9 +23,9 @@ if __name__ == "__main__":
   ###
   ###
   secTrkCuts = "*(trackStartDistToPrimTrkEnd < 2.)"
-  #weightStr = "pzWeight"+cuts
-  weightStr = "1"+cuts
-  nData = 30860.0
+  weightStr = "pzWeight"+cuts
+  #weightStr = "1"+cuts
+  nData = 1359.
   logy = True
 
   c = root.TCanvas()
@@ -34,8 +34,7 @@ if __name__ == "__main__":
   fileConfigs = [
     {
       'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_b_v02_triggerFilter.root",
-      #'addFriend': ["friend", "friendTree_Pos_RunII_v03.root"],
-      #'fn': "test_data_Pos_RunII_piAbsSelector.root",
+      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_60A_b_v02_triggerFilter.root"],
       'name': "RunII_Pos_60b_Trig",
       'title': "Run II +60A Trigger Cut",
       'caption': "Run II +60A Trigger Cut",
@@ -44,57 +43,48 @@ if __name__ == "__main__":
     },
     {
       'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_211.root",
-      #'addFriend': ["friend", "friendTree_pip_v5.root"],
-      #'fn': "test_pip_piAbsSelector.root",
+      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorMC1/friendTrees/friend_MC1_PDG_211.root"],
       'name': "pip",
       'title': "#pi^{+} MC",
       'caption': "#pi^{+} MC",
       'color': root.kBlue-7,
-      #'scaleFactor': 1./35250*nData*0.428/(1.-0.086), #No Cuts
-      #'scaleFactor': 1./35250*nData*0.428/(1.-0.086)*0.51, # pion, tpc, match cuts
+      'scaleFactor': 1./25000*nData,
     },
     {
       'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_2212.root",
-      #'addFriend': ["friend", "friendTree_p_v5.root"],
-      #'fn': "test_p_piAbsSelector.root",
+      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorMC1/friendTrees/friend_MC1_PDG_2212.root"],
       'name': "p",
       'title': "proton MC",
       'caption': "proton MC",
       'color': root.kRed-4,
-      #'scaleFactor': 1./35200*nData*0.162/(1.-0.086), #No Cuts
-      #'scaleFactor': 1./35200*nData*0.162/(1.-0.086)*0.7216, #proton, tpc, matching
+      'scaleFactor': 1./10000*nData,
     },
     {
       'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_-11.root",
-      #'addFriend': ["friend", "friendTree_ep_v5.root"],
-      #'fn': "test_ep_piAbsSelector.root",
+      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorMC1/friendTrees/friend_MC1_PDG_-11.root"],
       'name': "ep",
       'title': "e^{+} MC",
       'caption': "e^{+} MC",
       'color': root.kGreen,
-      #'scaleFactor': 1./35700*nData*0.301/(1.-0.086), #No Cuts
-      #'scaleFactor': 1./35700*nData*0.301/(1.-0.086)*0.35, # pion, tpc, match cuts
+      'scaleFactor': 1./10000*nData,
     },
     {
       'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_-13.root",
-      #'addFriend': ["friend", "friendTree_mup_v5.root"],
-      #'fn': "test_mup_piAbsSelector.root",
+      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorMC1/friendTrees/friend_MC1_PDG_-13.root"],
       'name': "mup",
       'title': "#mu^{+} MC",
       'caption': "#mu^{+} MC",
       'color': root.kMagenta-4,
-      #'scaleFactor': 1./35200*nData*0.021/(1.-0.086), #No Cuts
-      #'scaleFactor': 1./35200*nData*0.021/(1.-0.086)*0.51, # pion, tpc, match cuts
+      'scaleFactor': 1./10000*nData,
     },
     {
       'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_321.root",
-      #'addFriend': ["friend", "friendTree_kp_v5.root"],
-      #'fn': "test_kp_piAbsSelector.root",
+      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorMC1/friendTrees/friend_MC1_PDG_321.root"],
       'name': "kp",
       'title': "K^{+} MC",
       'caption': "K^{+} MC",
       'color': root.kOrange-3,
-      #'scaleFactor': 1./35700*nData*0.00057/(1.-0.086), #No Cuts
+      'scaleFactor': 1./10000*nData,
     },
   ]
 
@@ -177,7 +167,7 @@ if __name__ == "__main__":
       'ytitle': "Events / bin",
       'binning': [100,0,2000],
       'var': "pWC",
-      'cuts': "",
+      'cuts': "pzWeight*(isMC || (firstTOF > -100))",
       #'normalize': True,
       'logy': logy,
       'printIntegral': True,
@@ -813,6 +803,26 @@ if __name__ == "__main__":
     #  #'normalize': True,
     #  'logy': logy,
     #},
+    {
+      'name': "primTrkKins",
+      'xtitle': "Primary TPC Track Hit Kinetic Energy [MeV]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,1000],
+      'var': "primTrkKins",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "primTrkKinInteract",
+      'xtitle': "Primary TPC Track Interaction Kinetic Energy [MeV]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,1000],
+      'var': "primTrkKinInteract",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
     #{
     #  'name': "trueEndProcess",
     #  'xtitle': "trueEndProcess",
