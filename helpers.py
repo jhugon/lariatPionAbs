@@ -159,45 +159,53 @@ class DataMCStack:
       canvas.SetLogx(False)
 
   def loadTree(self,fileConfig,treename):
+    if len(fileConfig) == 0:
+      return
     fileConfig['tree'] = root.TChain(treename)
-    if type(fileConfig['fn']) is str:
-        fileConfig['tree'].AddFile(fileConfig['fn'])
-    elif type(fileConfig['fn']) is list:
-        for fn in fileConfig['fn']:
-            fileConfig['tree'].AddFile(fn)
-    else:
-        raise Exception("")
+    try:
+      if type(fileConfig['fn']) is str:
+          fileConfig['tree'].AddFile(fileConfig['fn'])
+      elif type(fileConfig['fn']) is list:
+          for fn in fileConfig['fn']:
+              fileConfig['tree'].AddFile(fn)
+      else:
+          raise Exception("")
+    except KeyError:
+      return
     if 'addFriend' in fileConfig:
       fileConfig['tree'].AddFriend(*(fileConfig['addFriend']))
     fileConfig['tree'].SetCacheSize(10000000);
     fileConfig['tree'].AddBranchToCache("*");
   
   def loadHist(self,histConfig,fileConfig,binning,var,cuts,nMax,isData):
-     hist = None
-     if len(binning) == 3:
-       hist = Hist(*binning)
-     else:
-       hist = Hist(binning)
-     varAndHist = var + " >> " + hist.GetName()
-     tree = fileConfig['tree']
-     thiscuts = copy.deepcopy(cuts)
-     if "cuts" in fileConfig:
-       thiscuts += fileConfig['cuts']
-     tree.Draw(varAndHist,thiscuts,"",nMax)
-     hist.UseCurrentStyle()
-     hist.Sumw2()
-     scaleFactor = 1.
-     if not isData and "scaleFactor" in fileConfig: scaleFactor = fileConfig['scaleFactor']
-     hist.Scale(scaleFactor)
-     if "normToBinWidth" in histConfig and histConfig["normToBinWidth"]:
-       normToBinWidth(hist)
-     if "integral" in histConfig and histConfig['integral']:
-       hist = getIntegralHist(hist)
-     if not isData and "color" in fileConfig:
-       hist.SetLineColor(fileConfig['color'])
-       hist.SetMarkerColor(fileConfig['color'])
-       hist.SetFillColor(fileConfig['color'])
-     return hist
+    hist = None
+    if len(binning) == 3:
+      hist = Hist(*binning)
+    else:
+      hist = Hist(binning)
+    varAndHist = var + " >> " + hist.GetName()
+    try:
+      tree = fileConfig['tree']
+    except KeyError:
+      return hist
+    thiscuts = copy.deepcopy(cuts)
+    if "cuts" in fileConfig:
+      thiscuts += fileConfig['cuts']
+    tree.Draw(varAndHist,thiscuts,"",nMax)
+    hist.UseCurrentStyle()
+    hist.Sumw2()
+    scaleFactor = 1.
+    if not isData and "scaleFactor" in fileConfig: scaleFactor = fileConfig['scaleFactor']
+    hist.Scale(scaleFactor)
+    if "normToBinWidth" in histConfig and histConfig["normToBinWidth"]:
+      normToBinWidth(hist)
+    if "integral" in histConfig and histConfig['integral']:
+      hist = getIntegralHist(hist)
+    if not isData and "color" in fileConfig:
+      hist.SetLineColor(fileConfig['color'])
+      hist.SetMarkerColor(fileConfig['color'])
+      hist.SetFillColor(fileConfig['color'])
+    return hist
 
 def plotManyFilesOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint):
   """
@@ -901,6 +909,122 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
     return allHists
   else:
     return allHists, allProfilesToo
+
+class NMinusOnePlot(DataMCStack):
+
+  def __init__(self,fileConfigData,fileConfigMCs,cutConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint):
+    """
+    Similar usage to DataMCStack, just cut instead of cuts
+    """
+    self.loadTree(fileConfigData,treename)
+    for fileConfig in fileConfigMCs:
+      self.loadTree(fileConfig,treename)
+    for iCut in range(len(cutConfigs)):
+      cutConfig = cutConfigs[iCut]
+      cuts = []
+      for jCut in range(len(cutConfigs)):
+        if iCut == jCut:
+          continue
+        cuts.append(cutConfigs[jCut]['cut'])
+      cutStr = "("+") && (".join(cuts) + ")"
+      hists = []
+      binning = cutConfig['binning']
+      var = cutConfig['var']
+      #if var.count(":") != 0:
+      #  raise Exception("No ':' allowed in variable, only 1D hists allowed",var)
+      xtitle = ""
+      ytitle = "Events/bin"
+      if "xtitle" in cutConfig: xtitle = cutConfig['xtitle']
+      if "ytitle" in cutConfig: ytitle = cutConfig['ytitle']
+      xlim = []
+      ylim = []
+      if "xlim" in cutConfig: xlim = cutConfig['xlim']
+      if "ylim" in cutConfig: ylim = cutConfig['ylim']
+      logy = False
+      logx = False
+      if "logy" in cutConfig: logy = cutConfig['logy']
+      if "logx" in cutConfig: logx = cutConfig['logx']
+      caption = ""
+      captionleft1 = ""
+      captionleft2 = ""
+      captionleft3 = ""
+      captionright1 = ""
+      captionright2 = ""
+      captionright3 = ""
+      preliminaryString = ""
+      if "caption" in cutConfig: caption = cutConfig['caption']
+      if "captionleft1" in cutConfig: captionleft1 = cutConfig['captionleft1']
+      if "captionleft2" in cutConfig: captionleft2 = cutConfig['captionleft2']
+      if "captionleft3" in cutConfig: captionleft3 = cutConfig['captionleft3']
+      if "captionright1" in cutConfig: captionright1 = cutConfig['captionright1']
+      if "captionright2" in cutConfig: captionright2 = cutConfig['captionright2']
+      if "captionright3" in cutConfig: captionright3 = cutConfig['captionright3']
+      if "preliminaryString" in cutConfig: preliminaryString = cutConfig['preliminaryString']
+      vlineXs = []
+      hlineYs = []
+      vlines = []
+      hlines = []
+      if "drawvlines" in cutConfig and type(cutConfig["drawvlines"]) == list:
+        vlineXs = cutConfig["drawvlines"]
+      if "drawhlines" in cutConfig and type(cutConfig["drawhlines"]) == list:
+        hlineYs = cutConfig["drawhlines"]
+      printIntegral = False
+      if "printIntegral" in cutConfig and cutConfig["printIntegral"]:
+        printIntegral = True
+      # now on to the real work
+      dataHist = self.loadHist(cutConfig,fileConfigData,binning,var,cutStr,nMax,False)
+      dataHist.SetLineColor(root.kBlack)
+      dataHist.SetMarkerColor(root.kBlack)
+      mcHists = []
+      for fileConfig in fileConfigMCs:
+        hist = self.loadHist(cutConfig,fileConfig,binning,var,cutStr,nMax,False)
+        mcHists.append(hist)
+      mcSumHist = None
+      mcStack = root.THStack()
+      if len(mcHists) > 0 :
+        mcSumHist = mcHists[0].Clone(mcHists[0].GetName()+"_sumHist")
+        mcSumHist.SetFillColor(root.kBlue)
+        #mcSumHist.SetFillStyle(3254)
+        mcSumHist.SetFillStyle(1)
+        mcSumHist.SetMarkerSize(0)
+        mcSumHist.Reset()
+        for mcHist in reversed(mcHists):
+          mcSumHist.Add(mcHist)
+          mcStack.Add(mcHist)
+      canvas.SetLogy(logy)
+      canvas.SetLogx(logx)
+      axisHist = makeStdAxisHist([dataHist,mcSumHist],logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
+      setHistTitles(axisHist,xtitle,ytitle)
+      axisHist.Draw()
+      for hlineY in hlineYs:
+        hlines.append(drawHline(axisHist,hlineY))
+      for vlineX in vlineXs:
+        vlines.append(drawVline(axisHist,vlineX))
+      #mcSumHist.Draw("histsame")
+      mcStack.Draw("histsame")
+      dataHist.Draw("esame")
+      labels = []
+      labelHists = []
+      legOptions = []
+      try:
+        labels += [fileConfigData['title']]
+      except KeyError:
+        pass
+      else:
+        legOptions += ["lep"]
+        labelHists += [dataHist]
+      labels += [fileConfig['title'] for fileConfig in fileConfigMCs]
+      legOptions += ["F"]*len(fileConfigMCs)
+      labelHists += mcHists
+      leg = drawNormalLegend(labelHists,labels,legOptions)
+      drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
+      canvas.RedrawAxis()
+      saveNameBase = outPrefix + cutConfig['name'] + outSuffix
+      canvas.SaveAs(saveNameBase+".png")
+      canvas.SaveAs(saveNameBase+".pdf")
+      canvas.SetLogy(False)
+      canvas.SetLogx(False)
+
 
 def getOrdinalStr(inInt):
   result = str(inInt)
