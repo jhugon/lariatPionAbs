@@ -119,10 +119,14 @@ class DataMCStack:
       dataHist = self.loadHist(histConfig,fileConfigData,binning,var,cuts,nMax,False)
       dataHist.SetLineColor(root.kBlack)
       dataHist.SetMarkerColor(root.kBlack)
+      if printIntegral:
+        print("{} {} Integral: {}".format(outPrefix+histConfig['name']+outSuffix,"data",dataHist.Integral()))
       mcHists = []
       for fileConfig in fileConfigMCs:
         hist = self.loadHist(histConfig,fileConfig,binning,var,cuts,nMax,False)
         mcHists.append(hist)
+        if printIntegral:
+          print("{} {} Integral: {}".format(outPrefix+histConfig['name']+outSuffix,fileConfig['title'],hist.Integral()))
       mcSumHist = None
       mcStack = root.THStack()
       if len(mcHists) > 0 :
@@ -135,6 +139,8 @@ class DataMCStack:
         for mcHist in reversed(mcHists):
           mcSumHist.Add(mcHist)
           mcStack.Add(mcHist)
+      if printIntegral and not (mcStack is None):
+        print("{} {} Integral: {}".format(outPrefix+histConfig['name']+outSuffix,"MC Sum",mcSumHist.Integral()))
       canvas.SetLogy(logy)
       canvas.SetLogx(logx)
       axisHist = makeStdAxisHist([dataHist,mcSumHist],logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
@@ -975,10 +981,14 @@ class NMinusOnePlot(DataMCStack):
       dataHist = self.loadHist(cutConfig,fileConfigData,binning,var,cutStr,nMax,False)
       dataHist.SetLineColor(root.kBlack)
       dataHist.SetMarkerColor(root.kBlack)
+      if printIntegral:
+        print("{} {} Integral: {}".format(outPrefix+cutConfig['name']+outSuffix,"data",dataHist.Integral()))
       mcHists = []
       for fileConfig in fileConfigMCs:
         hist = self.loadHist(cutConfig,fileConfig,binning,var,cutStr,nMax,False)
         mcHists.append(hist)
+        if printIntegral:
+          print("{} {} Integral: {}".format(outPrefix+cutConfig['name']+outSuffix,fileConfig['title'],hist.Integral()))
       mcSumHist = None
       mcStack = root.THStack()
       if len(mcHists) > 0 :
@@ -991,6 +1001,8 @@ class NMinusOnePlot(DataMCStack):
         for mcHist in reversed(mcHists):
           mcSumHist.Add(mcHist)
           mcStack.Add(mcHist)
+      if printIntegral and not (mcStack is None):
+        print("{} {} Integral: {}".format(outPrefix+cutConfig['name']+outSuffix,"MC Sum",mcSumHist.Integral()))
       canvas.SetLogy(logy)
       canvas.SetLogx(logx)
       axisHist = makeStdAxisHist([dataHist,mcSumHist],logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)

@@ -32,90 +32,70 @@ if __name__ == "__main__":
   NMAX=10000000000
   #NMAX=100
   fileConfigs = [
-    #{
-    #  'fn': "piAbs_data_Pos_RunI_v03.root",
-    #  #'addFriend': ["friend", "friendTree_Pos_RunI_v03.root"],
-    #  #'fn': "test_data_Pos_RunI_piAbsSelector.root",
-    #  'name': "RunI_Pos",
-    #  'title': "Run I Pos. Polarity",
-    #  'caption': "Run I Pos. Polarity",
-    #  'color': root.kBlack,
-    #  'isData': True,
-    #},
-    #{
-    #  'fn': "piAbs_data_Pos_RunII_v03.root",
-    #  #'addFriend': ["friend", "friendTree_Pos_RunII_v03.root"],
-    #  #'fn': "test_data_Pos_RunII_piAbsSelector.root",
-    #  'name': "RunII_Pos",
-    #  'title': "Run II Pos. Polarity",
-    #  'caption': "Run II Pos. Polarity",
-    #  'color': root.kGray+1,
-    #  'isData': True,
-    #},
     {
-      'fn': "piAbs_pip_v5.2.root",
+      'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_b_v02_triggerFilter.root",
+      #'addFriend': ["friend", "friendTree_Pos_RunII_v03.root"],
+      #'fn': "test_data_Pos_RunII_piAbsSelector.root",
+      'name': "RunII_Pos_60b_Trig",
+      'title': "Run II +60A Trigger Cut",
+      'caption': "Run II +60A Trigger Cut",
+      'color': root.kBlack,
+      'isData': True,
+    },
+    {
+      'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_211.root",
       #'addFriend': ["friend", "friendTree_pip_v5.root"],
       #'fn': "test_pip_piAbsSelector.root",
       'name': "pip",
       'title': "#pi^{+} MC",
       'caption': "#pi^{+} MC",
       'color': root.kBlue-7,
-      'scaleFactor': 1./35250*nData*0.428/(1.-0.086), #No Cuts
+      #'scaleFactor': 1./35250*nData*0.428/(1.-0.086), #No Cuts
       #'scaleFactor': 1./35250*nData*0.428/(1.-0.086)*0.51, # pion, tpc, match cuts
     },
     {
-      'fn': "piAbs_p_v5.2.root",
+      'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_2212.root",
       #'addFriend': ["friend", "friendTree_p_v5.root"],
       #'fn': "test_p_piAbsSelector.root",
       'name': "p",
       'title': "proton MC",
       'caption': "proton MC",
       'color': root.kRed-4,
-      'scaleFactor': 1./35200*nData*0.162/(1.-0.086), #No Cuts
+      #'scaleFactor': 1./35200*nData*0.162/(1.-0.086), #No Cuts
       #'scaleFactor': 1./35200*nData*0.162/(1.-0.086)*0.7216, #proton, tpc, matching
     },
     {
-      'fn': "piAbs_ep_v5.2.root",
+      'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_-11.root",
       #'addFriend': ["friend", "friendTree_ep_v5.root"],
       #'fn': "test_ep_piAbsSelector.root",
       'name': "ep",
       'title': "e^{+} MC",
       'caption': "e^{+} MC",
       'color': root.kGreen,
-      'scaleFactor': 1./35700*nData*0.301/(1.-0.086), #No Cuts
+      #'scaleFactor': 1./35700*nData*0.301/(1.-0.086), #No Cuts
       #'scaleFactor': 1./35700*nData*0.301/(1.-0.086)*0.35, # pion, tpc, match cuts
     },
     {
-      'fn': "piAbs_mup_v5.2.root",
+      'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_-13.root",
       #'addFriend': ["friend", "friendTree_mup_v5.root"],
       #'fn': "test_mup_piAbsSelector.root",
       'name': "mup",
       'title': "#mu^{+} MC",
       'caption': "#mu^{+} MC",
       'color': root.kMagenta-4,
-      'scaleFactor': 1./35200*nData*0.021/(1.-0.086), #No Cuts
+      #'scaleFactor': 1./35200*nData*0.021/(1.-0.086), #No Cuts
       #'scaleFactor': 1./35200*nData*0.021/(1.-0.086)*0.51, # pion, tpc, match cuts
     },
     {
-      'fn': "piAbs_kp_v5.2.root",
+      'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_321.root",
       #'addFriend': ["friend", "friendTree_kp_v5.root"],
       #'fn': "test_kp_piAbsSelector.root",
       'name': "kp",
       'title': "K^{+} MC",
       'caption': "K^{+} MC",
       'color': root.kOrange-3,
-      'scaleFactor': 1./35700*nData*0.00057/(1.-0.086), #No Cuts
+      #'scaleFactor': 1./35700*nData*0.00057/(1.-0.086), #No Cuts
     },
-    #{
-    #  #'fn': "/pnfs/lariat/scratch/users/jhugon/v06_15_00/piAbsSelector/lariat_PiAbsAndChEx_flat_gam_v4/anahist.root",
-    #  #'addFriend': ["friend", "friendTree_gam_v4.root"],
-    #  'fn': "test_gam_piAbsSelector.root",
-    #  'name': "gam",
-    #  'title': "#gamma MC",
-    #  'caption': "#gamma MC",
-    #  'color': root.kOrange-3,
-    #  'scaleFactor': 2953., #AllWeightsCuts Proton
-    #},
   ]
 
   histConfigs = [
@@ -187,6 +167,17 @@ if __name__ == "__main__":
       'binning': [100,0,2000],
       'var': "pWC",
       'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+      'printIntegral': True,
+    },
+    {
+      'name': "pWC_NoCuts",
+      'xtitle': "Momentum from WC [MeV/c]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,2000],
+      'var': "pWC",
+      'cuts': "",
       #'normalize': True,
       'logy': logy,
       'printIntegral': True,
@@ -839,13 +830,13 @@ if __name__ == "__main__":
   #  #if histConfigs[i]['name'] != "zWC4Hit":
   #    histConfigs.pop(i)
 
-  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
-#  fileConfigMCs = copy.deepcopy(fileConfigs)
-#  fileConfigData = None
-#  for i in reversed(range(len(fileConfigMCs))):
-#    if 'isData' in fileConfigMCs[i] and fileConfigMCs[i]['isData']:
-#      fileConfigData = fileConfigMCs.pop(i)
-#  DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
+  #plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",outPrefix="DataMC_",nMax=NMAX)
+  fileConfigMCs = copy.deepcopy(fileConfigs)
+  fileConfigData = None
+  for i in reversed(range(len(fileConfigMCs))):
+    if 'isData' in fileConfigMCs[i] and fileConfigMCs[i]['isData']:
+      fileConfigData = fileConfigMCs.pop(i)
+  DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"PiAbsSelector/tree",outPrefix="DataMC_",nMax=NMAX)
 
   #for i in range(len(histConfigs)):
   #  histConfigs[i]['cuts'] = weightStr + "*(pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3) && (isMC || (firstTOF > 28 && firstTOF < 55))"
@@ -991,4 +982,4 @@ if __name__ == "__main__":
     },
   ]
 
-  #plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX)
+  #plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",outPrefix="DataMC_",nMax=NMAX)
