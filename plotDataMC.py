@@ -9,9 +9,15 @@ if __name__ == "__main__":
   cuts = ""
   cuts += "*( pWC > 100 && pWC < 1100 && (isMC || (firstTOF > 0 && firstTOF < 25)))" # pions
 #  #cuts += "*( pWC > 450 && pWC < 1100 && (isMC || (firstTOF > 28 && firstTOF < 55)))" # protons
-  cuts += "*(nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3)" # tpc tracks
+  #cuts += "*(nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3)" # tpc tracks
+  cuts += "*(primTrkStartZ >= -1. && primTrkStartZ < 2.)" # tpc tracks
 
   cuts += "*( iBestMatch >= 0 && nMatchedTracks == 1)" # matching in analyzer
+
+  cuts += "*(primTrkEndInFid == 1)"
+  cuts += "*(primTrkEndX > 5.4 && primTrkEndX < 42.7)"
+  cuts += "*(primTrkEndY > -15. && primTrkEndY < 15.)"
+  cuts += "*(primTrkEndZ > 5. && primTrkEndZ < 85.)"
 
   # matching debug
   #cuts += "*(sqrt(pow(xWC-23.75,2)+pow(yWC-0.2,2)) < 11.93)" # wc track in flange
@@ -32,9 +38,18 @@ if __name__ == "__main__":
   NMAX=10000000000
   #NMAX=100
   fileConfigs = [
+    #{
+    #  'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_b_v02_triggerFilter.root",
+    #  'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_60A_b_v02_triggerFilter.root"],
+    #  'name': "RunII_Pos_60b_Trig",
+    #  'title': "Run II +60A Trigger Cut",
+    #  'caption': "Run II +60A Trigger Cut",
+    #  'color': root.kBlack,
+    #  'isData': True,
+    #},
     {
-      'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_b_v02_triggerFilter.root",
-      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_60A_b_v02_triggerFilter.root"],
+      'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_b_v02_NoTriggerFilter.root",
+      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_60A_b_v02_NoTriggerFilter.root"],
       'name': "RunII_Pos_60b_Trig",
       'title': "Run II +60A Trigger Cut",
       'caption': "Run II +60A Trigger Cut",
@@ -840,13 +855,17 @@ if __name__ == "__main__":
   #  #if histConfigs[i]['name'] != "zWC4Hit":
   #    histConfigs.pop(i)
 
-  #plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",outPrefix="DataMC_",nMax=NMAX)
+  #plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
   fileConfigMCs = copy.deepcopy(fileConfigs)
   fileConfigData = None
   for i in reversed(range(len(fileConfigMCs))):
     if 'isData' in fileConfigMCs[i] and fileConfigMCs[i]['isData']:
       fileConfigData = fileConfigMCs.pop(i)
-  DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"PiAbsSelector/tree",outPrefix="DataMC_",nMax=NMAX)
+  #DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
+  DataMCCategoryStack(fileConfigData,fileConfigMCs,histConfigs,c,"PiAbsSelectorTC/tree",
+                outPrefix="DataMC_",nMax=NMAX,
+                catConfigs=TRUECATEGORYCONFIGS
+             )
 
   #for i in range(len(histConfigs)):
   #  histConfigs[i]['cuts'] = weightStr + "*(pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3) && (isMC || (firstTOF > 28 && firstTOF < 55))"
