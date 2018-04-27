@@ -23,9 +23,9 @@ import itertools
 #import matplotlib.pyplot as mpl
 
 class DataMCStack:
-  def __init__(self,fileConfigData,fileConfigMCs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint):
+  def __init__(self,fileConfigDatas,fileConfigMCs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint):
     """
-    fileConfigs is a dictionary configuring the data
+    fileConfigDatas is a list of dictionaries configuring the data
     fileConfigMCs is a list of dictionaries configuring the MC files
     histConfigs is a list of dictionaries configuring the histograms. It is a
       list so you can do multiple plots.
@@ -63,7 +63,8 @@ class DataMCStack:
       printIntegral: if True, print integral after all scaling
     """
     #print("plotManyFilesOnePlot")
-    self.loadTree(fileConfigData,treename)    
+    for fileConfig in fileConfigDatas:
+      self.loadTree(fileConfig,treename)    
     for fileConfig in fileConfigMCs:
       self.loadTree(fileConfig,treename)
 
@@ -116,11 +117,12 @@ class DataMCStack:
       if "printIntegral" in histConfig and histConfig["printIntegral"]:
         printIntegral = True
       # now on to the real work
-      dataHist = self.loadHist(histConfig,fileConfigData,binning,var,cuts,nMax,False)
-      dataHist.SetLineColor(root.kBlack)
-      dataHist.SetMarkerColor(root.kBlack)
-      if printIntegral:
-        print("{} {} Integral: {}".format(outPrefix+histConfig['name']+outSuffix,"data",dataHist.Integral()))
+      dataHists = []
+      for fileConfig in fileConfigDatas:
+        hist = self.loadHist(histConfig,fileConfig,binning,var,cuts,nMax,False)
+        dataHists.append(hist)
+        if printIntegral:
+          print("{} {} Integral: {}".format(outPrefix+histConfig['name']+outSuffix,fileConfig['title'],hist.Integral()))
       mcHists = []
       for fileConfig in fileConfigMCs:
         hist = self.loadHist(histConfig,fileConfig,binning,var,cuts,nMax,False)
@@ -143,7 +145,7 @@ class DataMCStack:
         print("{} {} Integral: {}".format(outPrefix+histConfig['name']+outSuffix,"MC Sum",mcSumHist.Integral()))
       canvas.SetLogy(logy)
       canvas.SetLogx(logx)
-      axisHist = makeStdAxisHist([dataHist,mcSumHist],logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
+      axisHist = makeStdAxisHist(dataHists+[mcSumHist],logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
       setHistTitles(axisHist,xtitle,ytitle)
       axisHist.Draw()
       for hlineY in hlineYs:
@@ -152,10 +154,11 @@ class DataMCStack:
         vlines.append(drawVline(axisHist,vlineX))
       #mcSumHist.Draw("histsame")
       mcStack.Draw("histsame")
-      dataHist.Draw("esame")
-      labels = [fileConfigData['title']] + [fileConfig['title'] for fileConfig in fileConfigMCs]
-      legOptions = ["lep"]+["F"]*len(fileConfigMCs)
-      leg = drawNormalLegend([dataHist]+mcHists,labels,legOptions)
+      for dataHist in dataHists:
+        dataHist.Draw("esame")
+      labels = [fileConfig['title'] for fileConfig in fileConfigDatas] + [fileConfig['title'] for fileConfig in fileConfigMCs]
+      legOptions = ["lep"]*len(fileConfigDatas)+["F"]*len(fileConfigMCs)
+      leg = drawNormalLegend(dataHists+mcHists,labels,legOptions)
       drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
       canvas.RedrawAxis()
       saveNameBase = outPrefix + histConfig['name'] + outSuffix
@@ -918,11 +921,12 @@ def plotOneHistOnePlot(fileConfigs,histConfigs,canvas,treename,outPrefix="",outS
 
 class NMinusOnePlot(DataMCStack):
 
-  def __init__(self,fileConfigData,fileConfigMCs,cutConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint,weight="1"):
+  def __init__(self,fileConfigDatas,fileConfigMCs,cutConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint,weight="1"):
     """
     Similar usage to DataMCStack, just cut instead of cuts
     """
-    self.loadTree(fileConfigData,treename)
+    for fileConfig in fileConfigDatas:
+      self.loadTree(fileConfig,treename)
     for fileConfig in fileConfigMCs:
       self.loadTree(fileConfig,treename)
     for iCut in range(len(cutConfigs)):
@@ -979,11 +983,12 @@ class NMinusOnePlot(DataMCStack):
       if "printIntegral" in cutConfig and cutConfig["printIntegral"]:
         printIntegral = True
       # now on to the real work
-      dataHist = self.loadHist(cutConfig,fileConfigData,binning,var,cutStr,nMax,False)
-      dataHist.SetLineColor(root.kBlack)
-      dataHist.SetMarkerColor(root.kBlack)
-      if printIntegral:
-        print("{} {} Integral: {}".format(outPrefix+cutConfig['name']+outSuffix,"data",dataHist.Integral()))
+      dataHists = []
+      for fileConfig in fileConfigDatas:
+        hist = self.loadHist(cutConfig,fileConfig,binning,var,cutStr,nMax,False)
+        dataHists.append(hist)
+        if printIntegral:
+          print("{} {} Integral: {}".format(outPrefix+cutConfig['name']+outSuffix,fileConfig['title'],hist.Integral()))
       mcHists = []
       for fileConfig in fileConfigMCs:
         hist = self.loadHist(cutConfig,fileConfig,binning,var,cutStr,nMax,False)
@@ -1006,7 +1011,7 @@ class NMinusOnePlot(DataMCStack):
         print("{} {} Integral: {}".format(outPrefix+cutConfig['name']+outSuffix,"MC Sum",mcSumHist.Integral()))
       canvas.SetLogy(logy)
       canvas.SetLogx(logx)
-      axisHist = makeStdAxisHist([dataHist,mcSumHist],logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
+      axisHist = makeStdAxisHist(dataHists+[mcSumHist],logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
       setHistTitles(axisHist,xtitle,ytitle)
       axisHist.Draw()
       for hlineY in hlineYs:
@@ -1015,17 +1020,11 @@ class NMinusOnePlot(DataMCStack):
         vlines.append(drawVline(axisHist,vlineX))
       #mcSumHist.Draw("histsame")
       mcStack.Draw("histsame")
-      dataHist.Draw("esame")
-      labels = []
-      labelHists = []
-      legOptions = []
-      try:
-        labels += [fileConfigData['title']]
-      except KeyError:
-        pass
-      else:
-        legOptions += ["lep"]
-        labelHists += [dataHist]
+      for dataHist in dataHists:
+        dataHist.Draw("esame")
+      labels = [fileConfig['title'] for fileConfig in fileConfigDatas]
+      legOptions = ["lep"]*len(fileConfigDatas)
+      labelHists = dataHists
       labels += [fileConfig['title'] for fileConfig in fileConfigMCs]
       legOptions += ["F"]*len(fileConfigMCs)
       labelHists += mcHists
@@ -1039,9 +1038,9 @@ class NMinusOnePlot(DataMCStack):
       canvas.SetLogx(False)
 
 class DataMCCategoryStack(DataMCStack):
-  def __init__(self,fileConfigData,fileConfigMCs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint,catConfigs=[]):
+  def __init__(self,fileConfigDatas,fileConfigMCs,histConfigs,canvas,treename,outPrefix="",outSuffix="Hist",nMax=sys.maxint,catConfigs=[]):
     """
-    fileConfigs is a dictionary configuring the data
+    fileConfigDatas is a list of dictionary configuring the data
     fileConfigMCs is a list of dictionaries configuring the MC files
     histConfigs is a list of dictionaries configuring the histograms. It is a
       list so you can do multiple plots.
@@ -1082,7 +1081,8 @@ class DataMCCategoryStack(DataMCStack):
       cuts: Cuts to define the category, each one should be independent REQUIRED
       color: Color for this category REQUIRED
     """
-    self.loadTree(fileConfigData,treename)    
+    for fileConfig in fileConfigDatas:
+      self.loadTree(fileConfig,treename)
     for fileConfig in fileConfigMCs:
       self.loadTree(fileConfig,treename)
 
@@ -1131,11 +1131,12 @@ class DataMCCategoryStack(DataMCStack):
       if "printIntegral" in histConfig and histConfig["printIntegral"]:
         printIntegral = True
       # now on to the real work
-      dataHist = self.loadHist(histConfig,fileConfigData,binning,var,cuts,nMax,False)
-      dataHist.SetLineColor(root.kBlack)
-      dataHist.SetMarkerColor(root.kBlack)
-      if printIntegral:
-        print("{} {} Integral: {}".format(outPrefix+histConfig['name']+outSuffix,"data",dataHist.Integral()))
+      dataHists = []
+      for fileConfig in fileConfigDatas:
+        dataHist = self.loadHist(histConfig,fileConfig,binning,var,cuts,nMax,False)
+        dataHists.append(dataHist)
+        if printIntegral:
+          print("{} Integral: {}".format(outPrefix+histConfig['name']+outSuffix,fileConfig['title'],dataHist.Integral()))
       catHists = []
       for catConfig in catConfigs:
         thisCuts = cuts + "*(" + catConfig["cuts"] + ")"
@@ -1167,7 +1168,7 @@ class DataMCCategoryStack(DataMCStack):
         print("{} {} Integral: {}".format(outPrefix+histConfig['name']+outSuffix,"MC Sum",mcSumHist.Integral()))
       canvas.SetLogy(logy)
       canvas.SetLogx(logx)
-      axisHist = makeStdAxisHist([dataHist,mcSumHist],logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
+      axisHist = makeStdAxisHist(dataHists+[mcSumHist],logy=logy,freeTopSpace=0.35,xlim=xlim,ylim=ylim)
       setHistTitles(axisHist,xtitle,ytitle)
       axisHist.Draw()
       for hlineY in hlineYs:
@@ -1176,11 +1177,12 @@ class DataMCCategoryStack(DataMCStack):
         vlines.append(drawVline(axisHist,vlineX))
       #mcSumHist.Draw("histsame")
       mcStack.Draw("histsame")
-      dataHist.Draw("esame")
+      for dataHist in dataHists:
+        dataHist.Draw("esame")
 
-      labels = [fileConfigData['title']] + [catConfig['title'] for catConfig in catConfigs]
-      legOptions = ["lep"]+["F"]*len(catConfigs)
-      leg = drawNormalLegend([dataHist]+catHists,labels,legOptions,wide=True)
+      labels = [fileConfig['title'] for fileConfig in fileConfigDatas] + [catConfig['title'] for catConfig in catConfigs]
+      legOptions = ["lep"]*len(dataHists)+["F"]*len(catConfigs)
+      leg = drawNormalLegend(dataHists+catHists,labels,legOptions,wide=True)
       drawStandardCaptions(canvas,caption,captionleft1=captionleft1,captionleft2=captionleft2,captionleft3=captionleft3,captionright1=captionright1,captionright2=captionright2,captionright3=captionright3,preliminaryString=preliminaryString)
       canvas.RedrawAxis()
       saveNameBase = outPrefix + histConfig['name'] + outSuffix

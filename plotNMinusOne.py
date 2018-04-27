@@ -108,27 +108,27 @@ if __name__ == "__main__":
   c = root.TCanvas()
   NMAX=10000000000
   #NMAX=100
-  nData = 1359.
-  fileConfigData = \
+  nData = 224281.0
+  fileConfigData = [
     {
-      'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_b_v02_NoTriggerFilter.root",
-      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_60A_b_v02_NoTriggerFilter.root"],
-      'name': "RunII_Pos_60b_Trig",
-      'title': "Run II +60A Trigger Cut",
-      'caption': "Run II +60A Trigger Cut",
+      'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_100A_v02_all.root",
+      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_100A_v02_all.root"],
+      'name': "RunII_Pos_100",
+      'title': "Run II +100A",
+      'caption': "Run II +100A",
       'color': root.kBlack,
       'isData': True,
-    }
-    #{
-    #  'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_b_v02_triggerFilter.root",
-    #  #'addFriend': ["friend", "friendTree_Pos_RunII_v03.root"],
-    #  #'fn': "test_data_Pos_RunII_piAbsSelector.root",
-    #  'name': "RunII_Pos_60b_Trig",
-    #  'title': "Run II +60A Trigger Cut",
-    #  'caption': "Run II +60A Trigger Cut",
-    #  'color': root.kBlack,
-    #  'isData': True,
-    #}
+    },
+    {
+      'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_v02_all.root",
+      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_60A_v02_all.root"],
+      'name': "RunII_Pos_60",
+      'title': "Run II +60A",
+      'caption': "Run II +60A",
+      'color': root.kGray+2,
+      'isData': True,
+    },
+  ]
   fileConfigsMC = [
     {
       'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_211.root",

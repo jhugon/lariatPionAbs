@@ -51,15 +51,15 @@ if __name__ == "__main__":
       'color': root.kBlack,
       'isData': True,
     },
-    #{
-    #  'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_v02_all.root",
-    #  'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_60A_v02_all.root"],
-    #  'name': "RunII_Pos_60",
-    #  'title': "Run II +60A",
-    #  'caption': "Run II +60A",
-    #  'color': root.kRed,
-    #  'isData': True,
-    #},
+    {
+      'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_v02_all.root",
+      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_60A_v02_all.root"],
+      'name': "RunII_Pos_60",
+      'title': "Run II +60A",
+      'caption': "Run II +60A",
+      'color': root.kGray+2,
+      'isData': True,
+    },
     {
       'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_211.root",
       'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorMC1/friendTrees/friend_MC1_PDG_211.root"],
@@ -861,12 +861,12 @@ if __name__ == "__main__":
 
 #  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
   fileConfigMCs = copy.deepcopy(fileConfigs)
-  fileConfigData = None
+  fileConfigDatas = []
   for i in reversed(range(len(fileConfigMCs))):
     if 'isData' in fileConfigMCs[i] and fileConfigMCs[i]['isData']:
-      fileConfigData = fileConfigMCs.pop(i)
-  #DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
-  DataMCCategoryStack(fileConfigData,fileConfigMCs,histConfigs,c,"PiAbsSelectorTC/tree",
+      fileConfigDatas.append(fileConfigMCs.pop(i))
+  #DataMCStack(fileConfigDatas,fileConfigMCs,histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
+  DataMCCategoryStack(fileConfigDatas,fileConfigMCs,histConfigs,c,"PiAbsSelectorTC/tree",
                 outPrefix="DataMC_",nMax=NMAX,
                 catConfigs=TRUECATEGORYFEWERCONFIGS
              )
