@@ -3171,6 +3171,55 @@ for iCat in range(len(TRUECATEGORYCONFIGS)):
     #TRUECATEGORYCONFIGS[iCat]['color'] = COLORLIST[iCat]
     TRUECATEGORYCONFIGS[iCat]['color'] = rootColors[iCat % len(rootColors)] + rootAdds[iCat // len(rootColors)]
 
+TRUECATEGORYFEWERCONFIGS = [
+   {
+     'title': "#pi Absorption",
+     'cuts':"trueCategory==2",
+     'color': root.kBlue-7,
+   },
+   {
+     'title': "#pi Charge Exchange",
+     'cuts':"trueCategory==3",
+     'color': root.kGreen+3,
+   },
+   {
+     'title': "#pi Backgrounds",
+     'cuts':"trueCategory==1 || trueCategory==9 || trueCategory==10 || trueCategory==4",
+     'color': root.kOrange-3,
+   },
+   {
+     'title': "#pi Interacted Outside TPC",
+     'cuts':"trueCategory==6 || trueCategory==7 || trueCategory==8",
+     'color': root.kAzure+10,
+   },
+   {
+     'title': "Primary Electron",
+     'cuts':"trueCategory==11",
+     'color': root.kMagenta-4,
+   },
+   {
+     'title': "Primary Proton",
+     'cuts':"trueCategory==12",
+     'color': root.kRed-4,
+   },
+   {
+     'title': "Primary Muon",
+     'cuts':"trueCategory==13",
+     'color': root.kYellow+1,
+   },
+   {
+     'title': "Primary Kaon",
+     'cuts':"trueCategory==14",
+     'color': root.kViolet+2,
+   },
+   {
+     'title': "Unknown",
+     'cuts':"trueCategory==0 || trueCategory==16 || trueCategory == 15",
+     'color': root.kGray+1,
+   },
+]
+
+
 if __name__ == "__main__":
 
   root.gROOT.SetBatch(True)

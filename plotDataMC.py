@@ -31,31 +31,35 @@ if __name__ == "__main__":
   secTrkCuts = "*(trackStartDistToPrimTrkEnd < 2.)"
   weightStr = "pzWeight"+cuts
   #weightStr = "1"+cuts
-  nData = 1359.
-  logy = True
+
+  #DataMC_pWC_NoCutsHist Run II +100A Integral: 224281.0
+  #DataMC_pWC_NoCutsHist Run II +60A Integral: 50672.0
+
+  nData = 224281.0
+  logy = False
 
   c = root.TCanvas()
   NMAX=10000000000
   #NMAX=100
   fileConfigs = [
-    #{
-    #  'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_b_v02_triggerFilter.root",
-    #  'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_60A_b_v02_triggerFilter.root"],
-    #  'name': "RunII_Pos_60b_Trig",
-    #  'title': "Run II +60A Trigger Cut",
-    #  'caption': "Run II +60A Trigger Cut",
-    #  'color': root.kBlack,
-    #  'isData': True,
-    #},
     {
-      'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_b_v02_NoTriggerFilter.root",
-      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_60A_b_v02_NoTriggerFilter.root"],
-      'name': "RunII_Pos_60b_Trig",
-      'title': "Run II +60A Trigger Cut",
-      'caption': "Run II +60A Trigger Cut",
+      'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_100A_v02_all.root",
+      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_100A_v02_all.root"],
+      'name': "RunII_Pos_100",
+      'title': "Run II +100A",
+      'caption': "Run II +100A",
       'color': root.kBlack,
       'isData': True,
     },
+    #{
+    #  'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_v02_all.root",
+    #  'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_60A_v02_all.root"],
+    #  'name': "RunII_Pos_60",
+    #  'title': "Run II +60A",
+    #  'caption': "Run II +60A",
+    #  'color': root.kRed,
+    #  'isData': True,
+    #},
     {
       'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_211.root",
       'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorMC1/friendTrees/friend_MC1_PDG_211.root"],
@@ -169,7 +173,7 @@ if __name__ == "__main__":
       'name': "pWC",
       'xtitle': "Momentum from WC [MeV/c]",
       'ytitle': "Events / bin",
-      'binning': [100,0,2000],
+      'binning': [40,300,1100],
       'var': "pWC",
       'cuts': weightStr,
       #'normalize': True,
@@ -180,7 +184,7 @@ if __name__ == "__main__":
       'name': "pWC_NoCuts",
       'xtitle': "Momentum from WC [MeV/c]",
       'ytitle': "Events / bin",
-      'binning': [100,0,2000],
+      'binning': [60,300,1500],
       'var': "pWC",
       'cuts': "pzWeight*(isMC || (firstTOF > -100))",
       #'normalize': True,
@@ -855,7 +859,7 @@ if __name__ == "__main__":
   #  #if histConfigs[i]['name'] != "zWC4Hit":
   #    histConfigs.pop(i)
 
-  #plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
+#  plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
   fileConfigMCs = copy.deepcopy(fileConfigs)
   fileConfigData = None
   for i in reversed(range(len(fileConfigMCs))):
@@ -864,7 +868,7 @@ if __name__ == "__main__":
   #DataMCStack(fileConfigData,fileConfigMCs,histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
   DataMCCategoryStack(fileConfigData,fileConfigMCs,histConfigs,c,"PiAbsSelectorTC/tree",
                 outPrefix="DataMC_",nMax=NMAX,
-                catConfigs=TRUECATEGORYCONFIGS
+                catConfigs=TRUECATEGORYFEWERCONFIGS
              )
 
   #for i in range(len(histConfigs)):
@@ -1012,3 +1016,67 @@ if __name__ == "__main__":
   ]
 
   #plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",outPrefix="DataMC_",nMax=NMAX)
+
+
+
+  histConfigs = [
+    {
+      'title': "All",
+      'xtitle': "Momentum from WC [MeV/c]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,2000],
+      'var': "pWC",
+      'cuts': "pzWeight",
+      #'normalize': True,
+      'logy': logy,
+      'printIntegral': True,
+    },
+    {
+      'title': "TOF Good",
+      'xtitle': "Momentum from WC [MeV/c]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,2000],
+      'var': "pWC",
+      'cuts': "pzWeight*(firstTOF > -9999)",
+      #'normalize': True,
+      'logy': logy,
+      'printIntegral': True,
+    },
+    {
+      'title': "Any Triggers",
+      'xtitle': "Momentum from WC [MeV/c]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,2000],
+      'var': "pWC",
+      'cuts': "pzWeight*(triggerBits != 0)",
+      #'normalize': True,
+      'logy': logy,
+      'printIntegral': True,
+    },
+    {
+      'title': "WC 1 & 4 Triggers",
+      'xtitle': "Momentum from WC [MeV/c]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,2000],
+      'var': "pWC",
+      'cuts': "pzWeight*((triggerBits << 0) & 1)*((triggerBits << 3) & 1)",
+      #'normalize': True,
+      'logy': logy,
+      'printIntegral': True,
+    },
+    {
+      'title': "WC 1 & 4, Both TOF Triggers",
+      'xtitle': "Momentum from WC [MeV/c]",
+      'ytitle': "Events / bin",
+      'binning': [100,0,2000],
+      'var': "pWC",
+      'cuts': "pzWeight*((triggerBits << 0) & 1)*((triggerBits << 3) & 1)*((triggerBits << 5) & 1)*((triggerBits << 6) & 1)",
+      #'normalize': True,
+      'logy': logy,
+      'printIntegral': True,
+    },
+  ]
+  for i in range(len(histConfigs)):
+    histConfigs[i]["color"] = COLORLIST[i]
+
+  #plotManyHistsOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",outPrefix="DataCompare_",nMax=NMAX)
