@@ -7,8 +7,10 @@ root.gROOT.SetBatch(True)
 if __name__ == "__main__":
 
   cuts = ""
-  cuts += "*( pWC > 100 && pWC < 1100 && (isMC || (firstTOF > 0 && firstTOF < 25)))" # pions
-#  #cuts += "*( pWC > 450 && pWC < 1100 && (isMC || (firstTOF > 28 && firstTOF < 55)))" # protons
+  #cuts += "*( pWC > 100 && pWC < 1100 && (isMC || (firstTOF > 0 && firstTOF < 25)))" # old pions
+  #cuts += "*( pWC > 100 && pWC < 1100 && (isMC || pWC*pWC*(firstTOF*firstTOF*0.00201052122-1.) < 5e4))" # pions
+  #cuts += "*( pWC > 450 && pWC < 1100 && (isMC || (firstTOF > 28 && firstTOF < 55)))" # old protons
+  #cuts += "*( pWC > 450 && pWC < 1100 && (isMC || pWC*pWC*(firstTOF*firstTOF*0.00201052122-1.) > 7e5))" # protons
   #cuts += "*(nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3)" # tpc tracks
   cuts += "*(primTrkStartZ >= -1. && primTrkStartZ < 2.)" # tpc tracks
 
@@ -43,8 +45,8 @@ if __name__ == "__main__":
   #NMAX=100
   fileConfigs = [
     {
-      'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_100A_v02_all.root",
-      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_100A_v02_all.root"],
+      'fn': "piAbs_v2/piAbsSelector_Pos_RunII_current100_v02_all.root",
+      'addFriend': ["friend", "piAbs_v2/friendTrees/friendTree_piAbsSelector_Pos_RunII_current100_v02_all.root"],
       'name': "RunII_Pos_100",
       'title': "Run II +100A",
       'caption': "Run II +100A",
@@ -52,8 +54,8 @@ if __name__ == "__main__":
       'isData': True,
     },
     {
-      'fn': "/scratch/jhugon/lariat/pionAbsSelectorData/Pos_RunII_60A_v02_all.root",
-      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorData/friendTrees/friend_Pos_RunII_60A_v02_all.root"],
+      'fn': "piAbs_v2/piAbsSelector_Pos_RunII_current60_v02_all.root",
+      'addFriend': ["friend", "piAbs_v2/friendTrees/friendTree_piAbsSelector_Pos_RunII_current60_v02_all.root"],
       'name': "RunII_Pos_60",
       'title': "Run II +60A",
       'caption': "Run II +60A",
@@ -61,8 +63,26 @@ if __name__ == "__main__":
       'isData': True,
     },
     {
-      'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_211.root",
-      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorMC1/friendTrees/friend_MC1_PDG_211.root"],
+      'fn': "piAbs_v2/piAbsSelector_Neg_RunII_current100_v02_all.root",
+      'addFriend': ["friend", "piAbs_v2/friendTrees/friendTree_piAbsSelector_Neg_RunII_current100_v02_all.root"],
+      'name': "RunII_Neg_100",
+      'title': "Run II -100A",
+      'caption': "Run II -100A",
+      'color': root.kGreen,
+      'isData': True,
+    },
+    {
+      'fn': "piAbs_v2/piAbsSelector_Neg_RunII_current60_v02_all.root",
+      'addFriend': ["friend", "piAbs_v2/friendTrees/friendTree_piAbsSelector_Neg_RunII_current60_v02_all.root"],
+      'name': "RunII_Neg_60",
+      'title': "Run II -60A",
+      'caption': "Run II -60A",
+      'color': root.kYellow+1,
+      'isData': True,
+    },
+    {
+      'fn': "billMC1/MC1_PDG_211.root",
+      'addFriend': ["friend", "billMC1/friendTrees/friend_MC1_PDG_211.root"],
       'name': "pip",
       'title': "#pi^{+} MC",
       'caption': "#pi^{+} MC",
@@ -70,8 +90,8 @@ if __name__ == "__main__":
       'scaleFactor': 1./25000*nData,
     },
     {
-      'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_2212.root",
-      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorMC1/friendTrees/friend_MC1_PDG_2212.root"],
+      'fn': "billMC1/MC1_PDG_2212.root",
+      'addFriend': ["friend", "billMC1/friendTrees/friend_MC1_PDG_2212.root"],
       'name': "p",
       'title': "proton MC",
       'caption': "proton MC",
@@ -79,8 +99,8 @@ if __name__ == "__main__":
       'scaleFactor': 1./10000*nData,
     },
     {
-      'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_-11.root",
-      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorMC1/friendTrees/friend_MC1_PDG_-11.root"],
+      'fn': "billMC1/MC1_PDG_-11.root",
+      'addFriend': ["friend", "billMC1/friendTrees/friend_MC1_PDG_-11.root"],
       'name': "ep",
       'title': "e^{+} MC",
       'caption': "e^{+} MC",
@@ -88,8 +108,8 @@ if __name__ == "__main__":
       'scaleFactor': 1./10000*nData,
     },
     {
-      'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_-13.root",
-      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorMC1/friendTrees/friend_MC1_PDG_-13.root"],
+      'fn': "billMC1/MC1_PDG_-13.root",
+      'addFriend': ["friend", "billMC1/friendTrees/friend_MC1_PDG_-13.root"],
       'name': "mup",
       'title': "#mu^{+} MC",
       'caption': "#mu^{+} MC",
@@ -97,8 +117,8 @@ if __name__ == "__main__":
       'scaleFactor': 1./10000*nData,
     },
     {
-      'fn': "/scratch/jhugon/lariat/pionAbsSelectorMC1/MC1_PDG_321.root",
-      'addFriend': ["friend", "/scratch/jhugon/lariat/pionAbsSelectorMC1/friendTrees/friend_MC1_PDG_321.root"],
+      'fn': "billMC1/MC1_PDG_321.root",
+      'addFriend': ["friend", "billMC1/friendTrees/friend_MC1_PDG_321.root"],
       'name': "kp",
       'title': "K^{+} MC",
       'caption': "K^{+} MC",
@@ -261,46 +281,66 @@ if __name__ == "__main__":
 #      #'normalize': True,
 #      'logy': logy,
 #    },
-#    {
-#      'name': "nTracks",
-#      'xtitle': "Number of TPC Tracks / Event",
-#      'ytitle': "Events / bin",
-#      'binning': [31,0,30],
-#      'var': "nTracks",
-#      'cuts': weightStr,
-#      #'normalize': True,
-#      'logy': logy,
-#    },
-#    {
-#      'name': "nTracksInFirstZ2",
-#      'xtitle': "Number of TPC Tracks in first 2 cm / Event",
-#      'ytitle': "Events / bin",
-#      'binning': [16,0,15],
-#      'var': "nTracksInFirstZ[2]",
-#      'cuts': weightStr,
-#      #'normalize': True,
-#      'logy': logy,
-#    },
-#    {
-#      'name': "nTracksInFirstZ14",
-#      'xtitle': "Number of TPC Tracks in first 14 cm / Event",
-#      'ytitle': "Events / bin",
-#      'binning': [16,0,15],
-#      'var': "nTracksInFirstZ[14]",
-#      'cuts': weightStr,
-#      #'normalize': True,
-#      'logy': logy,
-#    },
-#    {
-#      'name': "nTracksLengthLt5",
-#      'xtitle': "Number of TPC Tracks with length < 5 cm / Event",
-#      'ytitle': "Events / bin",
-#      'binning': [16,0,15],
-#      'var': "nTracksLengthLt[5]",
-#      'cuts': weightStr,
-#      #'normalize': True,
-#      'logy': logy,
-#    },
+    {
+      'name': "primTrkStartZ",
+      'xtitle': "Primary TPC Track Start Z [cm]",
+      'ytitle': "Events / bin",
+      'binning': [60,-3,3],
+      'var': "primTrkStartZ",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': False,
+    },
+    {
+      'name': "primTrkStartZ_Logy",
+      'xtitle': "Primary TPC Track Start Z [cm]",
+      'ytitle': "Events / bin",
+      'binning': [60,-10,10],
+      'var': "primTrkStartZ",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': True,
+    },
+    {
+      'name': "nTracks",
+      'xtitle': "Number of TPC Tracks / Event",
+      'ytitle': "Events / bin",
+      'binning': [31,0,30],
+      'var': "nTracks",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "nTracksInFirstZ2",
+      'xtitle': "Number of TPC Tracks in first 2 cm / Event",
+      'ytitle': "Events / bin",
+      'binning': [16,0,15],
+      'var': "nTracksInFirstZ[2]",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "nTracksInFirstZ14",
+      'xtitle': "Number of TPC Tracks in first 14 cm / Event",
+      'ytitle': "Events / bin",
+      'binning': [16,0,15],
+      'var': "nTracksInFirstZ[14]",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
+    {
+      'name': "nTracksLengthLt5",
+      'xtitle': "Number of TPC Tracks with length < 5 cm / Event",
+      'ytitle': "Events / bin",
+      'binning': [16,0,15],
+      'var': "nTracksLengthLt[5]",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
 #    {
 #      'name': "nMatchedTracks",
 #      'xtitle': "Number of TPC/WC Track Matches / Event",
@@ -428,16 +468,16 @@ if __name__ == "__main__":
 #      #'normalize': True,
 #      'logy': logy,
 #    },
-#    {
-#      'name': "trackStartZ",
-#      'xtitle': "TPC Track Start Z [cm]",
-#      'ytitle': "Tracks / bin",
-#      'binning': [100,-20,110],
-#      'var': "trackStartZ",
-#      'cuts': weightStr,
-#      #'normalize': True,
-#      'logy': logy,
-#    },
+    {
+      'name': "trackStartZ",
+      'xtitle': "TPC Track Start Z [cm]",
+      'ytitle': "Tracks / bin",
+      'binning': [60,-10,50],
+      'var': "trackStartZ",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': True,
+    },
 #    #{
 #    #  'name': "trackEndX",
 #    #  'xtitle': "TPC Track End X [cm]",
@@ -468,16 +508,16 @@ if __name__ == "__main__":
 #    #  #'normalize': True,
 #    #  'logy': logy,
 #    #},
-    #{
-    #  'name': "trackLength",
-    #  'xtitle': "TPC Track Length [cm]",
-    #  'ytitle': "Tracks / bin",
-    #  'binning': [100,-10,100],
-    #  'var': "trackLength",
-    #  'cuts': weightStr,
-    #  #'normalize': True,
-    #  'logy': logy,
-    #},
+    {
+      'name': "trackLength",
+      'xtitle': "TPC Track Length [cm]",
+      'ytitle': "Tracks / bin",
+      'binning': [100,-10,100],
+      'var': "trackLength",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
     #{
     #  'name': "trackCaloKin",
     #  'xtitle': "TPC Calo Estimate of KE [MeV]",
@@ -655,7 +695,8 @@ if __name__ == "__main__":
       'name': "trackStartDistToPrimTrkEnd",
       'xtitle': "TPC Track Start Distance to Primary End [cm]",
       'ytitle': "Tracks / bin",
-      'binning': [40,0,20],
+      #'binning': [40,0,20],
+      'binning': [160,0,80],
       'var': "trackStartDistToPrimTrkEnd",
       'cuts': weightStr,
       #'normalize': True,
@@ -665,7 +706,8 @@ if __name__ == "__main__":
       'name': "trackEndDistToPrimTrkEnd",
       'xtitle': "TPC Track End Distance to Primary End [cm]",
       'ytitle': "Tracks / bin",
-      'binning': [40,0,20],
+      #'binning': [40,0,20],
+      'binning': [160,0,80],
       'var': "trackEndDistToPrimTrkEnd",
       'cuts': weightStr,
       #'normalize': True,
@@ -731,6 +773,16 @@ if __name__ == "__main__":
     #  #'normalize': True,
     #  'logy': logy,
     #},
+    {
+      'name': "secTrkStartZ",
+      'xtitle': "Secondary TPC Track Start z [cm]",
+      'ytitle': "Tracks / bin",
+      'binning': [120,-10,110],
+      'var': "trackStartZ",
+      'cuts': weightStr+secTrkCuts,
+      #'normalize': True,
+      'logy': logy,
+    },
     {
       'name': "secTrkLLR",
       'xtitle': "Secondary TPC Track Pion/Proton LLHR",
@@ -842,6 +894,16 @@ if __name__ == "__main__":
       #'normalize': True,
       'logy': logy,
     },
+    {
+      'name': "primTrkZs",
+      'xtitle': "Primary TPC Track Hit Z coordinates [cm]",
+      'ytitle': "Events / bin",
+      'binning': [80,-10,10],
+      'var': "primTrkZs",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': logy,
+    },
     #{
     #  'name': "trueEndProcess",
     #  'xtitle': "trueEndProcess",
@@ -871,16 +933,32 @@ if __name__ == "__main__":
                 catConfigs=TRUECATEGORYFEWERCONFIGS
              )
 
-  #for i in range(len(histConfigs)):
-  #  histConfigs[i]['cuts'] = weightStr + "*(pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3) && (isMC || (firstTOF > 28 && firstTOF < 55))"
-  #  #histConfigs[i]['cuts'] = weightStr + "*(pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3) && (isMC || (firstTOF < 25))"
-  #  #histConfigs[i]['cuts'] = weightStr + "*(pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3 && fabs(trackMatchDeltaY) < 5. && fabs(trackMatchDeltaX) < 5. && trackMatchDeltaAngle*180/pi < 10.)"
-  #plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX,outSuffix="HistCuts")
-
-  #for i in range(len(histConfigs)):
-  #  histConfigs[i]['cuts'] = " allWeight *( pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3 && (isMC || (firstTOF > 28 && firstTOF < 55)))"
-  #  #histConfigs[i]['cuts'] = " allWeight *( pzWC > 450 && pzWC < 1100 && nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3 && (isMC || (firstTOF < 25)))"
-  #plotManyFilesOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",nMax=NMAX,outSuffix="HistAllWeightsCuts")
+  m2SF = 1e-3
+  histConfigs = [
+    {
+      'name': "beamlineMass_NoCuts",
+      'xtitle': "Beamline Mass Squared [1000#times (MeV^{2})]",
+      'ytitle': "Events / bin",
+      'binning': [100,-2e5*m2SF,2e5*m2SF],
+      'var': "pWC*pWC*(firstTOF*firstTOF*0.00201052122-1.)*1e-3",
+      'cuts': "(!isMC)",
+      #'normalize': True,
+      'logy': False,
+      'drawvlines':[105.65**2*m2SF,139.6**2*m2SF,493.677**2*m2SF,938.272046**2*m2SF],
+    },
+    {
+      'name': "beamlineMass_NoCuts_Logy",
+      'xtitle': "Beamline Mass Squared [1000#times (MeV^{2})]",
+      'ytitle': "Events / bin",
+      'binning': [100,-5e5*m2SF,2e6*m2SF],
+      'var': "pWC*pWC*(firstTOF*firstTOF*0.00201052122-1.)*1e-3",
+      'cuts': "(!isMC)",
+      #'normalize': True,
+      'logy': True,
+      'drawvlines':[105.65**2*m2SF,139.6**2*m2SF,493.677**2*m2SF,938.272046**2*m2SF],
+    },
+  ]
+#  plotManyFilesOnePlot([f for f in fileConfigs if ('isData' in f and f['isData'])],histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
 
   histConfigs = [
     #{
@@ -993,90 +1071,57 @@ if __name__ == "__main__":
 #      #'normalize': True,
 #      #'logz': True,
 #    },
+#    {
+#      'name': "yWCVxWC",
+#      'xtitle': "X Position of WC track projection to TPC [cm]",
+#      'ytitle': "Y Position of WC track projection to TPC [cm]",
+#      'binning': [40,0,40,40,-20,20],
+#      'var': "yWC:xWC",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      #'logz': True,
+#    },
+#    {
+#      'name': "trackYFrontVtrackXFront",
+#      'xtitle': "X of TPC Track Projection to TPC Front [cm]",
+#      'ytitle': "Y of TPC Track Projection to TPC Front [cm]",
+#      'binning': [40,0,40,40,-20,20],
+#      'var': "trackYFront:trackXFront",
+#      'cuts': weightStr,
+#      #'normalize': True,
+#      #'logz': True,
+#    },
     {
-      'name': "yWCVxWC",
-      'xtitle': "X Position of WC track projection to TPC [cm]",
-      'ytitle': "Y Position of WC track projection to TPC [cm]",
-      'binning': [40,0,40,40,-20,20],
-      'var': "yWC:xWC",
+      'name': "trackLengthVtrackStartZ",
+      'ytitle': "TPC Track Length [cm]",
+      'xtitle': "TPC Track Start z [cm]",
+      'binning': [25,0,100,30,-10,110],
+      'var': "trackLength:trackStartZ",
       'cuts': weightStr,
       #'normalize': True,
       #'logz': True,
     },
     {
-      'name': "trackYFrontVtrackXFront",
-      'xtitle': "X of TPC Track Projection to TPC Front [cm]",
-      'ytitle': "Y of TPC Track Projection to TPC Front [cm]",
-      'binning': [40,0,40,40,-20,20],
-      'var': "trackYFront:trackXFront",
+      'name': "trackStartDistToPrimTrkEndVtrackStartZ",
+      'xtitle': "TPC Track Start z [cm]",
+      'ytitle': "TPC Track Start Distance to Primary End [cm]",
+      'binning': [25,0,100,20,0,80],
+      'var': "trackStartDistToPrimTrkEnd:trackStartZ",
+      'cuts': weightStr,
+      #'normalize': True,
+      #'logz': True,
+    },
+    {
+      'name': "trackStartDistToPrimTrkEndVprimTrkEndZ",
+      'xtitle': "Primary TPC Track End z [cm]",
+      'ytitle': "TPC Track Start Distance to Primary End [cm]",
+      'binning': [25,0,100,20,0,80],
+      'var': "trackStartDistToPrimTrkEnd:primTrkEndZ",
       'cuts': weightStr,
       #'normalize': True,
       #'logz': True,
     },
   ]
 
-  #plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",outPrefix="DataMC_",nMax=NMAX)
+  plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",outPrefix="DataMC_",nMax=NMAX)
 
-
-
-  histConfigs = [
-    {
-      'title': "All",
-      'xtitle': "Momentum from WC [MeV/c]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,2000],
-      'var': "pWC",
-      'cuts': "pzWeight",
-      #'normalize': True,
-      'logy': logy,
-      'printIntegral': True,
-    },
-    {
-      'title': "TOF Good",
-      'xtitle': "Momentum from WC [MeV/c]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,2000],
-      'var': "pWC",
-      'cuts': "pzWeight*(firstTOF > -9999)",
-      #'normalize': True,
-      'logy': logy,
-      'printIntegral': True,
-    },
-    {
-      'title': "Any Triggers",
-      'xtitle': "Momentum from WC [MeV/c]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,2000],
-      'var': "pWC",
-      'cuts': "pzWeight*(triggerBits != 0)",
-      #'normalize': True,
-      'logy': logy,
-      'printIntegral': True,
-    },
-    {
-      'title': "WC 1 & 4 Triggers",
-      'xtitle': "Momentum from WC [MeV/c]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,2000],
-      'var': "pWC",
-      'cuts': "pzWeight*((triggerBits << 0) & 1)*((triggerBits << 3) & 1)",
-      #'normalize': True,
-      'logy': logy,
-      'printIntegral': True,
-    },
-    {
-      'title': "WC 1 & 4, Both TOF Triggers",
-      'xtitle': "Momentum from WC [MeV/c]",
-      'ytitle': "Events / bin",
-      'binning': [100,0,2000],
-      'var': "pWC",
-      'cuts': "pzWeight*((triggerBits << 0) & 1)*((triggerBits << 3) & 1)*((triggerBits << 5) & 1)*((triggerBits << 6) & 1)",
-      #'normalize': True,
-      'logy': logy,
-      'printIntegral': True,
-    },
-  ]
-  for i in range(len(histConfigs)):
-    histConfigs[i]["color"] = COLORLIST[i]
-
-  #plotManyHistsOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",outPrefix="DataCompare_",nMax=NMAX)
