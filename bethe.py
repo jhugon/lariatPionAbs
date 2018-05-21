@@ -171,30 +171,30 @@ if __name__ == "__main__":
   b = Bethe()
   mt = MuonTable()
   l = 1.0
+  fig.text(0.7,0.91,"Liquid Argon, $\ell$ = {:.2f} cm".format(l),ha='right',va='bottom')
   print -b.mean(1,357,MUONMASS), b.mpv(1,357,MUONMASS), b.width(1,357,MUONMASS)
   print -b.mean(1,500,PROTONMASS), b.mpv(1,500,PROTONMASS), b.width(1,501,PROTONMASS)
 
   masses = [MUONMASS, PIONMASS, KAONMASS, PROTONMASS]
   labels = [r"$\mu^\pm$",r"$\pi^\pm$","$K^\pm$","p"]
   colors = ["b","g","k","r"]
+  ax.cla()
   for mass,label,color in zip(masses,labels,colors):
-    momentas = numpy.linspace(200,1500,100)
+    momentas = numpy.linspace(30,1000,200)
     energies = numpy.sqrt(momentas**2+mass**2)
     kes = energies - mass
-    means = [b.mean(l,m,mass) for m in momentas]
-    mpvs = [b.mpv(l,m,mass) for m in momentas]
-    widths = [b.width(l,m,mass) for m in momentas]
-    distlows = [mpv-0.5*width for mpv, width in zip(mpvs,widths)]
-    disthighs = [mpv+0.5*width for mpv, width in zip(mpvs,widths)]
+    means = numpy.array([b.mean(l,m,mass) for m in momentas])
+    mpvs = numpy.array([b.mpv(l,m,mass) for m in momentas])
+    widths = numpy.array([b.width(l,m,mass) for m in momentas])
+    distlows = mpvs-0.5*widths
+    disthighs = mpvs+0.5*widths
     tableVals = mt.dEdx(kes)*l
-    ax.fill_between(momentas,distlows,disthighs,edgecolor="",facecolor=color,alpha=0.4)
-    ax.plot(momentas,means,color+"--")
-    ax.plot(momentas,mpvs,color+"-",label=label)
+    ax.fill_between(momentas,distlows/l,disthighs/l,edgecolor="",facecolor=color,alpha=0.4)
+    ax.plot(momentas,means/l,color+"--")
+    ax.plot(momentas,mpvs/l,color+"-",label=label)
     ax.legend(loc="best")
     ax.set_xlabel("Momentum [MeV/c]")
-    ax.set_ylabel("Hit Energy [MeV]")
-    #ax.set_ylim(0,30)
-    fig.text(0.9,0.91,"Liquid Argon, $\ell$ = {:.2f} cm".format(l),ha='right',va='bottom')
-    fig.savefig("text.pdf")
-
-  
+    ax.set_ylabel("$\Delta/x$ [MeV/cm]")
+    ax.set_xlim(0,1000)
+    ax.set_ylim(0,30)
+  fig.savefig("BetheMomentum.pdf")
