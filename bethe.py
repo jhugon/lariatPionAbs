@@ -170,10 +170,11 @@ if __name__ == "__main__":
 
   b = Bethe()
   mt = MuonTable()
+  wire_spacing = 0.4 #cm
   l = 1.0
   fig.text(0.7,0.91,"Liquid Argon, $\ell$ = {:.2f} cm".format(l),ha='right',va='bottom')
   print -b.mean(1,357,MUONMASS), b.mpv(1,357,MUONMASS), b.width(1,357,MUONMASS)
-  print -b.mean(1,500,PROTONMASS), b.mpv(1,500,PROTONMASS), b.width(1,501,PROTONMASS)
+  print -b.mean(1,500,PROTONMASS), b.mpv(1,500,PROTONMASS), b.width(1,500,PROTONMASS)
 
   masses = [MUONMASS, PIONMASS, KAONMASS, PROTONMASS]
   labels = [r"$\mu^\pm$",r"$\pi^\pm$","$K^\pm$","p"]
@@ -192,9 +193,77 @@ if __name__ == "__main__":
     ax.fill_between(momentas,distlows/l,disthighs/l,edgecolor="",facecolor=color,alpha=0.4)
     ax.plot(momentas,means/l,color+"--")
     ax.plot(momentas,mpvs/l,color+"-",label=label)
-    ax.legend(loc="best")
-    ax.set_xlabel("Momentum [MeV/c]")
-    ax.set_ylabel("$\Delta/x$ [MeV/cm]")
-    ax.set_xlim(0,1000)
-    ax.set_ylim(0,30)
+  ax.legend(loc="best")
+  ax.set_xlabel("Momentum [MeV/c]")
+  ax.set_ylabel("$\Delta/x$ [MeV/cm]")
+  ax.set_xlim(0,1000)
+  ax.set_ylim(0,30)
+  fig.savefig("BetheMomentum.png")
   fig.savefig("BetheMomentum.pdf")
+  ax.set_ylim(1,5)
+  fig.savefig("BetheMomentum_Zoom.png")
+  fig.savefig("BetheMomentum_Zoom.pdf")
+
+  ax.cla()
+  for mass,label,color in zip(masses,labels,colors):
+    momentas = numpy.linspace(30,2000,400)
+    energies = numpy.sqrt(momentas**2+mass**2)
+    kes = energies - mass
+    means = numpy.array([b.mean(l,m,mass) for m in momentas])
+    mpvs = numpy.array([b.mpv(l,m,mass) for m in momentas])
+    widths = numpy.array([b.width(l,m,mass) for m in momentas])
+    distlows = mpvs-0.5*widths
+    disthighs = mpvs+0.5*widths
+    tableVals = mt.dEdx(kes)*l
+    ax.fill_between(kes,distlows/l,disthighs/l,edgecolor="",facecolor=color,alpha=0.4)
+    ax.plot(kes,means/l,color+"--")
+    ax.plot(kes,mpvs/l,color+"-",label=label)
+  ax.legend(loc="best")
+  ax.set_xlabel("Kinetic Energy [MeV]")
+  ax.set_ylabel("$\Delta/x$ [MeV/cm]")
+  ax.set_xlim(0,500)
+  ax.set_ylim(0,30)
+  fig.savefig("BetheKE.png")
+  fig.savefig("BetheKE.pdf")
+  ax.set_ylim(1,5)
+  fig.savefig("BetheKE_Zoom.png")
+  fig.savefig("BetheKE_Zoom.pdf")
+
+
+  m = 800.
+  mass = PIONMASS
+  color = 'b'
+  fig, ax = plt.subplots()
+  fig.suptitle(r"$\pi^\pm$ on Liquid Argon, p = {0:.0f} MeV/c, KE = {1:.0f} MeV".format(m,numpy.sqrt(m**2+mass**2)-mass))
+  lengths = numpy.logspace(-2,1)
+  mpvs = numpy.array([b.mpv(l,m,mass) for l in lengths])
+  widths = numpy.array([b.width(l,m,mass) for l in lengths])
+  distlows = mpvs-0.5*widths
+  disthighs = mpvs+0.5*widths
+  ax.fill_between(lengths,distlows/lengths,disthighs/lengths,edgecolor="",facecolor=color,alpha=0.4)
+  ax.plot(lengths,mpvs/lengths,color+"-",label=label)
+  ax.set_xlabel("$\ell$ [cm]")
+  ax.set_ylabel("$\Delta/x$ [MeV/cm]")
+  ax.set_xlim(0.4,5)
+  ax.set_ylim(1.,2.4)
+  fig.savefig("BetheL.png")
+  fig.savefig("BetheL.pdf")
+
+  ax.cla()
+  fig.text(0.15,0.94,"Wire Spacing = 0.4 cm".format(l),ha='left',va='top')
+  #angles = numpy.linspace(0,90,300)
+  angles = numpy.logspace(-2,2,100)
+  lengths = wire_spacing/numpy.sin(angles*numpy.pi/180.)
+  mpvs = numpy.array([b.mpv(l,m,mass) for l in lengths])
+  widths = numpy.array([b.width(l,m,mass) for l in lengths])
+  distlows = mpvs-0.5*widths
+  disthighs = mpvs+0.5*widths
+  ax.fill_between(angles,distlows/lengths,disthighs/lengths,edgecolor="",facecolor=color,alpha=0.4)
+  ax.plot(angles,(mpvs/lengths),color+"-",label=label)
+  ax.set_xlabel(r"$\theta$ w.r.t wire direction in wire plane (0 is $\|\|$ to wire) [deg]")
+  ax.set_ylabel("$\Delta/x$ [MeV/cm]")
+  ax.set_xlim(0.,90.)
+  ax.set_ylim(1.,2.4)
+  fig.savefig("BetheAngle.png")
+  fig.savefig("BetheAngle.pdf")
+
