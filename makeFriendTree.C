@@ -32,7 +32,7 @@ float thetayz(double theta, double phi)
   return asin(sinthetayz(theta,phi));
 }
 
-void makeFriendTree (TString inputFileName,TString outputFileName,TString histFileName, TString histName, unsigned maxEvents)
+void makeFriendTree (TString inputFileName,TString outputFileName,TString histFileName, TString histName, unsigned maxEvents, TString inputTreeName="PiAbsSelector/tree")
 {
   using namespace std;
 
@@ -40,6 +40,7 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString histFi
 
   bool isMC;
   Float_t pzWC;
+  Float_t trueStartMom;
 
   // Histograms
   TFile* histFile = new TFile(histFileName);
@@ -65,10 +66,11 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString histFi
   cout << "pzHist Integral: " << pzHistIntegral << endl;
 
   // infile chain
-  TChain * tree = new TChain("PiAbsSelector/tree");
+  TChain * tree = new TChain(inputTreeName);
   tree->Add(inputFileName);
   tree->SetBranchAddress("isMC",&isMC);
   tree->SetBranchAddress("pzWC",&pzWC);
+  tree->SetBranchAddress("trueStartMom",&trueStartMom);
 
   ///////////////////////////////
   ///////////////////////////////
@@ -110,7 +112,12 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString histFi
 
     if (isMC)
     {
-      pzWeight = pzHist->GetBinContent(pzHist->FindBin(pzWC));
+      float pz = pzWC;
+      if (pzWC < -100.)
+      {
+        pz = trueStartMom;
+      }
+      pzWeight = pzHist->GetBinContent(pzHist->FindBin(pz));
       allWeight = pzWeight;
     }
     pzWeightSum += pzWeight;
@@ -134,7 +141,12 @@ void makeFriendTree (TString inputFileName,TString outputFileName,TString histFi
 
     if (isMC)
     {
-      pzWeight = pzHist->GetBinContent(pzHist->FindBin(pzWC)) * pzWeightScaleFactor;
+      float pz = pzWC;
+      if (pzWC < -100.)
+      {
+        pz = trueStartMom;
+      }
+      pzWeight = pzHist->GetBinContent(pzHist->FindBin(pz)) * pzWeightScaleFactor;
       allWeight = pzWeight;
     }
     pzWeightSum += pzWeight;

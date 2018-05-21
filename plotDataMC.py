@@ -12,7 +12,7 @@ if __name__ == "__main__":
   #cuts += "*( pWC > 450 && pWC < 1100 && (isMC || (firstTOF > 28 && firstTOF < 55)))" # old protons
   #cuts += "*( pWC > 450 && pWC < 1100 && (isMC || pWC*pWC*(firstTOF*firstTOF*0.00201052122-1.) > 7e5))" # protons
   #cuts += "*(nTracksInFirstZ[2] >= 1 && nTracksInFirstZ[14] < 4 && nTracksLengthLt[5] < 3)" # tpc tracks
-  cuts += "*(primTrkStartZ >= -1. && primTrkStartZ < 2.)" # tpc tracks
+  cuts += "*(primTrkStartZ < 2.)" # tpc tracks
 
   cuts += "*( iBestMatch >= 0 && nMatchedTracks == 1)" # matching in analyzer
 
@@ -472,7 +472,17 @@ if __name__ == "__main__":
       'name': "trackStartZ",
       'xtitle': "TPC Track Start Z [cm]",
       'ytitle': "Tracks / bin",
-      'binning': [60,-10,50],
+      'binning': [20,-5,5],
+      'var': "trackStartZ",
+      'cuts': weightStr,
+      #'normalize': True,
+      'logy': False,
+    },
+    {
+      'name': "trackStartZ_Logy",
+      'xtitle': "TPC Track Start Z [cm]",
+      'ytitle': "Tracks / bin",
+      'binning': [30,-10,20],
       'var': "trackStartZ",
       'cuts': weightStr,
       #'normalize': True,
@@ -927,11 +937,11 @@ if __name__ == "__main__":
   for i in reversed(range(len(fileConfigMCs))):
     if 'isData' in fileConfigMCs[i] and fileConfigMCs[i]['isData']:
       fileConfigDatas.append(fileConfigMCs.pop(i))
-  #DataMCStack(fileConfigDatas,fileConfigMCs,histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
-  DataMCCategoryStack(fileConfigDatas,fileConfigMCs,histConfigs,c,"PiAbsSelectorTC/tree",
-                outPrefix="DataMC_",nMax=NMAX,
-                catConfigs=TRUECATEGORYFEWERCONFIGS
-             )
+  DataMCStack(fileConfigDatas,fileConfigMCs,histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
+  #DataMCCategoryStack(fileConfigDatas,fileConfigMCs,histConfigs,c,"PiAbsSelectorTC/tree",
+  #              outPrefix="DataMC_",nMax=NMAX,
+  #              catConfigs=TRUECATEGORYFEWERCONFIGS
+  #           )
 
   m2SF = 1e-3
   histConfigs = [
@@ -958,7 +968,7 @@ if __name__ == "__main__":
       'drawvlines':[105.65**2*m2SF,139.6**2*m2SF,493.677**2*m2SF,938.272046**2*m2SF],
     },
   ]
-#  plotManyFilesOnePlot([f for f in fileConfigs if ('isData' in f and f['isData'])],histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
+  plotManyFilesOnePlot([f for f in fileConfigs if ('isData' in f and f['isData'])],histConfigs,c,"PiAbsSelectorTC/tree",outPrefix="DataMC_",nMax=NMAX)
 
   histConfigs = [
     #{
