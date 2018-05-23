@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
   beamCuts = "*pzWeight"+cuts
   beamPionCuts = beamCuts + "*((((!isMC) && pWC > 100 && pWC < 1100) || (isMC && trueStartMom > 100 && trueStartMom < 1100)) && (isMC || pWC*pWC*(firstTOF*firstTOF*0.00201052122-1.) < 5e4))" + "*(primTrkLength > 85.)"
-  beamProtonCuts = beamCuts + "*((((!isMC) && pWC > 1000 && pWC < 1100) || (isMC && trueStartMom > 1000 && trueStartMom < 1100)) && (isMC || pWC*pWC*(firstTOF*firstTOF*0.00201052122-1.) > 7e5))" + "*(primTrkLength < 60.)"
+  beamProtonCuts = beamCuts + "*((((!isMC) && pWC > 100 && pWC < 1100) || (isMC && trueStartMom > 100 && trueStartMom < 1100)) && (isMC || pWC*pWC*(firstTOF*firstTOF*0.00201052122-1.) > 7e5))" + "*(primTrkLength < 60.)"
 
   hitCuts = "*(primTrkXs > 3. && primTrkXs < 46. && primTrkYs < 18. && primTrkYs > -18. && primTrkZs > 3. && primTrkZs < 87.)"
   cosmicHitCuts = hitCuts
@@ -102,7 +102,7 @@ if __name__ == "__main__":
       'xtitle': "Primary TPC Track dE/dx [MeV/cm]",
       'ytitle': "Hits / bin",
       'binning': [50,1.,2.5],
-      'var': "primTrkdEdxs*((1.02-1.)*isMC + 1.)",
+      'var': "primTrkdEdxs",
       'cuts': "1",
       'normalize': True,
     },
@@ -152,7 +152,7 @@ if __name__ == "__main__":
       'xtitle': "Beamline Momentum [MeV/c]",
       'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
       'binning': [50,300,1100,50,1.,2.5],
-      'var': "primTrkdEdxs*((1.02-1.)*isMC + 1.):(!isMC)*pWC+isMC*trueStartMom",
+      'var': "primTrkdEdxs:(!isMC)*pWC+isMC*trueStartMom",
       'cuts': "1",
     },
     {
@@ -160,7 +160,7 @@ if __name__ == "__main__":
       'xtitle': "Residual Range [cm]",
       'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
       'binning': [50,0,100,50,1.,2.5],
-      'var': "primTrkdEdxs*((1.02-1.)*isMC + 1.):primTrkResRanges",
+      'var': "primTrkdEdxs:primTrkResRanges",
       'cuts': "1",
     },
     {
@@ -168,7 +168,7 @@ if __name__ == "__main__":
       'xtitle': "Track Distance from Start [cm]",
       'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
       'binning': [50,0,100,50,1.,2.5],
-      'var': "primTrkdEdxs*((1.02-1.)*isMC + 1.):primTrkRangeSoFars",
+      'var': "primTrkdEdxs:primTrkRangeSoFars",
       'cuts': "1",
     },
     {
@@ -247,9 +247,9 @@ if __name__ == "__main__":
     {
       'fn': baseDir+"caloAmpFiles/CosmicAna_p_flat_caloAmp.root",
       'addFriend': ["friend", baseDir+"caloAmpFiles/friendTrees/CosmicAna_p_flat_caloAmp.root"],
-      'name': "BeamMC_pip",
-      'title': "Beam p MC",
-      'caption': "Beam p MC",
+      'name': "BeamMC_pip_CaloAmp",
+      'title': "Beam p MC Amp",
+      'caption': "Beam p MC Amp",
       'isData': False,
       'isBeam': True,
       'cuts': beamProtonCuts + beamHitCuts,
@@ -331,7 +331,7 @@ if __name__ == "__main__":
       'xtitle': "Residual Range [cm]",
       'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
       'binning': [50,0,100,50,1.,2.5],
-      'var': "primTrkdEdxs*((1.02-1.)*isMC + 1.):primTrkResRanges",
+      'var': "primTrkdEdxs:primTrkResRanges",
       'cuts': "1",
     },
     {
@@ -380,7 +380,7 @@ if __name__ == "__main__":
     #  'isData': False,
     #},
     {
-      'fn': [baseDir+"caloAmpFiles/CosmicAna_cosmic_data_Pos_RunII_current100_a_caloAmp.root"],
+      'fn': [baseDir+"caloAmpFiles/CosmicAna_cosmics_data_Pos_RunII_current100_a_caloAmp.root"],
       'name': "CosmicsRunIIPos100aAmp",
       'title': "Run II +100 A Cosmics a Amp",
       'caption': "Run II +100 A Cosmics a Amp",
@@ -436,7 +436,7 @@ if __name__ == "__main__":
     #  'isData': False,
     #},
     {
-      'fn': [baseDir+"caloAmpFiles/CosmicAna_cosmic_data_Pos_RunII_current100_a_caloAmp.root"],
+      'fn': [baseDir+"caloAmpFiles/CosmicAna_cosmics_data_Pos_RunII_current100_a_caloAmp.root"],
       'name': "CosmicsRunIIPos100aAmp",
       'title': "Run II +100 A Cosmics a Amp",
       'caption': "Run II +100 A Cosmics a Amp",
