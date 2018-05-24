@@ -104,66 +104,71 @@ def makeGraphsModeAndFWHM(hist):
     graphFWHM.SetPoint(iBin-1,x,fwhm)
   return graph, graphFWHM
 
-def fitLandaus(c,hist):
+def fitLandaus(c,hist,nLandaus=3,smearGauss=True,samplename=""):
+  if nLandaus <= 0:
+    raise ValueError("nLandaus must be > 0")
 
   t = root.RooRealVar("t","dE/dx [MeV/cm]",0.,10)
+  t.setBins(10000,"cache")
   observables = root.RooArgSet(t)
 
   data = root.RooDataHist("data_"+hist.GetName(),"Data Hist",root.RooArgList(t),hist)
 
   ##############
-  mpvl = root.RooRealVar("mpvl","mpv landau",1.7,0,5)
-  wl = root.RooRealVar("wl","width landau",0.42,0.01,10)
-  ml = root.RooFormulaVar("ml","first landau param","@0+0.22278*@1",root.RooArgList(mpvl,wl))
-  landau = root.RooLandau("lx","lx",t,ml,wl)
 
   mg = root.RooRealVar("mg","mg",0)
   sg = root.RooRealVar("sg","sg",0.1,0.01,2.)
   gauss = root.RooGaussian("gauss","gauss",t,mg,sg)
 
-  t.setBins(10000,"cache")
-  langaus = root.RooFFTConvPdf("langaus","landau (X) gauss",t,landau,gauss)
-  langaus.setBufferFraction(0.2)
+  landauParams = []
+  landaus = []
+  langauses = []
 
-  mpvl2 = root.RooRealVar("mpvl2","mpv landau",1.7,0,5)
-  wl2 = root.RooRealVar("wl2","width landau",0.42,0.01,10)
-  ml2 = root.RooFormulaVar("ml2","first landau param","@0+0.22278*@1",root.RooArgList(mpvl2,wl2))
-  landau2 = root.RooLandau("lx2","lx2",t,ml2,wl2)
-  langaus2 = root.RooFFTConvPdf("langaus2","landau (X) gauss",t,landau2,gauss)
-  langaus2.setBufferFraction(0.2)
-  
-  mpvl3 = root.RooRealVar("mpvl3","mpv landau",1.7,0,5)
-  wl3 = root.RooRealVar("wl3","width landau",0.42,0.01,10)
-  ml3 = root.RooFormulaVar("ml3","first landau param","@0+0.22278*@1",root.RooArgList(mpvl3,wl3))
-  landau3 = root.RooLandau("lx3","lx3",t,ml3,wl3)
-  langaus3 = root.RooFFTConvPdf("langaus3","landau (X) gauss",t,landau3,gauss)
-  langaus3.setBufferFraction(0.2)
-  
-  ratio = root.RooRealVar("ratio","ratio",0.18,0,1)
-  ratio2 = root.RooRealVar("ratio2","ratio2",0.18,0,1)
-  twolandaus = root.RooAddPdf("twolandaus","twolandaus",landau,landau2,ratio)
-  threelandaus = root.RooAddPdf("threelandaus","threelandaus",root.RooArgList(landau,landau2,landau3),root.RooArgList(ratio,ratio2))
-  twolangaus = root.RooAddPdf("twolangaus","twolandaus",langaus,langaus2,ratio)
-  threelangaus = root.RooAddPdf("threelangaus","threelandaus",root.RooArgList(langaus,langaus2,langaus3),root.RooArgList(ratio,ratio2))
+  for iLandau in range(1,nLandaus+1):
+    iLandauStr = str(iLandau)
+    mpvl = root.RooRealVar("mpvl"+iLandauStr,"mpv landau "+iLandauStr,1.7,0,5)
+    wl = root.RooRealVar("wl"+iLandauStr,"width landau "+iLandauStr,0.42,0.01,10)
+    ml = root.RooFormulaVar("ml"+iLandauStr,"first landau param "+iLandauStr,"@0+0.22278*@1",root.RooArgList(mpvl,wl))
+    landau = root.RooLandau("lx"+iLandauStr,"lx "+iLandauStr,t,ml,wl)
 
+    landauParams += [mpvl,wl,ml]
+    landaus.append(landau)
 
-  model = threelandaus
+    langaus = root.RooFFTConvPdf("langaus"+iLandauStr,"landau (X) gauss "+iLandauStr,t,landau,gauss)
+    langaus.setBufferFraction(0.2)
+    langauses.append(langaus)
+
+  ratioParams = []
+
+  for iRatio in range(1,nLandaus):
+    iRatioStr = str(iRatio)
+    ratio = root.RooRealVar("ratio"+iRatioStr,"ratio "+iRatioStr,0.18,0,1)
+    ratioParams.append(ratio)
+
+  model = landaus[0]
+  multiLandaus = None
+  multiLangaus = None
+  if nLandaus > 1:
+    multiLandaus = root.RooAddPdf("multiLandaus","multiLandaus",root.RooArgList(*landaus),root.RooArgList(*ratioParams))
+    multiLangaus = root.RooAddPdf("multiLangaus","multiLangaus",root.RooArgList(*langauses),root.RooArgList(*ratioParams))
+    model = multiLandaus
+    if smearGauss:
+      model = multiLangaus
 
   ##############
 
   model.fitTo(data)
 
-  frame = t.frame(root.RooFit.Title("landau (x) gauss convolution"))
+  frame = t.frame(root.RooFit.Title(""))
   data.plotOn(frame)
   model.plotOn(frame)
 
-  model.plotOn(frame,root.RooFit.Components("lx"),root.RooFit.LineStyle(root.kDashed))
-  model.plotOn(frame,root.RooFit.Components("lx2"),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kRed))
-  model.plotOn(frame,root.RooFit.Components("lx3"),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kGreen))
-
-  #model.plotOn(frame,root.RooFit.Components("langaus"),root.RooFit.LineStyle(root.kDashed))
-  #model.plotOn(frame,root.RooFit.Components("langaus2"),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kRed))
-  #model.plotOn(frame,root.RooFit.Components("langaus3"),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(root.kGreen))
+  for iLandau in range(2,nLandaus+1):
+    iLandauStr = str(iLandau)
+    if smearGauss:
+      model.plotOn(frame,root.RooFit.Components("langaus"+iLandauStr),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iLandau]))
+    else:
+      model.plotOn(frame,root.RooFit.Components("lx"+iLandauStr),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iLandau]))
 
   #root.gPad.SetLeftMargin(0.15)
   #frame.GetYaxis().SetTitleOffset(1.4)
@@ -173,11 +178,11 @@ def fitLandaus(c,hist):
   #axisHist.Draw()
   #frame.Draw("same")
   frame.Draw()
-  c.SaveAs("roofit.pdf")
+  c.SaveAs("roofit_{}.png".format(samplename))
 
-def fitSlicesLandaus(c,hist):
+def fitSlicesLandaus(c,hist,postfix,nLandaus=1,smearGauss=False):
   histAll = hist.ProjectionY("_pyAll",1,hist.GetNbinsX())
-  fitLandaus(c,histAll)
+  fitLandaus(c,histAll,nLandaus=nLandaus,smearGauss=smearGauss,samplename=postfix)
 
 def fitGaussCore(c,hist,postfix,caption,fitMin=1.4,fitMax=2.4):
 
