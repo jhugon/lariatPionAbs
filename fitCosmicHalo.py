@@ -180,9 +180,72 @@ def fitLandaus(c,hist,nLandaus=3,smearGauss=True,samplename=""):
   frame.Draw()
   c.SaveAs("roofit_{}.png".format(samplename))
 
-def fitSlicesLandaus(c,hist,postfix,nLandaus=1,smearGauss=False):
-  histAll = hist.ProjectionY("_pyAll",1,hist.GetNbinsX())
-  fitLandaus(c,histAll,nLandaus=nLandaus,smearGauss=smearGauss,samplename=postfix)
+  bestFits = []
+  errs = []
+  for iLandau in range(nLandaus):
+    for iParam in range(2):
+      param = landauParams[iParam+iLandau*3]
+      bestFits.append(param.getVal())
+      bestFits.append(param.getError())
+
+  return bestFits, errs
+
+def fitSlicesLandaus(c,hist,fileprefix,nJump=1,nLandaus=1,smearGauss=False):
+  xaxis = hist.GetXaxis()
+  xTitle = xaxis.GetTitle()
+  yaxis = hist.GetYaxis()
+  yTitle = yaxis.GetTitle()
+  mpvlGraph = root.TGraphErrors()
+  wlGraph = root.TGraphErrors()
+  sgGraph = root.TGraphErrors()
+  fwhmGraph = root.TGraphErrors()
+  iPoint=0
+  for i in range(hist.GetNbinsX()//nJump):
+      firstBin = i*nJump+1
+      lastBin = (i+1)*(nJump)
+      lastBin = min(lastBin,hist.GetNbinsX())
+      histAll = hist.ProjectionY("_pyAll",firstBin,lastBin)
+      if histAll.GetEntries() < 10:
+        continue
+      postfix = "_"+fileprefix+"bins{}".format(i)
+      xMin = xaxis.GetBinLowEdge(firstBin)
+      xMax = xaxis.GetBinUpEdge(lastBin)
+      caption = "{} from {} to {}".format(xTitle,xMin,xMax)
+      xMiddle = 0.5*(xMax+xMin)
+      xError = 0.5*(xMax-xMin)
+      startFit = 0.
+      endFit = 0.
+      #startFit, endFit = getFracMaxVals(histAll,fracMax)
+      bestFits,errors = fitLandaus(c,histAll,nLandaus,smearGauss,postfix)
+      #if and (mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5):
+      #      continue
+      mpvlGraph.SetPoint(iPoint,xMiddle,bestFits[0])
+      wlGraph.SetPoint(iPoint,xMiddle,bestFits[1])
+      mpvlGraph.SetPointError(iPoint,xError,bestFits[0])
+      wlGraph.SetPointError(iPoint,xError,bestFits[1])
+      iPoint += 1
+  graphs = [mpvlGraph,wlGraph]
+  labels = ["Landau MPV", "Landau Width"]
+  #graphs = [mpvlGraph,sgGraph]
+  #labels = ["Landau MPV", "Gaussian #sigma"]
+  for i, graph in enumerate(graphs):
+    graph.SetLineColor(COLORLIST[i])
+    graph.SetMarkerColor(COLORLIST[i])
+  pad1 = root.TPad("pad1"+hist.GetName(),"",0.02,0.50,0.98,0.98,0)
+  pad2 = root.TPad("pad2"+hist.GetName(),"",0.02,0.01,0.98,0.49,0)
+  c.cd()
+  c.Clear()
+  pad1.Draw()
+  pad2.Draw()
+  pad1.cd()
+  axis1 = drawGraphs(pad1,[mpvlGraph],xTitle,"Landau MPV [MeV/cm]",yStartZero=False)
+  pad2.cd()
+  axis2 = drawGraphs(pad2,[sgGraph],xTitle,"Gaussian #sigma [MeV/cm]")
+  #leg = drawNormalLegend(graphs,labels,option="lep",position=[0.2,0.50,0.6,0.70])
+  c.cd()
+  c.SaveAs(fileprefix+".png")
+  c.SaveAs(fileprefix+".pdf")
+  return mpvlGraph,wlGraph
 
 def fitGaussCore(c,hist,postfix,caption,fitMin=1.4,fitMax=2.4):
 
