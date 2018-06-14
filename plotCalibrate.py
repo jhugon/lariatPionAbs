@@ -8,6 +8,7 @@ root.gROOT.SetBatch(True)
 import sys
 import numpy
 
+SLABTHICKNESS = 0.4/math.sin(60.*math.pi/180.)
 SLABTHICKNESS = 1.
 
 if __name__ == "__main__":
@@ -67,15 +68,15 @@ if __name__ == "__main__":
       'caption': "Run II +60A",
       'isData': True,
     },
-    {
-      'fn': "billMC1/MC1_PDG_211.root",
-      'addFriend': ["friend", "billMC1/friendTrees/friend_MC1_PDG_211.root"],
-      'name': "pip_weighted",
-      'title': "#pi^{+} MC Weighted",
-      'caption': "#pi^{+} MC Weighted",
-      'scaleFactor': 1./25000*nData,
-      'cuts': "*pzWeight",
-    },
+    #{
+    #  'fn': "billMC1/MC1_PDG_211.root",
+    #  'addFriend': ["friend", "billMC1/friendTrees/friend_MC1_PDG_211.root"],
+    #  'name': "pip_weighted",
+    #  'title': "#pi^{+} MC Weighted",
+    #  'caption': "#pi^{+} MC Weighted",
+    #  'scaleFactor': 1./25000*nData,
+    #  'cuts': "*pzWeight",
+    #},
     {
       'fn': "billMC1/MC1_PDG_211.root",
       'addFriend': ["friend", "billMC1/friendTrees/friend_MC1_PDG_211.root"],
@@ -92,15 +93,15 @@ if __name__ == "__main__":
       'caption': "#pi^{+} MC Smear 10%",
       'scaleFactor': 1./25000*nData,
     },
-    {
-      'fn': "mcSmearedForCalibration/PiAbsSelector_lariat_PiAbsAndChEx_flat_pip_presmear10_v6.root",
-      'addFriend': ["friend", "mcSmearedForCalibration/friendTrees/PiAbsSelector_lariat_PiAbsAndChEx_flat_pip_presmear10_v6.root"],
-      'name': "pip_presmear10_weighted",
-      'title': "#pi^{+} MC Smear 10%",
-      'caption': "#pi^{+} MC Smear 10%",
-      'scaleFactor': 1./25000*nData,
-      'cuts': "*pzWeight",
-    },
+    #{
+    #  'fn': "mcSmearedForCalibration/PiAbsSelector_lariat_PiAbsAndChEx_flat_pip_presmear10_v6.root",
+    #  'addFriend': ["friend", "mcSmearedForCalibration/friendTrees/PiAbsSelector_lariat_PiAbsAndChEx_flat_pip_presmear10_v6.root"],
+    #  'name': "pip_presmear10_weighted",
+    #  'title': "#pi^{+} MC Smear 10%",
+    #  'caption': "#pi^{+} MC Smear 10%",
+    #  'scaleFactor': 1./25000*nData,
+    #  'cuts': "*pzWeight",
+    #},
     {
       'fn': "mcSmearedForCalibration/PiAbsSelector_lariat_PiAbsAndChEx_flat_pip_presmear30_v6.root",
       'addFriend': ["friend", "mcSmearedForCalibration/friendTrees/PiAbsSelector_lariat_PiAbsAndChEx_flat_pip_presmear30_v6.root"],
@@ -109,15 +110,15 @@ if __name__ == "__main__":
       'caption': "#pi^{+} MC Smear 30%",
       'scaleFactor': 1./25000*nData,
     },
-    {
-      'fn': "mcSmearedForCalibration/PiAbsSelector_lariat_PiAbsAndChEx_flat_pip_presmear30_v6.root",
-      'addFriend': ["friend", "mcSmearedForCalibration/friendTrees/PiAbsSelector_lariat_PiAbsAndChEx_flat_pip_presmear30_v6.root"],
-      'name': "pip_presmear30_weighted",
-      'title': "#pi^{+} MC Smear 30%",
-      'caption': "#pi^{+} MC Smear 30%",
-      'scaleFactor': 1./25000*nData,
-      'cuts': "*pzWeight",
-    },
+    #{
+    #  'fn': "mcSmearedForCalibration/PiAbsSelector_lariat_PiAbsAndChEx_flat_pip_presmear30_v6.root",
+    #  'addFriend': ["friend", "mcSmearedForCalibration/friendTrees/PiAbsSelector_lariat_PiAbsAndChEx_flat_pip_presmear30_v6.root"],
+    #  'name': "pip_presmear30_weighted",
+    #  'title': "#pi^{+} MC Smear 30%",
+    #  'caption': "#pi^{+} MC Smear 30%",
+    #  'scaleFactor': 1./25000*nData,
+    #  'cuts': "*pzWeight",
+    #},
 #    {
 #      'fn': "billMC1/MC1_PDG_2212.root",
 #      'addFriend': ["friend", "billMC1/friendTrees/friend_MC1_PDG_2212.root"],
@@ -279,12 +280,47 @@ if __name__ == "__main__":
         mpvGraphs[i].SetMarkerColor(COLORLIST[i])
     predictor = bethe.Bethe()
     pionPredGraph = root.TGraph()
+    muonPredGraph = root.TGraph()
+    muonPredGraph.SetLineColor(root.kGray+2)
     for iPoint, mom in enumerate(numpy.linspace(100,1500)):
-      mpvPred = predictor.mpv(SLABTHICKNESS,mom,bethe.PIONMASS)
+      mpvPred = predictor.mpv(SLABTHICKNESS,mom,bethe.PIONMASS)/SLABTHICKNESS
       pionPredGraph.SetPoint(iPoint,mom,mpvPred)
-    ax = drawGraphs(c,mpvGraphs+[pionPredGraph],"Beamline Momentum [MeV/c]","Landau MPV [MeV/cm]",xlims=[0,1200],ylims=[0,5],freeTopSpace=0.5)
+      mpvPred = predictor.mpv(SLABTHICKNESS,mom,bethe.MUONMASS)/SLABTHICKNESS
+      muonPredGraph.SetPoint(iPoint,mom,mpvPred)
+    ax = drawGraphs(c,mpvGraphs+[pionPredGraph,muonPredGraph],"Beamline Momentum [MeV/c]","Landau MPV [MeV/cm]",xlims=[0,1200],ylims=[0,5],freeTopSpace=0.5,drawOptions=["pez"]*len(mpvGraphs)+["c"]*2,reverseDrawOrder=True)
     #ax = drawGraphs(c,mpvGraphs,"Beamline Momentum [MeV/c]","Landau MPV [MeV/cm]",xlims=[400,1200],ylims=[0,10],freeTopSpace=0.5)
-    leg = drawNormalLegend(mpvGraphs+[pionPredGraph],labels+["Bethe #pi^{+}"],"lep")
+    leg = drawNormalLegend(mpvGraphs+[pionPredGraph,muonPredGraph],labels+["Bethe #pi^{+}","Bethe #mu^{+}"],["lep"]*len(mpvGraphs)+["l"]*2)
+    drawStandardCaptions(c,"Assuming Slab Thickness {:.3f} cm".format(SLABTHICKNESS))
+
     c.SaveAs("Calibrate_mpvs.png")
     c.SaveAs("Calibrate_mpvs.pdf")
 
+    ########################################
+    ## Ratio Plot
+
+    for mpvGraph in mpvGraphs:
+      N = mpvGraph.GetN()
+      #xs  = list(mpvGraph.GetX()]
+      #ys  = list(mpvGraph.GetY()]
+      #exs = list(mpvGraph.GetEX()]
+      #eys = list(mpvGraph.GetEY()]
+      xs  = mpvGraph.GetX()
+      ys  = mpvGraph.GetY()
+      exs = mpvGraph.GetEX()
+      eys = mpvGraph.GetEY()
+      for iPoint in range(N):
+        mom = xs[iPoint]
+        mpvPred = predictor.mpv(SLABTHICKNESS,mom,bethe.PIONMASS)/SLABTHICKNESS
+        ys[iPoint] /= mpvPred
+        eys[iPoint] /= mpvPred
+
+    xlims = [0,1200]
+    oneGraph = root.TGraph()
+    oneGraph.SetLineStyle(7)
+    oneGraph.SetPoint(0,xlims[0],1)
+    oneGraph.SetPoint(1,xlims[1],1)
+    ax = drawGraphs(c,mpvGraphs+[oneGraph],"Beamline Momentum [MeV/c]","Landau MPV: Measured / Bethe Prediction",xlims=xlims,ylims=[0,2.5],freeTopSpace=0.5,drawOptions=["pez"]*len(mpvGraphs)+["l"],reverseDrawOrder=True)
+    leg = drawNormalLegend(mpvGraphs,labels,"lep")
+    drawStandardCaptions(c,"Assuming Slab Thickness {:.3f} cm".format(SLABTHICKNESS))
+    c.SaveAs("Calibrate_mpvs_pi_ratio.png")
+    c.SaveAs("Calibrate_mpvs_pi_ratio.pdf")

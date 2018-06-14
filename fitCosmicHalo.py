@@ -104,7 +104,7 @@ def makeGraphsModeAndFWHM(hist):
     graphFWHM.SetPoint(iBin-1,x,fwhm)
   return graph, graphFWHM
 
-def fitLandaus(c,hist,postfix,caption,fitMin=1.6,fitMax=2.3,nLandaus=3,smearGauss=True,fixedLandauWidth=None,dQdx=False):
+def fitLandaus(c,hist,postfix,caption,fitMin=1.6,fitMax=2.3,nLandaus=3,smearGauss=True,fixedLandauWidth=None,dQdx=False,dumpFitPlot=False):
   if nLandaus <= 0:
     raise ValueError("nLandaus must be > 0")
 
@@ -165,38 +165,42 @@ def fitLandaus(c,hist,postfix,caption,fitMin=1.6,fitMax=2.3,nLandaus=3,smearGaus
 
   ##############
 
-  frame = t.frame(root.RooFit.Title(""))
-  data.plotOn(frame)
+  plotOnBaseArgs = []
 
-  plotOnBaseArgs = [frame]
-
+  printLevel = root.RooFit.PrintLevel(-1) #Makes RooFit and MINUIT mostly quiet
   if not (fitMin is None or fitMax is None):
-    model.fitTo(data,root.RooFit.Range(fitMin,fitMax))
+    model.fitTo(data,root.RooFit.Range(fitMin,fitMax),printLevel)
     plotOnBaseArgs.append(root.RooFit.Range(fitMin,fitMax))
   else:
-    model.fitTo(data)
+    model.fitTo(data,printLevel)
 
-  model.plotOn(*plotOnBaseArgs)
+  if dumpFitPlot:
+    frame = t.frame(root.RooFit.Title(""))
+    plotOnBaseArgs.append(frame)
 
-  for iLandau in range(2,nLandaus+1):
-    iLandauStr = str(iLandau)
-    plotOnArgs = plotOnBaseArgs + [root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iLandau])]
-    if smearGauss:
-      plotOnArgs.append(root.RooFit.Components("langaus"+iLandauStr))
-    else:
-      plotOnArgs.append(root.RooFit.Components("lx"+iLandauStr))
-    model.plotOn(*plotOnArgs)
+    data.plotOn(frame)
 
-  #root.gPad.SetLeftMargin(0.15)
-  #frame.GetYaxis().SetTitleOffset(1.4)
-  #frame.Draw("same")
-  #axisHist = root.TH2F("axisHist","",1,0,50,1,0,1000)
-  ##axisHist = root.TH2F("axisHist","",1,-1,1,1,1000,1300)
-  #axisHist.Draw()
-  #frame.Draw("same")
-  frame.Draw()
-  frame.SetTitle(caption)
-  c.SaveAs("roofit_landau_{}.png".format(postfix))
+    model.plotOn(*plotOnBaseArgs)
+
+    for iLandau in range(2,nLandaus+1):
+      iLandauStr = str(iLandau)
+      plotOnArgs = plotOnBaseArgs + [root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iLandau])]
+      if smearGauss:
+        plotOnArgs.append(root.RooFit.Components("langaus"+iLandauStr))
+      else:
+        plotOnArgs.append(root.RooFit.Components("lx"+iLandauStr))
+      model.plotOn(*plotOnArgs)
+
+    #root.gPad.SetLeftMargin(0.15)
+    #frame.GetYaxis().SetTitleOffset(1.4)
+    #frame.Draw("same")
+    #axisHist = root.TH2F("axisHist","",1,0,50,1,0,1000)
+    ##axisHist = root.TH2F("axisHist","",1,-1,1,1,1000,1300)
+    #axisHist.Draw()
+    #frame.Draw("same")
+    frame.Draw()
+    frame.SetTitle(caption)
+    c.SaveAs("roofit_landau_{}.png".format(postfix))
 
   bestFits = []
   errs = []
@@ -212,7 +216,7 @@ def fitLandaus(c,hist,postfix,caption,fitMin=1.6,fitMax=2.3,nLandaus=3,smearGaus
 
   return bestFits, errs
 
-def fitSlicesLandaus(c,hist,fileprefix,nJump=1,nLandaus=1,smearGauss=False,fracMax=None):
+def fitSlicesLandaus(c,hist,fileprefix,nJump=1,nLandaus=1,smearGauss=False,fracMax=None,dumpFitPlots=False):
   xaxis = hist.GetXaxis()
   xTitle = xaxis.GetTitle()
   yaxis = hist.GetYaxis()
@@ -241,7 +245,7 @@ def fitSlicesLandaus(c,hist,fileprefix,nJump=1,nLandaus=1,smearGauss=False,fracM
       endFit = None
       if not (fracMax is None):
         startFit, endFit = getFracMaxVals(histAll,fracMax)
-      bestFits,errors = fitLandaus(c,histAll,postfix,caption,fitMin=startFit,fitMax=endFit,nLandaus=1,smearGauss=smearGauss)
+      bestFits,errors = fitLandaus(c,histAll,postfix,caption,fitMin=startFit,fitMax=endFit,nLandaus=1,smearGauss=smearGauss,dumpFitPlot=dumpFitPlots)
       #if and (mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5):
       #      continue
       mpvlGraph.SetPoint(iPoint,xMiddle,bestFits[0])

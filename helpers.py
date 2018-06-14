@@ -2950,7 +2950,7 @@ def drawHline(axisHist,y):
   result.Draw("lsame")
   return result
 
-def drawGraphs(canvas,graphs,xTitle,yTitle,yStartZero=True,xlims=None,ylims=None,freeTopSpace=0.):
+def drawGraphs(canvas,graphs,xTitle,yTitle,yStartZero=True,xlims=None,ylims=None,freeTopSpace=0.,drawOptions="PEZ",reverseDrawOrder=False):
   xMin = 1e15
   xMax = -1e15
   yMin = 1e15
@@ -2990,8 +2990,16 @@ def drawGraphs(canvas,graphs,xTitle,yTitle,yStartZero=True,xlims=None,ylims=None
   axisHist = Hist2D(1,xMin,xMax,1,yMin,yMax)
   setHistTitles(axisHist,xTitle,yTitle)
   axisHist.Draw()
-  for graph in graphs:
-    graph.Draw("PEZ")
+  drawOptionsList = drawOptions
+  if type(drawOptionsList) is str:
+    drawOptionsList = [drawOptionsList]*len(graphs)
+  if len(drawOptionsList) != len(graphs):
+    raise Exception("Different number of drawOptions and graphs")
+  rangeOfGraphs = range(len(graphs))
+  if reverseDrawOrder:
+    rangeOfGraphs.reverse()
+  for iGraph in rangeOfGraphs:
+    graphs[iGraph].Draw(drawOptionsList[iGraph])
   return axisHist
 
 def smallMultiples(histLists,axisLabels=None,xlimits=[0.001,0.999],ylimits=[0.001,0.999],xlabel="X", ylabel="Counts",wide=True):
