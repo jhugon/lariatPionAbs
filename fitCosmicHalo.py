@@ -104,11 +104,15 @@ def makeGraphsModeAndFWHM(hist):
     graphFWHM.SetPoint(iBin-1,x,fwhm)
   return graph, graphFWHM
 
-def fitLandaus(c,hist,nLandaus=3,smearGauss=True,samplename=""):
+def fitLandaus(c,hist,postfix,caption,fitMin=1.6,fitMax=2.3,nLandaus=3,smearGauss=True,fixedLandauWidth=None,dQdx=False):
   if nLandaus <= 0:
     raise ValueError("nLandaus must be > 0")
 
-  t = root.RooRealVar("t","dE/dx [MeV/cm]",0.,10)
+  xTitle = "dE/dx [MeV/cm]"
+  if dQdx:
+    xTitle = "dQ/dx [ADC ns / cm]"
+
+  t = root.RooRealVar("t",xTitle,0.,10)
   t.setBins(10000,"cache")
   observables = root.RooArgSet(t)
 
@@ -127,7 +131,11 @@ def fitLandaus(c,hist,nLandaus=3,smearGauss=True,samplename=""):
   for iLandau in range(1,nLandaus+1):
     iLandauStr = str(iLandau)
     mpvl = root.RooRealVar("mpvl"+iLandauStr,"mpv landau "+iLandauStr,1.7,0,5)
-    wl = root.RooRealVar("wl"+iLandauStr,"width landau "+iLandauStr,0.42,0.01,10)
+    wl = None
+    if fixedLandauWidth is None:
+      wl = root.RooRealVar("wl"+iLandauStr,"width landau "+iLandauStr,0.42,0.01,10)
+    else:
+      wl = root.RooRealVar("wl"+iLandauStr,"width landau "+iLandauStr,fixedLandauWidth)
     ml = root.RooFormulaVar("ml"+iLandauStr,"first landau param "+iLandauStr,"@0+0.22278*@1",root.RooArgList(mpvl,wl))
     landau = root.RooLandau("lx"+iLandauStr,"lx "+iLandauStr,t,ml,wl)
 
@@ -157,18 +165,27 @@ def fitLandaus(c,hist,nLandaus=3,smearGauss=True,samplename=""):
 
   ##############
 
-  model.fitTo(data)
-
   frame = t.frame(root.RooFit.Title(""))
   data.plotOn(frame)
-  model.plotOn(frame)
+
+  plotOnBaseArgs = [frame]
+
+  if not (fitMin is None or fitMax is None):
+    model.fitTo(data,root.RooFit.Range(fitMin,fitMax))
+    plotOnBaseArgs.append(root.RooFit.Range(fitMin,fitMax))
+  else:
+    model.fitTo(data)
+
+  model.plotOn(*plotOnBaseArgs)
 
   for iLandau in range(2,nLandaus+1):
     iLandauStr = str(iLandau)
+    plotOnArgs = plotOnBaseArgs + [root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iLandau])]
     if smearGauss:
-      model.plotOn(frame,root.RooFit.Components("langaus"+iLandauStr),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iLandau]))
+      plotOnArgs.append(root.RooFit.Components("langaus"+iLandauStr))
     else:
-      model.plotOn(frame,root.RooFit.Components("lx"+iLandauStr),root.RooFit.LineStyle(root.kDashed),root.RooFit.LineColor(COLORLIST[iLandau]))
+      plotOnArgs.append(root.RooFit.Components("lx"+iLandauStr))
+    model.plotOn(*plotOnArgs)
 
   #root.gPad.SetLeftMargin(0.15)
   #frame.GetYaxis().SetTitleOffset(1.4)
@@ -178,7 +195,8 @@ def fitLandaus(c,hist,nLandaus=3,smearGauss=True,samplename=""):
   #axisHist.Draw()
   #frame.Draw("same")
   frame.Draw()
-  c.SaveAs("roofit_{}.png".format(samplename))
+  frame.SetTitle(caption)
+  c.SaveAs("roofit_landau_{}.png".format(postfix))
 
   bestFits = []
   errs = []
@@ -186,11 +204,15 @@ def fitLandaus(c,hist,nLandaus=3,smearGauss=True,samplename=""):
     for iParam in range(2):
       param = landauParams[iParam+iLandau*3]
       bestFits.append(param.getVal())
-      bestFits.append(param.getError())
+      errs.append(param.getError())
+
+  if smearGauss:
+    bestFits.append(sg.getVal())
+    errs.append(sg.getError())
 
   return bestFits, errs
 
-def fitSlicesLandaus(c,hist,fileprefix,nJump=1,nLandaus=1,smearGauss=False):
+def fitSlicesLandaus(c,hist,fileprefix,nJump=1,nLandaus=1,smearGauss=False,fracMax=None):
   xaxis = hist.GetXaxis()
   xTitle = xaxis.GetTitle()
   yaxis = hist.GetYaxis()
@@ -215,14 +237,17 @@ def fitSlicesLandaus(c,hist,fileprefix,nJump=1,nLandaus=1,smearGauss=False):
       xError = 0.5*(xMax-xMin)
       startFit = 0.
       endFit = 0.
-      #startFit, endFit = getFracMaxVals(histAll,fracMax)
-      bestFits,errors = fitLandaus(c,histAll,nLandaus,smearGauss,postfix)
+      startFit = None
+      endFit = None
+      if not (fracMax is None):
+        startFit, endFit = getFracMaxVals(histAll,fracMax)
+      bestFits,errors = fitLandaus(c,histAll,postfix,caption,fitMin=startFit,fitMax=endFit,nLandaus=1,smearGauss=smearGauss)
       #if and (mpvlErr > 0.5 or wlErr > 0.5 or sgErr > 0.5):
       #      continue
       mpvlGraph.SetPoint(iPoint,xMiddle,bestFits[0])
       wlGraph.SetPoint(iPoint,xMiddle,bestFits[1])
-      mpvlGraph.SetPointError(iPoint,xError,bestFits[0])
-      wlGraph.SetPointError(iPoint,xError,bestFits[1])
+      mpvlGraph.SetPointError(iPoint,xError,errors[0])
+      wlGraph.SetPointError(iPoint,xError,errors[1])
       iPoint += 1
   graphs = [mpvlGraph,wlGraph]
   labels = ["Landau MPV", "Landau Width"]
@@ -240,11 +265,12 @@ def fitSlicesLandaus(c,hist,fileprefix,nJump=1,nLandaus=1,smearGauss=False):
   pad1.cd()
   axis1 = drawGraphs(pad1,[mpvlGraph],xTitle,"Landau MPV [MeV/cm]",yStartZero=False)
   pad2.cd()
-  axis2 = drawGraphs(pad2,[sgGraph],xTitle,"Gaussian #sigma [MeV/cm]")
+  #axis2 = drawGraphs(pad2,[sgGraph],xTitle,"Gaussian #sigma [MeV/cm]")
+  axis2 = drawGraphs(pad2,[wlGraph],xTitle,"Landau Width [MeV/cm]")
   #leg = drawNormalLegend(graphs,labels,option="lep",position=[0.2,0.50,0.6,0.70])
   c.cd()
-  c.SaveAs(fileprefix+".png")
-  c.SaveAs(fileprefix+".pdf")
+  c.SaveAs("SliceFitParams_"+fileprefix+".png")
+  c.SaveAs("SliceFitParams_"+fileprefix+".pdf")
   return mpvlGraph,wlGraph
 
 def fitGaussCore(c,hist,postfix,caption,fitMin=1.4,fitMax=2.4):

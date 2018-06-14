@@ -3,8 +3,12 @@
 import ROOT as root
 from helpers import *
 import fitCosmicHalo
+import bethe
 root.gROOT.SetBatch(True)
 import sys
+import numpy
+
+SLABTHICKNESS = 1.
 
 if __name__ == "__main__":
 
@@ -114,15 +118,15 @@ if __name__ == "__main__":
       'scaleFactor': 1./25000*nData,
       'cuts': "*pzWeight",
     },
-    #{
-    #  'fn': "billMC1/MC1_PDG_2212.root",
-    #  'addFriend': ["friend", "billMC1/friendTrees/friend_MC1_PDG_2212.root"],
-    #  'name': "p",
-    #  'title': "proton MC",
-    #  'caption': "proton MC",
-    #  'color': root.kRed-4,
-    #  'scaleFactor': 1./10000*nData,
-    #},
+#    {
+#      'fn': "billMC1/MC1_PDG_2212.root",
+#      'addFriend': ["friend", "billMC1/friendTrees/friend_MC1_PDG_2212.root"],
+#      'name': "p",
+#      'title': "proton MC",
+#      'caption': "proton MC",
+#      'color': root.kRed-4,
+#      'scaleFactor': 1./10000*nData,
+#    },
   ]
   for i in range(len(fileConfigs)):
     fileConfigs[i]['color'] = COLORLIST[i]
@@ -138,6 +142,15 @@ if __name__ == "__main__":
       'ytitle': "Hits / bin",
       'binning': [100,1.,5.0],
       'var': "primTrkdEdxs",
+      'cuts': "1"+hitcuts,
+      'normalize': True,
+    },
+    {
+      'name': "primTrkPitches",
+      'xtitle': "Primary TPC Track Pitch [cm]",
+      'ytitle': "Hits / bin",
+      'binning': [100,0.,2.0],
+      'var': "primTrkPitches",
       'cuts': "1"+hitcuts,
       'normalize': True,
     },
@@ -204,7 +217,7 @@ if __name__ == "__main__":
       'name': "primTrkdEdxsVbeamlineMom",
       'xtitle': "Beamline Momentum [MeV/c]",
       'ytitle': "Primary TPC Track dE/dx [MeV/cm]",
-      'binning': [20,100,1100,100,1.5,3.0],
+      'binning': [20,100,1100,100,0,10.0],
       'var': "primTrkdEdxs:(!isMC)*pWC+isMC*trueStartMom",
       'cuts': "1"+hitcuts,
     },
@@ -245,9 +258,33 @@ if __name__ == "__main__":
   ]
   hists = plotOneHistOnePlot(fileConfigs,histConfigs,c,"PiAbsSelector/tree",outPrefix="Calibrate_PiMuE_",nMax=NMAX)
   for histname in hists:
-    for samplename in hists[histname]:
+    mpvGraphs = []
+    wGraphs = []
+    labels = []
+    for samplename in sorted(hists[histname]):
       hist = hists[histname][samplename]
-      print histname, samplename, hist
-      fitCosmicHalo.fitSlicesLandaus(c,hist,samplename)
+      print "justin:", histname, samplename, hist, hists[histname]
+      mpvGraph, wGraph = fitCosmicHalo.fitSlicesLandaus(c,hist,samplename,fracMax=0.4)
+      mpvGraphs.append(mpvGraph)
+      wGraphs.append(wGraph)
+      label = samplename
+      for fileConfig in fileConfigs:
+        if fileConfig['name'] == samplename:
+          label = fileConfig['title']
+      labels.append(label)
       #fitCosmicHalo.fitSlicesLandauCore(c,hist,samplename)
+    c.Clear()
+    for i in range(len(mpvGraphs)):
+        mpvGraphs[i].SetLineColor(COLORLIST[i])
+        mpvGraphs[i].SetMarkerColor(COLORLIST[i])
+    predictor = bethe.Bethe()
+    pionPredGraph = root.TGraph()
+    for iPoint, mom in enumerate(numpy.linspace(100,1500)):
+      mpvPred = predictor.mpv(SLABTHICKNESS,mom,bethe.PIONMASS)
+      pionPredGraph.SetPoint(iPoint,mom,mpvPred)
+    ax = drawGraphs(c,mpvGraphs+[pionPredGraph],"Beamline Momentum [MeV/c]","Landau MPV [MeV/cm]",xlims=[0,1200],ylims=[0,5],freeTopSpace=0.5)
+    #ax = drawGraphs(c,mpvGraphs,"Beamline Momentum [MeV/c]","Landau MPV [MeV/cm]",xlims=[400,1200],ylims=[0,10],freeTopSpace=0.5)
+    leg = drawNormalLegend(mpvGraphs+[pionPredGraph],labels+["Bethe #pi^{+}"],"lep")
+    c.SaveAs("Calibrate_mpvs.png")
+    c.SaveAs("Calibrate_mpvs.pdf")
 
