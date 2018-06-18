@@ -52,22 +52,22 @@ if __name__ == "__main__":
   ########################################################
 
   fileConfigs = [
-    {
-      'fn': "piAbs_v2/piAbsSelector_Pos_RunII_current100_v02_all.root",
-      'addFriend': ["friend", "piAbs_v2/friendTrees/friendTree_piAbsSelector_Pos_RunII_current100_v02_all.root"],
-      'name': "RunII_Pos_100",
-      'title': "Run II +100A",
-      'caption': "Run II +100A",
-      'isData': True,
-    },
-    {
-      'fn': "piAbs_v2/piAbsSelector_Pos_RunII_current60_v02_all.root",
-      'addFriend': ["friend", "piAbs_v2/friendTrees/friendTree_piAbsSelector_Pos_RunII_current60_v02_all.root"],
-      'name': "RunII_Pos_60",
-      'title': "Run II +60A",
-      'caption': "Run II +60A",
-      'isData': True,
-    },
+    #{
+    #  'fn': "piAbs_v2/piAbsSelector_Pos_RunII_current100_v02_all.root",
+    #  'addFriend': ["friend", "piAbs_v2/friendTrees/friendTree_piAbsSelector_Pos_RunII_current100_v02_all.root"],
+    #  'name': "RunII_Pos_100",
+    #  'title': "Run II +100A",
+    #  'caption': "Run II +100A",
+    #  'isData': True,
+    #},
+    #{
+    #  'fn': "piAbs_v2/piAbsSelector_Pos_RunII_current60_v02_all.root",
+    #  'addFriend': ["friend", "piAbs_v2/friendTrees/friendTree_piAbsSelector_Pos_RunII_current60_v02_all.root"],
+    #  'name': "RunII_Pos_60",
+    #  'title': "Run II +60A",
+    #  'caption': "Run II +60A",
+    #  'isData': True,
+    #},
     #{
     #  'fn': "billMC1/MC1_PDG_211.root",
     #  'addFriend': ["friend", "billMC1/friendTrees/friend_MC1_PDG_211.root"],
@@ -262,9 +262,9 @@ if __name__ == "__main__":
     mpvGraphs = []
     wGraphs = []
     labels = []
+    names = []
     for samplename in sorted(hists[histname]):
       hist = hists[histname][samplename]
-      print "justin:", histname, samplename, hist, hists[histname]
       mpvGraph, wGraph = fitCosmicHalo.fitSlicesLandaus(c,hist,samplename,fracMax=0.4)
       mpvGraphs.append(mpvGraph)
       wGraphs.append(wGraph)
@@ -273,6 +273,7 @@ if __name__ == "__main__":
         if fileConfig['name'] == samplename:
           label = fileConfig['title']
       labels.append(label)
+      names.append(samplename)
       #fitCosmicHalo.fitSlicesLandauCore(c,hist,samplename)
     c.Clear()
     for i in range(len(mpvGraphs)):
@@ -298,29 +299,66 @@ if __name__ == "__main__":
     ########################################
     ## Ratio Plot
 
+    mpvGraphsRatioToPred = []
     for mpvGraph in mpvGraphs:
       N = mpvGraph.GetN()
-      #xs  = list(mpvGraph.GetX()]
-      #ys  = list(mpvGraph.GetY()]
-      #exs = list(mpvGraph.GetEX()]
-      #eys = list(mpvGraph.GetEY()]
       xs  = mpvGraph.GetX()
       ys  = mpvGraph.GetY()
       exs = mpvGraph.GetEX()
       eys = mpvGraph.GetEY()
+      graph = root.TGraphErrors()
+      graph.SetLineColor(mpvGraph.GetLineColor())
+      graph.SetMarkerColor(mpvGraph.GetMarkerColor())
       for iPoint in range(N):
         mom = xs[iPoint]
         mpvPred = predictor.mpv(SLABTHICKNESS,mom,bethe.PIONMASS)/SLABTHICKNESS
-        ys[iPoint] /= mpvPred
-        eys[iPoint] /= mpvPred
+        graph.SetPoint(iPoint,xs[iPoint],ys[iPoint]/mpvPred)
+        graph.SetPointError(iPoint,exs[iPoint],eys[iPoint]/mpvPred)
+      mpvGraphsRatioToPred.append(graph)
 
     xlims = [0,1200]
     oneGraph = root.TGraph()
     oneGraph.SetLineStyle(7)
     oneGraph.SetPoint(0,xlims[0],1)
     oneGraph.SetPoint(1,xlims[1],1)
-    ax = drawGraphs(c,mpvGraphs+[oneGraph],"Beamline Momentum [MeV/c]","Landau MPV: Measured / Bethe Prediction",xlims=xlims,ylims=[0,2.5],freeTopSpace=0.5,drawOptions=["pez"]*len(mpvGraphs)+["l"],reverseDrawOrder=True)
-    leg = drawNormalLegend(mpvGraphs,labels,"lep")
+    ax = drawGraphs(c,mpvGraphsRatioToPred+[oneGraph],"Beamline Momentum [MeV/c]","Landau MPV: Measured / Bethe Prediction",xlims=xlims,ylims=[0,2.5],drawOptions=["pez"]*len(mpvGraphsRatioToPred)+["l"],reverseDrawOrder=True)
+    leg = drawNormalLegend(mpvGraphsRatioToPred,labels,"lep")
     drawStandardCaptions(c,"Assuming Slab Thickness {:.3f} cm".format(SLABTHICKNESS))
     c.SaveAs("Calibrate_mpvs_pi_ratio.png")
     c.SaveAs("Calibrate_mpvs_pi_ratio.pdf")
+
+    mpvGraphsRatioToUnsmearMC = []
+    labelsRatioToUnsmearMC = []
+    unsmearMCGraph = None
+    for name, mpvGraph in zip(names,mpvGraphs):
+        if name == "pip":
+            unsmearMCGraph = mpvGraph
+            break
+    if unsmearMCGraph is None:
+        raise Exception("Couldn't find pip graph for unsmeared MC")
+    for name, label, mpvGraph in zip(names,labels,mpvGraphs):
+      if name == "pip":
+        continue
+      labelsRatioToUnsmearMC.append(label)
+      N = mpvGraph.GetN()
+      xs  = mpvGraph.GetX()
+      ys  = mpvGraph.GetY()
+      exs = mpvGraph.GetEX()
+      eys = mpvGraph.GetEY()
+      if N != unsmearMCGraph.GetN():
+        raise Exception("Unsmeared mpv graph N points doesn't match this graph N points")
+      ys_unsmear = unsmearMCGraph.GetY()
+      graph = root.TGraphErrors()
+      graph.SetLineColor(mpvGraph.GetLineColor())
+      graph.SetMarkerColor(mpvGraph.GetMarkerColor())
+      for iPoint in range(N):
+        mom = xs[iPoint]
+        mpvUnsmear = ys_unsmear[iPoint]
+        graph.SetPoint(iPoint,xs[iPoint],ys[iPoint]/mpvUnsmear)
+        graph.SetPointError(iPoint,exs[iPoint],eys[iPoint]/mpvUnsmear)
+      mpvGraphsRatioToUnsmearMC.append(graph)
+
+    ax = drawGraphs(c,mpvGraphsRatioToUnsmearMC+[oneGraph],"Beamline Momentum [MeV/c]","Landau MPV: Ratio to Unsmeared MC",xlims=xlims,ylims=[0.8,1.2],freeTopSpace=0.5,drawOptions=["pez"]*len(mpvGraphsRatioToUnsmearMC)+["l"],reverseDrawOrder=True)
+    leg = drawNormalLegend(mpvGraphsRatioToUnsmearMC,labelsRatioToUnsmearMC,"lep")
+    c.SaveAs("Calibrate_mpvs_nosmear_ratio.png")
+    c.SaveAs("Calibrate_mpvs_nosmear_ratio.pdf")
