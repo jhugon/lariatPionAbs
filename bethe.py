@@ -165,16 +165,31 @@ class Bethe(object):
     beta = momentum / energy
     return energy, gamma, beta
 
+  def csdaRange(self,momentum,mass):
+    r = 0.
+    dl = 1.
+    mom = momentum
+    energy = math.sqrt(mom**2+mass**2)
+    while True:
+      mom = math.sqrt(energy**2-mass**2)
+      dE = self.mean(dl,mom,mass)      
+      energy -= abs(dE)
+      r += dl
+      if energy <= mass:
+        break
+    return r
+
 if __name__ == "__main__":
   fig, ax = plt.subplots()
 
   b = Bethe()
   mt = MuonTable()
   wire_spacing = 0.4 #cm
-  l = 1.0
+  l = 1.
   fig.text(0.7,0.91,"Liquid Argon, $\ell$ = {:.2f} cm".format(l),ha='right',va='bottom')
-  print -b.mean(1,357,MUONMASS), b.mpv(1,357,MUONMASS), b.width(1,357,MUONMASS)
-  print -b.mean(1,500,PROTONMASS), b.mpv(1,500,PROTONMASS), b.width(1,500,PROTONMASS)
+  print "mu",357, -b.mean(1,357,MUONMASS), b.mpv(1,357,MUONMASS), b.width(1,357,MUONMASS)
+  print "p",500, -b.mean(1,500,PROTONMASS), b.mpv(1,500,PROTONMASS), b.width(1,500,PROTONMASS)
+  print "mu",5000, -b.mean(1,5000,MUONMASS), b.mpv(1,5000,MUONMASS), b.width(1,5000,MUONMASS)
 
   masses = [MUONMASS, PIONMASS, KAONMASS, PROTONMASS]
   labels = [r"$\mu^\pm$",r"$\pi^\pm$","$K^\pm$","p"]
@@ -189,10 +204,12 @@ if __name__ == "__main__":
     widths = numpy.array([b.width(l,m,mass) for m in momentas])
     distlows = mpvs-0.5*widths
     disthighs = mpvs+0.5*widths
-    tableVals = mt.dEdx(kes)*l
+    tableVals = mt.dEdx(kes)
     ax.fill_between(momentas,distlows/l,disthighs/l,edgecolor="",facecolor=color,alpha=0.4)
     ax.plot(momentas,means/l,color+"--")
     ax.plot(momentas,mpvs/l,color+"-",label=label)
+    if label == r"$\mu^\pm$":
+      ax.plot(momentas,tableVals,color+":")
   ax.legend(loc="best")
   ax.set_xlabel("Momentum [MeV/c]")
   ax.set_ylabel("MPV/x [MeV/cm]")
@@ -267,3 +284,24 @@ if __name__ == "__main__":
   fig.savefig("BetheAngle.png")
   fig.savefig("BetheAngle.pdf")
 
+  ## Muon range
+  fig, ax = plt.subplots()
+  fig.suptitle(r"$\mu^\pm$ on Liquid Argon, $\rho$ = 1.396 g/cm$^3$")
+  energies = numpy.logspace(-2,1,10) # GeV
+  momMuonMeV = numpy.sqrt((energies*1000.+MUONMASS)**2-MUONMASS**2)
+  nistRange = mt.rangeCSDA(energies*1000.)
+  myMuonRange = [b.csdaRange(m,MUONMASS) for m in momMuonMeV]
+  print "kinetic energy MeV"
+  print energies*1000.
+  print "momMuon MeV"
+  print momMuonMeV
+  print "NIST Range cm"
+  print nistRange
+  print "My mu Range cm"
+  print myMuonRange
+  ax.plot(energies,nistRange,"b-",label="$\mu^\pm$ NIST CSDA")
+  ax.plot(energies,myMuonRange,"r-",label="$\mu^\pm$ CSDA")
+  ax.set_xlabel(r"Kinetic Energy [GeV]")
+  ax.set_ylabel("CSDA Range [cm]")
+  fig.savefig("BetheRange.png")
+  fig.savefig("BetheRange.pdf")
